@@ -1,0 +1,16 @@
+Here are the known outstanding bugs, with reasons if it's known...
+
+Problem					Reason for problem if known
+=======					===========================
+Makefile doesn't have dependencies	dependencies need to be added
+
+Timeouts are compile-time		RTT adaptive timeouts need to be added
+
+tunnel and call id's always start at	Need to initialize the random number
+the same value.				generator, but for debugging, this is
+					a good thing
+										a nice feature!
+pppd not shut down cleanly		we need a nicer way of shutting down
+										pppd other than SIGKILL
+All the FIXME's need to be fixed and of course everything in the TODO list
+needs to be done, too!

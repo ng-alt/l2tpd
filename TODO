@@ -1,0 +1,24 @@
+Critical:
+* Improved performance
+* Rate Adaptive Timeouts
+
+Other:
+* Support tie breakers
+* Support proxy authentication
+* Support LCP initial/final states
+* Maybe do something with private groups
+* Tunnel and call lookups should be hashes, not lists
+* Support outgoing calls
+
+Way-down-the-line:
+* GUI configuration
+
+Already done:
+* Support Information Hiding (done, 5/9/98)
+* Support challenge authentication (done, 5/8/98)
+* Read settings from configuration file (done, 5/3/98)
+* Access control (done, 5/2/98)
+* LAC implementation (done, 4/20/98)
+* Improved flow control (done, 4/25/98)
+* Support sequence numbers (done, 3/30/98)
+* Send payload packets to pppd (done, 3/22/98)

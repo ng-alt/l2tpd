@@ -1,0 +1,25 @@
+I (Mark Spencer) am the primary author of this work.  However, I would like
+to thank the following people for their contributions:
+
+* Peter Brackett, Adtran, for supporting the creation of this free software
+
+* Alan Cox, RedHat, for architectural suggestions and moral support :)
+
+* Kyle Farnsworth, Adtran, for helping me get started and for providing me with
+the Adtran LAC for initial testing
+
+* Ashish Lal, Midnight Networks, for thorughly evaluating compliance of l2tpd 
+to the published l2tp specification
+
+* Rich Martin, Deltacom, for loaning me a Cisco 3000 router for
+interoperability testing
+
+* Kevin Schneider, Adtran, for initially pointing me in the direction of doing
+l2tp support for Linux
+
+* Mark Townsley, Cisco Systems, for helping answer a variety of questions
+(particularly relating to authentication) and for aiding with interoperability
+testing with Cisco l2tp software
+
+The MD5 code was written by Colin Plumb, and is without copyright (public
+domain).
