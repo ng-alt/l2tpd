@@ -1,0 +1,11 @@
+0.62
+--
+Removed call flow/session control (inapplicable as of RFC spec draft 13)
+Corrected invalid Receive Window Size AVP in ICCN
+Corrected Bearer Capabilities non-requirement in SCCRQ & SCCRP
+Verified operability with Cisco 3000 series
+
+0.61
+--
+Fixed shutdown of PPPd from SIGKILL to SIGTERM
+Beginning code cleanup and interoperability testing
