@@ -1,4 +1,4 @@
-l2tpd version 0.68
+l2tpd version 0.69
 ==================
 Now maintained at:
 http://www.l2tpd.org
@@ -46,7 +46,7 @@ to fix the fixme's and submit patches!
 
 Release Notes
 -------------
-Version 0.68 should be considered ALPHA.  It does NOT completely
+Version 0.69 should be considered ALPHA.  It does NOT completely
 implement the l2tp specification (RFC 2661), but its pretty close!
 
 The primary use of this ALPHA level code is to test the ability of l2tpd
@@ -92,7 +92,12 @@ Important non-specification related features to be added
 
 Usage notes on /var/run/l2tp-control
 ------------------------------------
-There aren't any command line options to l2tpd yet.
+There are a few command line options to l2tpd:
+    -D  prevents l2tpd from detaching from terminal and running as a
+        daemon
+    -c <configfile> use alternate config file
+    -s <secretfile> use alternate secrets file
+    -p <pidfile> use alternate pid file
 
 Upon running l2tpd, a pipe is created in /var/run/l2tp-control.  Simple
 commands can then be echoed to this pipe to control l2tp on the fly.

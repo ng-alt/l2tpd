@@ -5,17 +5,17 @@ l2tpd.conf \- L2TPD configuration file
 The l2tpd.conf file contains configuration information for l2tpd, the implementation of l2tp protocol.
 
 The configuration file is composed of sections and parameters. Each section
-have a given name which will be used when using the configuration FIFO 
-(normaly /var/run/l2tpd\-control). See l2tpd.8  for more details.
+has a given name which will be used when using the configuration FIFO 
+(normaly /var/run/l2tp\-control). See l2tpd.8  for more details.
 
 The specific given name 
 .B default
-will specifies parameters applicables for all the following sections.
+will specify parameters applicables for all the following sections.
 .SH "GLOBAL SECTION"
 .TP 
 .B auth file
 Specify where to find the authentication file used to authenticate
-ppp sessions. The default is /etc/l2tp/l2tp\-secrets.
+l2tp tunnels. The default is /etc/l2tp/l2tp\-secrets.
 
 .TP 
 .B Port
@@ -35,9 +35,9 @@ between 2 peers. CHECK
 .TP 
 .B (no) ip range
 Specify the range of ip addresses the LNS will assign to the connecting
-LAC PPP tunnels. Multiple ranges definitions is a legal configuration,
-using the 'no' statement disallow the use of that particular range.
-Ranges are defined using the format IP \- IP (expl: 1.1.1.1 \- 1.1.1.10)
+LAC PPP tunnels. Multiple ranges can be defined. Using the 'no'
+statement disallows the use of that particular range.  Ranges are defined
+using the format IP \- IP (example: 1.1.1.1 \- 1.1.1.10)
 
 .TP 
 .B (no) lac
@@ -48,16 +48,17 @@ option.
 
 .TP 
 .B hidden bit
-If set to yes, the private AVP's will be used by l2tpd. To get more information
-about hidden AVP's and AVP in general, refere to (FIXME)
+If set to yes, l2tpd will use the AVP hiding feature of L2TP. To get
+more information about hidden AVP's and AVP in general, refer to rfc2661
+(add URL?)
 
 .TP 
 .B local ip
-use the following ip as the l2tpd own ip address.
+Use the following IP as l2tpd's own ip address.
 
 .TP 
-.B lenght bit
-If set to yes, the lenght bit present in the l2tp packet payload
+.B length bit
+If set to yes, the length bit present in the l2tp packet payload
 will be used.
 
 .TP 
@@ -93,19 +94,26 @@ to be used.
 
 .TP 
 .B call rws
-This does something FIXME
+This option is deprecated and no longer functions.  It used to be used
+to define the flow control window size for individual L2TP calls or
+sessions.  The L2TP standard (RFC2661) no longer defines flow control or
+window sizes on calls or sessions.
 
 .TP 
 .B tunnel rws
-This does something FIXME
+This defines the window size of the control channel.  The window size is
+defined as the number of outstanding unacknowledged packets, not as a
+number of bytes.
 
 .TP 
 .B flow bits
 If set to yes, sequence numbers will be included in the communication.
+The feature to use sequence numbers in sessions is currently broken and
+does not function.
 
 .TP 
 .B challenge
-If set to yes, challenge authenticate peer (FIXME)
+If set to yes, use challenge authentication to authenticate peer.
 
 
 .SH "LAC SECTION"
@@ -116,7 +124,7 @@ authentication / ppp related ones).
 
 .TP 
 .B lns
-Set the dns name or ip address to the LNS to connect to.
+Set the dns name or ip address of the LNS to connect to.
 
 .TP 
 .B redial
@@ -124,7 +132,7 @@ If set to yes, l2tpd will attemps to redial if the call get disconected.
 
 .TP 
 .B redial timeout
-wait X seconds before redial. The redial option must be set to yes
+Wait X seconds before redial. The redial option must be set to yes
 to use this option.
 
 .TP 
@@ -134,7 +142,7 @@ Will give up redial tries after X attempts.
 .SH "FILES"
 
 \fB\fR/etc/l2tp/l2tpd.conf \fB\fR/etc/l2tp/l2tp\-secrets 
-\fB\fR/var/run/l2tpd\-control
+\fB\fR/var/run/l2tp\-control
 .SH "BUGS"
 
 Please address bugs and comment to l2tpd\-dev@l2tpd.org
@@ -142,10 +150,21 @@ Please address bugs and comment to l2tpd\-dev@l2tpd.org
 
 \fB\fRl2tpd(8)
 .SH "AUTHORS"
-Scott Balmos <sbalmos@iglou.com>
 Jeff McAdams <jeffm@iglou.com>
+
+
+Previous development was hosted at sourceforge
+(http://www.sourceforge.net/projects/l2tpd) by:
+.P
+Scott Balmos <sbalmos@iglou.com>
+.br
 David Stipp <dstipp@one.net>
+.br
+Jeff McAdams <jeffm@iglou.com>
+
 
 Based off of l2tpd version 0.60
+.br
 Copyright (C)1998 Adtran, Inc.
+.br
 Mark Spencer <markster@marko.net>

@@ -1,3 +1,10 @@
+0.69
+--
+Edited l2tpd.conf.5 man page to correct some information
+Added l2tpd.8 and l2tp-secrets.5 man pages
+Zero'ed out memory malloced to hold challenge, otherwise we may pass
+    wrong challenge to md5 code
+
 0.68
 --
 Updated copyright notice on all relevent files

@@ -122,9 +122,9 @@ void show_status (int fd)
         while (c)
         {
             fprintf (f,
-                     "Call %s, ID = %d (local), %d (remote), serno = %d,\n"
+                     "Call %s, ID = %d (local), %d (remote), serno = %u,\n"
                      "      data_seq_num = %d, data_rec_seq_num = %d,\n"
-                     "      pLr = %d, tx = %d bytes (%d), rx= %d bytes (%d)\n",
+                     "      pLr = %d, tx = %u bytes (%u), rx= %u bytes (%u)\n",
                      (c->lac ? c->lac->
                       entname : (c->lns ? c->lns->entname : "")), c->ourcid,
                      c->cid, c->serno, c->data_seq_num, c->data_rec_seq_num,
