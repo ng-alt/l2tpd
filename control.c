@@ -190,10 +190,10 @@ int control_finish(struct tunnel *t, struct call *c) {
 		 */
 		if (t->self==c) {
 			if (t->lns) {
-				t->self->ourrws = t->lns->tun_rws;
+				t->ourrws = t->lns->tun_rws;
 				t->hbit = t->lns->hbit;
 			} else if (t->lac) {
-				t->self->ourrws = t->lac->tun_rws;
+				t->ourrws = t->lac->tun_rws;
 				t->hbit = t->lac->hbit;
 			}
 			/* This is an attempt to bring up the tunnel */
@@ -212,8 +212,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 			add_hostname_avp(buf);
 			add_vendor_avp(buf);
 			add_tunnelid_avp(buf, t->ourtid);
-			if (c->ourrws >= 0)
-				add_avp_rws(buf,c->ourrws);
+			if (t->ourrws >= 0)
+				add_avp_rws(buf,t->ourrws);
 			if ((t->lac && t->lac->challenge) || (t->lns && t->lns->challenge)) {
 				mk_challenge(t->chal_them.challenge,MD_SIG_SIZE);
 				add_challenge_avp(buf, t->chal_them.challenge, MD_SIG_SIZE);
@@ -233,12 +233,12 @@ int control_finish(struct tunnel *t, struct call *c) {
 			c->state = ICRQ;
 			if (c->lns) {
 				c->lbit = c->lns->lbit ? LBIT : 0;
-				c->ourrws = c->lns->call_rws;
-				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0;
+/*				c->ourrws = c->lns->call_rws;
+				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
 			} else if (c->lac) {
 				c->lbit = c->lac->lbit ? LBIT : 0;
-				c->ourrws = c->lac->call_rws;
-				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0;
+/*				c->ourrws = c->lac->call_rws;
+				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
 			}
 			buf = new_outgoing(t);
 			add_message_type_avp(buf,ICRQ);
@@ -283,7 +283,7 @@ int control_finish(struct tunnel *t, struct call *c) {
 			c->needclose = -1;
 			return -EINVAL;
 		}
-		t->self->ourrws = t->lns->tun_rws;
+		t->ourrws = t->lns->tun_rws;
 		t->hbit = t->lns->hbit;
 		if (t->fc < 0) {
 			if (DEBUG) log(LOG_DEBUG,
@@ -292,14 +292,18 @@ int control_finish(struct tunnel *t, struct call *c) {
 			c->needclose = -1;
 			return -EINVAL;
 		}
-		/* FIXME: Do we need to be sure they specified a version number? */
+		/* FIXME: Do we need to be sure they specified a version number?
+		 *   Theoretically, yes, but we don't have anything in the code
+		 *   to actually *do* anything with it, so...why check at this point?
+		 * We shouldn't be requiring a bearer capabilities avp to be present in 
+		 * SCCRQ and SCCRP as they aren't required
 		if (t->bc < 0 ) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer did not specify bearer capability.  Closing.\n",__FUNCTION__);
 			set_error(c, VENDOR_ERROR, "Specify bearer capability");
 			c->needclose = -1;
 			return -EINVAL;
-		}
+		}  */
 		if (!strlen(t->hostname)) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer did not specify hostname.  Closing.\n",__FUNCTION__);
@@ -333,8 +337,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 		add_hostname_avp(buf);
 		add_vendor_avp(buf);
 		add_tunnelid_avp(buf,t->ourtid);
-		if (c->ourrws >= 0)
-			add_avp_rws(buf,c->ourrws);
+		if (t->ourrws >= 0)
+			add_avp_rws(buf,t->ourrws);
 		if (t->chal_us.state) {
 			t->chal_us.ss=SCCRP;
 			handle_challenge(t,&t->chal_us);
@@ -372,14 +376,18 @@ int control_finish(struct tunnel *t, struct call *c) {
 			c->needclose = -1;
 			return -EINVAL;
 		}
-		/* FIXME: Do we need to be sure they specified a version number? */
+		/* FIXME: Do we need to be sure they specified a version number?
+		 *   Theoretically, yes, but we don't have anything in the code
+		 *   to actually *do* anything with it, so...why check at this point?
+		 * We shouldn't be requiring a bearer capabilities avp to be present in 
+		 * SCCRQ and SCCRP as they aren't required
 		if (t->bc < 0 ) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer did not specify bearer capability.  Closing.\n",__FUNCTION__);
 			set_error(c, VENDOR_ERROR, "Specify bearer capability");
 			c->needclose = -1;
 			return -EINVAL;
-		}
+		} */
 		if (!strlen(t->hostname)) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer did not specify hostname.  Closing.\n", __FUNCTION__);
@@ -525,8 +533,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 			return -EINVAL;
 		}
 		p->lbit = p->lns->lbit ? LBIT : 0;
-		p->ourrws = p->lns->call_rws;
-		if (p->ourrws > -1) p->ourfbit = FBIT; else p->ourfbit = 0;
+/*		p->ourrws = p->lns->call_rws;
+		if (p->ourrws > -1) p->ourfbit = FBIT; else p->ourfbit = 0; */
 		if (p->cid<0) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer tried to initiate call without call ID\n", __FUNCTION__);
@@ -574,8 +582,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 #else
 		add_callid_avp(buf, p->ourcid);
 #endif
-		if (p->ourrws >=0)
-			add_avp_rws(buf, p->ourrws);
+/*		if (p->ourrws >=0)
+			add_avp_rws(buf, p->ourrws); */
 		/*
 		 * FIXME: I should really calculate
 		 * Packet Processing Delay
@@ -609,8 +617,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 		}
 		add_txspeed_avp(buf,DEFAULT_TX_BPS);
 		add_frame_avp(buf,c->frame);
-		if (c->ourrws >= 0)
-			add_avp_rws(buf, c->ourrws);
+/*		if (c->ourrws >= 0)
+			add_avp_rws(buf, c->ourrws); */
 		/* FIXME: Packet Processing Delay */
 		/* We don't need any kind of proxy PPP stuff */
 		/* Can we proxy authenticate ourselves??? */
@@ -636,8 +644,8 @@ int control_finish(struct tunnel *t, struct call *c) {
 		if (debug_state)
 			log(LOG_DEBUG, "%s: Sending ICCN\n",__FUNCTION__);
 		log(LOG_LOG,
-			"%s: Call established with %s, Local: %d, Remote: %d, Serial: %d, RWS: %d\n",
-			__FUNCTION__, IPADDY(t->peer.sin_addr),c->ourcid, c->cid, c->serno,c->rws);
+			"%s: Call established with %s, Local: %d, Remote: %d, Serial: %d\n",
+			__FUNCTION__, IPADDY(t->peer.sin_addr),c->ourcid, c->cid, c->serno);
 		control_xmit(buf);
 		po=NULL;
 		po=add_opt(po, "passive");
@@ -744,7 +752,7 @@ int control_finish(struct tunnel *t, struct call *c) {
 			po=add_opt(po,"debug");
 		start_pppd(c, po);
 		opt_destroy(po);
-		log(LOG_LOG,"%s: Call established with %s, Local: %d, Remote: %d, Serial: %d, RWS: %d\n",__FUNCTION__, IPADDY(t->peer.sin_addr),c->ourcid, c->cid, c->serno,c->rws);
+		log(LOG_LOG,"%s: Call established with %s, Local: %d, Remote: %d, Serial: %d\n",__FUNCTION__, IPADDY(t->peer.sin_addr),c->ourcid, c->cid, c->serno);
 		break;
 	case CDN:
 		if (c->qcid<0)  {
@@ -931,20 +939,20 @@ inline int check_payload(struct buffer *buf, struct tunnel *t, struct call *c) {
 		}
 		if (PLBIT(h->ver)) ehlen += 2;	/* Should have length information */
 		if (PFBIT(h->ver)) {
-			if (!c->fbit && !c->ourfbit) {
+/*			if (!c->fbit && !c->ourfbit) {
 				if (DEBUG)
 					log(LOG_DEBUG,"%s: flow bit set, but no RWS negotiated.\n",__FUNCTION__);
 				return -EINVAL;
-			}
+			} */
 			ehlen += 4;  /* Should have Ns and Nr too */
 		}
-		if (!PFBIT(h->ver)) {
+/*		if (!PFBIT(h->ver)) {
 			if (c->fbit || c->ourfbit) {
 				if (DEBUG)
 					log(LOG_DEBUG, "%s: no flow bit, but RWS was negotiated.\n",__FUNCTION__);
 				return -EINVAL;;
 			}
-		}
+		} */
 		if (PSBIT(h->ver)) ehlen += 4;	/* Offset information */
 		if (PLBIT(h->ver)) ehlen += h->length;	/* include length if available */
 		if (PVER(h->ver)!=VER_L2TP) {
@@ -1281,7 +1289,7 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 		if (!check_payload(buf, t, c)) {
 			if (!expand_payload(buf,t,c)) {
 				if (buf->len > sizeof(struct payload_hdr)) {
-					if (c->throttle) {
+/*					if (c->throttle) {
 						if (c->pSs > c->pLr + c->rws) {
 #ifdef DEBUG_FLOW
 							log(LOG_DEBUG, "%s: not yet dethrottling call\n",__FUNCTION__);
@@ -1294,7 +1302,7 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 							c->dethrottle=NULL;
 							c->throttle = 0;
 						}
-					}
+					} */
 					res = write_packet(buf,t,c, c->frame & SYNC_FRAMING);
 					if (res) return res;
 					/* 
@@ -1303,23 +1311,23 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 				   * window size or if they we have turned off our fbit. 
 				   */
 
-					if (c->ourfbit && (c->ourrws > 0)) {
+/*					if (c->ourfbit && (c->ourrws > 0)) {
 						if (c->pSr >= c->prx + c->ourrws - 2) {
-						/* We've received enough to fill our receive window.  At
-						this point, we should immediately send a ZLB! */
+						We've received enough to fill our receive window.  At
+						this point, we should immediately send a ZLB!
 #ifdef DEBUG_ZLB
 							log(LOG_DEBUG, "%s: Sending immediate ZLB!\n",__FUNCTION__);
 #endif
 							if (c->zlb_xmit) {
-							/* Deschedule any existing zlb_xmit's */
+							Deschedule any existing zlb_xmit's
 								deschedule(c->zlb_xmit);
 								c->zlb_xmit = NULL;
 							}
 							send_zlb((void *)c);
 						} else {
-						/* We need to schedule sending a ZLB.  FIXME:  Should
+						We need to schedule sending a ZLB.  FIXME:  Should
 						be 1/4 RTT instead, when rate adaptive stuff is
-						in place. Spec allows .5 seconds though */
+						in place. Spec allows .5 seconds though
 							tv.tv_sec = 0;
 							tv.tv_usec = 500000;
 							if (c->zlb_xmit)
@@ -1329,13 +1337,13 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 #endif
 							c->zlb_xmit = schedule(tv, &send_zlb, (void *)c);
 						}
-					}
+					} */
 					return 0;
 				} else if (buf->len == sizeof(struct payload_hdr)) {
 #ifdef DEBUG_ZLB
 					log(LOG_DEBUG, "%s: payload ZLB received\n",__FUNCTION__);
 #endif
-					if (c->throttle) {
+/*					if (c->throttle) {
 						if (c->pSs > c->pLr + c->rws) {
 #ifdef DEBUG_FLOW
 							log(LOG_DEBUG, "%s: not yet dethrottling call\n",__FUNCTION__);
@@ -1349,7 +1357,7 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 							c->dethrottle=NULL;
 							c->throttle = 0;
 						}
-					}
+					} */
 					c->pSr--;
 					return 0;
 				} else {

@@ -1212,8 +1212,8 @@ int receive_window_size_avp(struct tunnel *t, struct call *c, void *data, int da
 		case SCCRP:
 		case SCCRQ:
 		case StopCCN:
-		case ICRP:
-		case ICCN:
+/*		case ICRP:
+		case ICCN: */
 			break;
 		default:
 			if (DEBUG)
@@ -1231,14 +1231,14 @@ int receive_window_size_avp(struct tunnel *t, struct call *c, void *data, int da
 		}
 	}
 #endif
-	c->rws = ntohs(raw[3]);
-	if (c->rws >= 0)
-		c->fbit = FBIT;
+	t->rws = ntohs(raw[3]);
+/*	if (c->rws >= 0)
+		c->fbit = FBIT; */
 if (debug_avp) {
 	if (DEBUG)
 		log(LOG_DEBUG,
 			"%s: peer wants RWS of %d.  Will use flow control.\n",__FUNCTION__,
-			c->rws);
+			t->rws);
 }
 	return 0;		
 }	

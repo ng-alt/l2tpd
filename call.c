@@ -63,7 +63,8 @@ void add_payload_hdr(struct tunnel *t, struct call *c, struct buffer *buf)
 		buf->len -= 2;
 	}
 	p = (struct payload_hdr *)buf->start;
-	p->ver = htons(c->lbit | c->rbit | c->fbit | c->ourfbit | VER_L2TP);
+/*	p->ver = htons(c->lbit | c->rbit | c->fbit | c->ourfbit | VER_L2TP); */
+	p->ver = htons(c->lbit | c->fbit | c->ourfbit | VER_L2TP);
 	if (c->lbit) {
 		p->length = htons((_u16)buf->len);
 	} else {
@@ -76,7 +77,7 @@ void add_payload_hdr(struct tunnel *t, struct call *c, struct buffer *buf)
 		p->Nr = htons(c->pSr);
 	}
 	c->pSs++;
-	c->rbit=0;
+/*	c->rbit=0; */
 }
 
 int read_packet(struct buffer *buf, int fd, int convert) {
@@ -272,7 +273,7 @@ void call_close(struct call *c)
 		struct l2tp_call_opts co;
 #endif
 		if (c->zlb_xmit) deschedule(c->zlb_xmit);
-		if (c->dethrottle) deschedule(c->dethrottle);
+/*		if (c->dethrottle) deschedule(c->dethrottle); */
 		if (c->closing) {
 #ifdef DEBUG_CLOSE
 			log(LOG_DEBUG, "%s: Actually closing call %d\n",__FUNCTION__,c->ourcid);
@@ -332,7 +333,7 @@ void destroy_call(struct call *c)
 	 * Close the tty
 	 */
 	if (c->fd>0) close(c->fd);
-	if (c->dethrottle) deschedule(c->dethrottle);
+/*	if (c->dethrottle) deschedule(c->dethrottle); */
 	if (c->zlb_xmit) deschedule(c->zlb_xmit);
 	if (c->addr) unreserve_addr(c->addr);
 	/*
@@ -397,12 +398,12 @@ struct call *new_call(struct tunnel *parent) {
 	tmp->tx_bytes=0;
 	tmp->rx_bytes=0;
 	tmp->zlb_xmit = NULL;
-	tmp->throttle = 0;
-	tmp->dethrottle=NULL;
+/*	tmp->throttle = 0; */
+/*	tmp->dethrottle=NULL; */
 	tmp->prx = 0;
-	tmp->rbit = 0;
+/*	tmp->rbit = 0; */
 	tmp->msgtype = 0;
-	tmp->timeout = 0;
+/*	tmp->timeout = 0; */
 	tmp->pSs = 0;
 	tmp->pSr = 0;
 	tmp->pLr = -1;
@@ -433,7 +434,7 @@ struct call *new_call(struct tunnel *parent) {
 	tmp->cid = -1;
 	tmp->qcid = -1;
 	tmp->container = parent;
-	tmp->rws = -1;
+/*	tmp->rws = -1; */
 	tmp->fd = -1;
 	tmp->pnu = 0;
 	tmp->cnu = 0;
@@ -451,11 +452,11 @@ struct call *new_call(struct tunnel *parent) {
 	tmp->lns=parent->lns;
 	tmp->lac=parent->lac;
 	tmp->addr=0;
-	tmp->ourrws = DEFAULT_RWS_SIZE;	
-	if (tmp->ourrws >= 0)
+/*	tmp->ourrws = DEFAULT_RWS_SIZE;	 */
+/*	if (tmp->ourrws >= 0)
 		tmp->ourfbit = FBIT;
 	else
-		tmp->ourfbit = 0;
+		tmp->ourfbit = 0; */
 	return tmp;
 }
 

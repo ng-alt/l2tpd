@@ -561,7 +561,7 @@ struct tunnel *new_tunnel() {
 		free(tmp);
 		return NULL;
 	};
-	tmp->self->ourrws = DEFAULT_RWS_SIZE;
+	tmp->ourrws = DEFAULT_RWS_SIZE;
 	tmp->self->ourfbit = FBIT;
 	tmp->lac=NULL;
 	tmp->lns=NULL;
@@ -697,6 +697,7 @@ void init() {
 	}
 	log(LOG_LOG, "l2tpd version " SERVER_VERSION " started on %s\n",hostname);
 	log(LOG_LOG, "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
+    log(LOG_LOG, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
 	log(LOG_LOG, "%s version %s on a %s, port %d\n",uts.sysname,uts.release,uts.machine,gconfig.port);
 	lac = laclist;
 	while(lac) {

@@ -16,9 +16,9 @@
 #define CALL_CACHE_SIZE 256
 
 struct call {
-	int rbit;		/* Set the "R" bit on the next packet? */
+/*	int rbit;		Set the "R" bit on the next packet? */
 	int lbit;		/* Should we send length field? */
-	int throttle;	/* Throttle the connection? */
+/*	int throttle;	Throttle the connection? */
 	int seq_reqd;	/* Sequencing required? */
 	int tx_pkts;	/* Transmitted packets */
 	int rx_pkts;	/* Received packets */
@@ -26,9 +26,9 @@ struct call {
 	int rx_bytes;	/* received bytes */
 	struct schedule_entry *zlb_xmit;
 					/* Scheduled ZLB transmission */
-	struct schedule_entry *dethrottle;
+/*	struct schedule_entry *dethrottle; */
 					/* Scheduled dethrottling (overrun) */
-	int timeout;	/* Has our timeout expired? If so, we'll go ahead
+/*	int timeout;	Has our timeout expired? If so, we'll go ahead
 					 and transmit, full window or not, and set the
 					 R-bit on this packet.  */
 	int prx;		/* What was the last packet we sent
@@ -73,11 +73,11 @@ struct call {
 	int error;		/* Error code */
 	int fbit;		/* Use sequence numbers? */
 	int ourfbit;		/* Do we want sequence numbers? */
-	int ourrws;		/* Our RWS for the call */
+/*	int ourrws;		Our RWS for the call */
 	int cnu;		/* Do we need to send updated Ns, Nr values? */
 	int pnu;		/* ditto for payload packet */
 	char errormsg[MAXSTRLEN]; /* Error message */
-	int rws;		/* Receive window size, or -1 for none */
+/*	int rws;		Receive window size, or -1 for none */
 	struct timeval lastsent;  /* When did we last send something? */
 	_u16 pSs;		/* Sequence for next payload packet */
 	_u16 pSr;		/* Sequence for next received payload packet */

@@ -123,15 +123,15 @@ inline void fix_hdr(void *buf) {
 
 void dethrottle(void *call) 
 {
-	struct call *c = (struct call *)call;
-	if (c->throttle) {
+/*	struct call *c = (struct call *)call; */
+/*	if (c->throttle) {
 #ifdef DEBUG_FLOW
 		log(LOG_DEBUG, "%s: dethrottling call %d, and setting R-bit\n",__FUNCTION__,c->ourcid); 
 #endif 		c->rbit = RBIT;
 		c->throttle = 0;
 	} else {
 		log(LOG_DEBUG, "%s:  call %d already dethrottled?\n",__FUNCTION__,c->ourcid); 	
-	}
+	} */
 }
 
 void control_xmit(void *b) {
@@ -246,7 +246,8 @@ void network_thread() {
 					continue;
 				}
 				if (sc->fd>-1) {
-					if (!sc->throttle && !sc->needclose && !sc->closing) {
+/*					if (!sc->throttle && !sc->needclose && !sc->closing) { */
+					if (!sc->needclose && !sc->closing) {
 						if (sc->fd>max) max=sc->fd;
 						FD_SET(sc->fd,&readfds);
 					}
@@ -341,20 +342,20 @@ tunnel = %d, call = %d\n",__FUNCTION__,inet_ntoa(from.sin_addr),recvsize,tunnel,
 #ifdef DEBUG_FLOW_MORE
 					log(LOG_DEBUG, "%s: rws = %d, pSs = %d, pLr = %d\n",__FUNCTION__,sc->rws, sc->pSs, sc->pLr); 
 #endif
-					if ((sc->rws>0) && (sc->pSs > sc->pLr + sc->rws) && !sc->rbit) {
+/*					if ((sc->rws>0) && (sc->pSs > sc->pLr + sc->rws) && !sc->rbit) {
 #ifdef DEBUG_FLOW
 						log(LOG_DEBUG, "%s: throttling payload (call = %d, tunnel = %d, Lr = %d, Ss = %d, rws = %d)!\n",__FUNCTION__,
 								 sc->cid, sc->container->tid, sc->pLr, sc->pSs, sc->rws); 
 #endif
 						sc->throttle = -1;
-						/* We unthrottle in handle_packet if we get a payload packet, 
+						We unthrottle in handle_packet if we get a payload packet, 
 						valid or ZLB, but we also schedule a dethrottle in which
-						case the R-bit will be set */
-						/* FIXME: Rate Adaptive timeout? */ 						
+						case the R-bit will be set
+						FIXME: Rate Adaptive timeout? 						
 						tv.tv_sec = 2;
 						tv.tv_usec = 0;
 						sc->dethrottle = schedule(tv, dethrottle, sc); 					
-					} else
+					} else */
 					while ((result=read_packet(buf,sc->fd,sc->frame & SYNC_FRAMING))>0) {
 						add_payload_hdr(sc->container, sc, buf); 						
 						if (packet_dump) {

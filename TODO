@@ -1,6 +1,9 @@
 Critical:
 * Improved performance
 * Rate Adaptive Timeouts
+* Fork processing code into a kernel module(?)
+* Fix protocol correctness issues
+	* Are we sending valid and no invalid AVPs in various message types
 
 Other:
 * Support tie breakers
@@ -9,6 +12,12 @@ Other:
 * Maybe do something with private groups
 * Tunnel and call lookups should be hashes, not lists
 * Support outgoing calls
+* Meaningful error message about pppd problems...for 
+  either not installed, or no kernel support (if possible)
+
+Niceties:
+* Send notices to a syslog
+* Command-line tunnel control program, instead of using echo commands
 
 Way-down-the-line:
 * GUI configuration

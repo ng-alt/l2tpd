@@ -32,7 +32,7 @@ typedef unsigned long long _u64;
 
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
-#define SERVER_VERSION "0.61-jmca2"
+#define SERVER_VERSION "0.61"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
@@ -142,6 +142,8 @@ struct tunnel {
 #ifdef SANITY
 	int sanity;		/* check for sanity? */
 #endif
+	int rws;		/* Peer's Receive Window Size */
+	int ourrws;		/* Receive Window Size */
 	struct call *self;
 	struct lns *lns;	/* LNS that owns us */
 	struct lac *lac;	/* LAC that owns us */
