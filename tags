@@ -7,8 +7,8 @@
 ADDR_HASH_SIZE	aaa.h	19;"	d
 AHBIT	avp.h	53;"	d
 ALENGTH	avp.h	60;"	d
-ALT_CONFIG_FILE	file.h	54;"	d
 ALT_DEFAULT_AUTH_FILE	file.h	52;"	d
+ALT_DEFAULT_CONFIG_FILE	file.h	54;"	d
 AMBIT	avp.h	49;"	d
 ANALOG_BEARER	avp.h	71;"	d
 ASYNC_FRAMING	avp.h	68;"	d
@@ -23,7 +23,6 @@ CDN	control.h	41;"	d
 CFBIT	l2tp.h	65;"	d
 CFLAGS	Makefile	/^CFLAGS= $(DFLAGS) -Wall -DSANITY $(OSFLAGS)$/;"	m
 CLBIT	l2tp.h	59;"	d
-CONFIG_FILE	file.h	53;"	d
 CONTEXT_DEFAULT	file.h	46;"	d
 CONTEXT_GLOBAL	file.h	43;"	d
 CONTEXT_LAC	file.h	45;"	d
@@ -34,9 +33,11 @@ CVER	l2tp.h	68;"	d
 CZBITS	l2tp.h	62;"	d
 DEBUG	misc.h	44;"	d
 DEFAULT_AUTH_FILE	file.h	51;"	d
+DEFAULT_CONFIG_FILE	file.h	53;"	d
 DEFAULT_MAX_BPS	l2tp.h	95;"	d
 DEFAULT_MAX_RETRIES	l2tp.h	90;"	d
 DEFAULT_MIN_BPS	l2tp.h	96;"	d
+DEFAULT_PID_FILE	file.h	55;"	d
 DEFAULT_RWS_SIZE	l2tp.h	91;"	d
 DEFAULT_RX_BPS	l2tp.h	94;"	d
 DEFAULT_TX_BPS	l2tp.h	93;"	d
@@ -202,6 +203,8 @@ addr	call.h	/^    unsigned int addr;          \/* Address reserved for this call
 addr_ent	aaa.h	/^struct addr_ent$/;"	s
 alarm	scheduler.c	/^static sigset_t alarm;$/;"	v	file:
 alarm_handler	scheduler.c	/^void alarm_handler (int signal)$/;"	f
+altauthfile	file.h	/^    char altauthfile[STRLEN];   \/* File containing authentication info *\/$/;"	m	struct:global
+altconfigfile	file.h	/^    char altconfigfile[STRLEN]; \/* File containing configuration info *\/$/;"	m	struct:global
 args	l2tpd.c	/^char *args;$/;"	v
 aschedule	scheduler.c	/^inline struct schedule_entry *aschedule (struct timeval tv,$/;"	f
 assigned_call_avp	avp.c	/^int assigned_call_avp (struct tunnel *t, struct call *c, void *data,$/;"	f
@@ -264,6 +267,7 @@ cid	l2tp.h	/^    _u16 cid;                   \/* Caller ID *\/$/;"	m	struct:payl
 closeSs	call.h	/^    _u16 closeSs;               \/* What number was in Ns when we started to $/;"	m	struct:call
 closing	call.h	/^    int closing;                \/* Are we actually in the process of closing? *\/$/;"	m	struct:call
 cnu	call.h	/^    int cnu;                    \/* Do we need to send updated Ns, Nr values? *\/$/;"	m	struct:call
+configfile	file.h	/^    char configfile[STRLEN];    \/* File containing configuration info *\/$/;"	m	struct:global
 container	call.h	/^    struct tunnel *container;   \/* Tunnel we belong to *\/$/;"	m	struct:call
 control_fd	l2tpd.c	/^int control_fd;                 \/* descriptor of control area *\/$/;"	v
 control_finish	control.c	/^int control_finish (struct tunnel *t, struct call *c)$/;"	f
@@ -274,6 +278,8 @@ control_xmit	network.c	/^void control_xmit (void *b)$/;"	f
 control_zlb	control.c	/^void control_zlb (struct buffer *buf, struct tunnel *t, struct call *c)$/;"	f
 count	l2tp.h	/^    int count;                  \/* How many membmer calls? *\/$/;"	m	struct:tunnel
 count	l2tp.h	/^    int count;$/;"	m	struct:tunnel_list
+daemon	file.h	/^    int daemon;                 \/* Use daemon mode? *\/$/;"	m	struct:global
+daemonize	l2tpd.c	/^void daemonize() {$/;"	f
 data	scheduler.h	/^    void *data;                 \/* Data to be passed to func *\/$/;"	m	struct:schedule_entry
 data_rec_seq_num	call.h	/^    _u16 data_rec_seq_num;      \/* Sequence for next received payload packet *\/$/;"	m	struct:call
 data_seq_num	call.h	/^    _u16 data_seq_num;          \/* Sequence for next payload packet *\/$/;"	m	struct:call
@@ -365,8 +371,9 @@ idle	file.h	/^    int idle;                   \/* Idle timeout in seconds *\/$/;
 ignore_avp	avp.c	/^int ignore_avp (struct tunnel *t, struct call *c, void *data, int datalen)$/;"	f
 in	md5.h	/^    unsigned char in[64];$/;"	m	struct:MD5Context
 index	osport.h	21;"	d
-init	l2tpd.c	/^void init ()$/;"	f
+init	l2tpd.c	/^void init (int argc,char *argv[])$/;"	f
 init_addr	aaa.c	/^void init_addr ()$/;"	f
+init_args	l2tpd.c	/^void init_args(int argc, char *argv[]) {$/;"	f
 init_config	file.c	/^int init_config ()$/;"	f
 init_network	network.c	/^int init_network (void)$/;"	f
 init_scheduler	scheduler.c	/^void init_scheduler (void)$/;"	f
@@ -434,6 +441,7 @@ next	l2tp.h	/^    struct tunnel *next;        \/* Allows us to be linked easily 
 next	misc.h	/^    struct ppp_opts *next;$/;"	m	struct:ppp_opts
 next	scheduler.h	/^    struct schedule_entry *next;        \/* Next entry in queue *\/$/;"	m	struct:schedule_entry
 ntohs	misc.h	55;"	d
+null_handler	l2tpd.c	/^void null_handler(int sig)$/;"	f
 num	avp.h	/^    int num;                    \/* Number of AVP *\/$/;"	m	struct:avp
 o_pad	l2tp.h	/^    _u16 o_pad;                 \/* Optional offset padding *\/$/;"	m	struct:payload_hdr
 o_size	l2tp.h	/^    _u16 o_size;                \/* Optional offset size *\/$/;"	m	struct:payload_hdr
@@ -462,6 +470,7 @@ peer	misc.h	/^    struct sockaddr_in peer;$/;"	m	struct:buffer
 peername	file.h	/^    char peername[STRLEN];      \/* Force peer name to this *\/$/;"	m	struct:lac
 peername	file.h	/^    char peername[STRLEN];      \/* Force peer name to this *\/$/;"	m	struct:lns
 physchan	call.h	/^    int physchan;               \/* Physical channel ID *\/$/;"	m	struct:call
+pidfile	file.h	/^    char pidfile[STRLEN];       \/* File containing the pid number*\/$/;"	m	struct:global
 pnu	call.h	/^    int pnu;                    \/* ditto for payload packet *\/$/;"	m	struct:call
 port	file.h	/^    int port;                   \/* Port number to listen to *\/$/;"	m	struct:global
 port	file.h	/^    int port;$/;"	m	struct:host
@@ -598,6 +607,7 @@ udp_xmit	network.c	/^void udp_xmit (struct buffer *buf)$/;"	f
 uint32	md5.h	/^typedef unsigned int uint32;$/;"	t
 uint32	md5.h	/^typedef unsigned long uint32;$/;"	t
 unreserve_addr	aaa.c	/^void unreserve_addr (unsigned int addr)$/;"	f
+usage	l2tpd.c	/^void usage(void) {$/;"	f
 uts	l2tpd.c	/^struct utsname uts;$/;"	v
 vector	aaa.h	/^    unsigned char *vector;$/;"	m	struct:challenge
 vector_len	aaa.h	/^    unsigned int vector_len;$/;"	m	struct:challenge

@@ -29,6 +29,7 @@ char filerr[STRLEN];
 
 int parse_config (FILE *);
 struct keyword words[];
+
 int init_config ()
 {
     FILE *f;
@@ -38,24 +39,20 @@ int init_config ()
     lnslist = NULL;
     laclist = NULL;
     deflac = (struct lac *) malloc (sizeof (struct lac));
-    f = fopen (CONFIG_FILE, "r");
-    if (f)
+
+    f = fopen (gconfig.configfile, "r");
+    if (!f) 
     {
-        strncpy (gconfig.authfile, DEFAULT_AUTH_FILE,
-                 sizeof (gconfig.authfile));
-    }
-    else
-    {
-        f = fopen (ALT_CONFIG_FILE, "r");
+        f = fopen (gconfig.altconfigfile, "r");
         if (f)
         {
-            strncpy (gconfig.authfile, ALT_DEFAULT_AUTH_FILE,
-                     sizeof (gconfig.authfile));
+            strncpy (gconfig.authfile, gconfig.altauthfile, 
+            	sizeof (gconfig.authfile));
         }
         else
         {
             log (LOG_CRIT, "%s: Unable to open config file %s or %s\n",
-                 __FUNCTION__, CONFIG_FILE, ALT_CONFIG_FILE);
+                 __FUNCTION__, gconfig.configfile, gconfig.altconfigfile);
             return -1;
         }
 
@@ -64,7 +61,7 @@ int init_config ()
     fclose (f);
     return (returnedValue);
     filerr[0] = 0;
-};
+}
 
 struct lns *new_lns ()
 {

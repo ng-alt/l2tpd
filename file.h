@@ -50,8 +50,9 @@ struct host
 
 #define DEFAULT_AUTH_FILE "/etc/l2tp/l2tp-secrets"
 #define ALT_DEFAULT_AUTH_FILE "/etc/l2tpd/l2tp-secrets"
-#define CONFIG_FILE "/etc/l2tp/l2tpd.conf"
-#define ALT_CONFIG_FILE "/etc/l2tpd/l2tpd.conf"
+#define DEFAULT_CONFIG_FILE "/etc/l2tp/l2tpd.conf"
+#define ALT_DEFAULT_CONFIG_FILE "/etc/l2tpd/l2tpd.conf"
+#define DEFAULT_PID_FILE "/var/run/l2tpd.pid"
 
 /* Definition of an LNS */
 struct lns
@@ -130,6 +131,11 @@ struct global
 {
     int port;                   /* Port number to listen to */
     char authfile[STRLEN];      /* File containing authentication info */
+    char altauthfile[STRLEN];   /* File containing authentication info */
+    char configfile[STRLEN];    /* File containing configuration info */
+    char altconfigfile[STRLEN]; /* File containing configuration info */
+    char pidfile[STRLEN];       /* File containing the pid number*/
+    int daemon;                 /* Use daemon mode? */
     int accesscontrol;          /* Use access control? */
     int forceuserspace;         /* Force userspace? */
 };

@@ -164,6 +164,14 @@ void show_status (int fd)
     close (fd2);
 }
 
+void null_handler(int sig)
+{
+       /* FIXME 
+        * A sighup is received when a call is terminated, unknown origine .. 
+        * I catch it and ll looks good, but .. 
+	*/
+}
+
 void status_handler (int sig)
 {
     show_status (1);
@@ -186,8 +194,8 @@ void child_handler (int signal)
     if (pid < 1)
     {
         /*
-           * Oh well, nobody there.  Maybe we reaped it
-           * somewhere else already
+         * Oh well, nobody there.  Maybe we reaped it
+         * somewhere else already
          */
         return;
     }
@@ -200,8 +208,12 @@ void child_handler (int signal)
             {
                 log (LOG_DEBUG, "%s : pppd died for call %d\n", __FUNCTION__,
                      c->cid);
-
                 c->needclose = -1;
+                /* 
+                 * OK...pppd died, we can go ahead and close the pty for
+                 * it
+                 */
+                close (c->fd);
                 return;
             }
             c = c->next;
@@ -237,6 +249,10 @@ void death_handler (int signal)
         }
         st = st2;
     }
+
+    /* erase pid file */
+	unlink (gconfig.pidfile);
+
     exit (1);
 }
 
@@ -367,7 +383,6 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
 
         /* close the control pipe fd */
         close (control_fd);
-
 
         execv (PPPD, stropt);
         log (LOG_WARN, "%s: Exec of %s failed!\n", __FUNCTION__, PPPD);
@@ -896,9 +911,130 @@ void do_control ()
     control_fd = open (CONTROL_PIPE, O_RDONLY | O_NONBLOCK, 0600);
 }
 
-void init ()
+void usage(void) {
+    printf("Usage: l2tpd -D -c [config file] -s [secret file] -p [pid file]\n");
+    printf("\n");
+    exit(1);
+}
+
+void init_args(int argc, char *argv[]) {
+    int i=0;
+    gconfig.daemon=1;
+    memset(gconfig.altauthfile,0,STRLEN);
+    memset(gconfig.altconfigfile,0,STRLEN);
+    memset(gconfig.authfile,0,STRLEN);
+    memset(gconfig.configfile,0,STRLEN);
+    memset(gconfig.pidfile,0,STRLEN);
+    strncpy(gconfig.altauthfile,ALT_DEFAULT_AUTH_FILE,
+            sizeof(gconfig.altauthfile) - 1);
+    strncpy(gconfig.altconfigfile,ALT_DEFAULT_CONFIG_FILE,
+            sizeof(gconfig.altconfigfile) - 1);
+    strncpy(gconfig.authfile,DEFAULT_AUTH_FILE,
+            sizeof(gconfig.authfile) - 1);
+    strncpy(gconfig.configfile,DEFAULT_CONFIG_FILE,
+            sizeof(gconfig.configfile) - 1);
+    strncpy(gconfig.pidfile,DEFAULT_PID_FILE,
+            sizeof(gconfig.pidfile) - 1);
+    for (i = 1; i < argc; i++) {
+        if(! strncmp(argv[i],"-c",2)) {
+            if(++i == argc)
+                usage();
+            else
+                strncpy(gconfig.configfile,argv[i],
+                        sizeof(gconfig.configfile) - 1);
+        }
+        else if (! strncmp(argv[i],"-D",2)) {
+            gconfig.daemon=0;
+        }
+        else if (! strncmp(argv[i],"-s",2)) {
+            if(++i == argc)
+                usage();
+            else
+                strncpy(gconfig.authfile,argv[i],
+                        sizeof(gconfig.authfile) - 1);
+        }
+        else if (! strncmp(argv[i],"-p",2)) {
+            if(++i == argc)
+                usage();
+            else
+                strncpy(gconfig.pidfile,argv[i],
+                        sizeof(gconfig.pidfile) - 1);
+        }
+        else {
+            usage();
+        }
+    }
+}
+
+
+void daemonize() {
+    int pid=0;
+    int i,l;
+    char buf[STRLEN];
+    int pidfilewritten=0;
+
+    if((pid = fork()) < 0) {
+        log(LOG_LOG, "%s: Unable to fork ()\n",__FUNCTION__);
+        close(server_socket);
+        exit(1);
+    }
+    else if (pid)
+        exit(0);
+
+    close(0);
+    close(1);
+    close(2);
+
+    /* Read previous pid file. */
+    if ((i = open(gconfig.pidfile,O_RDONLY)) > 0) {
+        l=read(i,buf,sizeof(buf)-1);
+        if (i < 0) {
+            log(LOG_LOG, "%s: Unable to read pid file [%s]\n",
+                    __FUNCTION__, gconfig.pidfile);
+        }
+        buf[i] = '\0';
+        pid = atoi(buf);
+
+        /* If the previous server process is not still running,
+           write a new pid file immediately. */
+        if (pid && (pid == getpid () || kill (pid, 0) < 0)) {
+            unlink (gconfig.pidfile);
+            if ((i = open (gconfig.pidfile, O_WRONLY | O_CREAT, 0640)) >= 0)
+            {
+                snprintf (buf, sizeof(buf), "%d\n", (int)getpid());
+                write (i, buf, strlen(buf));
+                close (i);
+                pidfilewritten = 1;
+            }
+        }
+        else
+        {
+            log(LOG_LOG, "%s: There's already a l2tpd server running.\n",
+                    __FUNCTION__);
+            close(server_socket);
+            exit(1);
+        }
+    }
+
+    pid = setsid();
+
+    if(! pidfilewritten) {
+        unlink(gconfig.pidfile);
+        if ((i = open (gconfig.pidfile, O_WRONLY | O_CREAT, 0640)) >= 0) {
+            snprintf (buf, strlen(buf), "%d\n", (int)getpid());
+            write (i, buf, strlen(buf));
+            close (i);
+            pidfilewritten = 1;
+        }
+    }
+}
+
+
+
+void init (int argc,char *argv[])
 {
     struct lac *lac;
+    init_args (argc,argv);
     init_addr ();
     if (init_config ())
     {
@@ -914,10 +1050,13 @@ void init ()
     init_tunnel_list (&tunnels);
     if (init_network ())
         exit (1);
+    if (gconfig.daemon)
+	daemonize ();
     signal (SIGTERM, &death_handler);
     signal (SIGINT, &death_handler);
     signal (SIGCHLD, &child_handler);
     signal (SIGUSR1, &status_handler);
+    signal (SIGHUP, &null_handler);
     init_scheduler ();
     mkfifo (CONTROL_PIPE, 0600);
     control_fd = open (CONTROL_PIPE, O_RDONLY | O_NONBLOCK, 0600);
@@ -953,8 +1092,7 @@ void init ()
 
 int main (int argc, char *argv[])
 {
-    args = argv[0];
-    init ();
+    init(argc,argv);
     dial_no_tmp = calloc (128, sizeof (char));
     network_thread ();
     return 0;

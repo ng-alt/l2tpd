@@ -69,7 +69,6 @@ extern void udppush_handler (int);
 extern int addfcs (struct buffer *buf);
 extern inline void swaps (void *, int);
 extern void do_packet_dump (struct buffer *);
-extern char *args;
 extern void status (const char *fmt, ...);
 extern void status_handler (int signal);
 extern int getPtyMaster (char *a, char *b);

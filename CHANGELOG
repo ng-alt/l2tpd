@@ -1,3 +1,14 @@
+0.67
+--
+close pty connecting to pppd in child_handler()
+Add code to daemonize correctly
+Add command line options
+    -D to not daemonize
+    -p to specify a pidfile
+    -c to specify a config file
+    -s to specify a secrets file
+Catch a SIGHUP that's coming from who-knows-where and do nothing
+
 0.66
 --
 Fixed tunnel authentication mechanism so that it works!

@@ -35,11 +35,11 @@ typedef unsigned long long _u64;
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
 #define BINARY "l2tpd"
-#define SERVER_VERSION "0.66"
+#define SERVER_VERSION "0.67"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
-#define FIRMWARE_REV	0x0660  /* Revision of our firmware (software, in this case) */
+#define FIRMWARE_REV	0x0670  /* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32      /* By default only allow this many
                                    tunnels to exist */
 
