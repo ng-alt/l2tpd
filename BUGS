@@ -6,8 +6,5 @@ Makefile doesn't have dependencies	dependencies need to be added
 
 Timeouts are compile-time			RTT adaptive timeouts need to be added
 
-tunnel and call id's always start   Need to initialize the random number generator.
-with the same value.				For now, for debugging purposes, leaving this out is fine.
-
 All the FIXME's need to be fixed and of course everything in the TODO list
 needs to be done, too!

@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -26,7 +27,7 @@ void init_scheduler (void)
 {
     struct sigaction act;
     act.sa_handler = alarm_handler;
-#ifdef LINUX
+#if defined (LINUX) && (__i386__)
     act.sa_restorer = NULL;
 #endif
     act.sa_flags = 0;

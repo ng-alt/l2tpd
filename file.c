@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -18,8 +19,12 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "l2tp.h"
+
 struct lns *lnslist;
 struct lac *laclist;
 struct lns *deflns;
@@ -678,7 +683,7 @@ int set_userspace (char *word, char *value, int context, void *item)
 
 struct iprange *set_range (char *word, char *value, struct iprange *in)
 {
-    char *c, *d;
+    char *c, *d = NULL;
     struct iprange *ipr, *p;
     struct hostent *hp;
     c = strchr (value, '-');
@@ -904,6 +909,81 @@ int set_lns (char *word, char *value, int context, void *item)
     return 0;
 }
 
+int set_rand_sys ()
+{
+    log(LOG_WARN, "The \"rand()\" function call is not a very good source"
+            "of randomness\n");
+   rand_source = RAND_SYS;
+    return 0;
+}
+
+int set_rand_dev ()
+{
+    rand_source = RAND_DEV;
+    return 0;
+}
+
+int set_rand_egd (char *value)
+{
+    log(LOG_WARN, "%s: not yet implemented!\n", __FUNCTION__);
+    rand_source = RAND_EGD;
+    return -1;
+}
+
+int set_rand_source (char *word, char *value, int context, void *item)
+{
+    time_t seconds;
+    /*
+     * We're going to go ahead and seed the rand() function with srand()
+     * because even if we set the randomness source to dev or egd, they
+     * can fall back to sys if they fail, so we want to make sure we at
+     * least have *some* semblance of randomness available from the
+     * rand() function
+     */
+    /*
+     * This is a sucky random number seed...just the result from the
+     * time() call...but...the user requested to use the rand()
+     * function, which is a pretty sucky source of randomness
+     * regardless...at least we can get a almost sorta decent seed.  If
+     * you have any better suggestions for creating a seed...lemme know
+     * :/
+     */
+    seconds = time(NULL);
+    srand(seconds);
+ 
+    if (context != CONTEXT_GLOBAL)
+    {
+        log(LOG_WARN, "%s: %s not valid in context %d\n",
+                __FUNCTION__, word, context);
+        return -1;
+    }
+    /* WORKING HERE */
+    if (strlen(value) == 0)
+    {
+        snprintf(filerr, sizeof (filerr), "no randomness source specified\n");
+        return -1;
+    }
+    if (strncmp(value, "egd", 3) == 0)
+    {
+        return set_rand_egd(value);
+    }
+    else if (strncmp(value, "dev", 3) == 0)
+    {
+        return set_rand_dev();
+    }
+    else if (strncmp(value, "sys", 3) == 0)
+    {
+        return set_rand_sys();
+    }
+    else
+    {
+        log(LOG_WARN, "%s: %s is not a valid randomness source\n",
+                __FUNCTION__, value);
+        return -1;
+
+    }
+}
+
 int parse_config (FILE * f)
 {
     /* Read in the configuration file handed to us */
@@ -1117,6 +1197,7 @@ int parse_config (FILE * f)
 
 struct keyword words[] = {
     {"port", &set_port},
+    {"rand source", &set_rand_source},
     {"auth file", &set_authfile},
     {"exclusive", &set_exclusive},
     {"autodial", &set_autodial},

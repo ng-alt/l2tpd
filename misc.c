@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -11,6 +12,11 @@
  * Miscellaneous but important functions
  *
  */
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +28,7 @@
 #endif
 #include <netinet/in.h>
 #include "l2tp.h"
+
 
 void log (int level, const char *fmt, ...)
 {
@@ -221,4 +228,74 @@ void opt_destroy (struct ppp_opts *option)
         free (option);
         option = tmp;
     };
+}
+
+int get_egd_entropy(char *buf, int count)
+{
+    return -1;
+}
+
+int get_sys_entropy(char *buf, int count)
+{
+    /*
+     * This way of filling buf with rand() generated data is really
+     * fairly inefficient from a function call point of view...rand()
+     * returns four bytes of data (on most systems, sizeof(int))
+     * and we end up only using 1 byte of it (sizeof(char))...ah
+     * well...it was a *whole* lot easier to code this way...suggestions
+     * for improvements are, of course, welcome
+     */
+    int counter;
+    for (counter = 0; counter < count; counter++)
+    {
+        buf[counter] = (char)rand();
+    }
+#ifdef DEBUG_ENTROPY
+    bufferDump (buf, count);
+#endif
+    return count;
+}
+
+int get_dev_entropy(char *buf, int count)
+{
+    int devrandom;
+    ssize_t entropy_amount;
+
+    devrandom = open ("/dev/urandom", O_RDONLY | O_NONBLOCK);
+    if (devrandom == -1)
+    {
+#ifdef DEBUG_ENTROPY
+        log(LOG_WARN, "%s: couldn't open /dev/urandom,"
+                      "falling back to rand()\n",
+                      __FUNCTION__);
+#endif
+        return get_sys_entropy(buf, count);
+    }
+    entropy_amount = read(devrandom, buf, count);
+    close(devrandom);
+    return entropy_amount;
+}
+
+int get_entropy (char *buf, int count)
+{
+    if (rand_source == RAND_SYS)
+    {
+        return get_sys_entropy(buf, count);
+    }
+    else if (rand_source == RAND_DEV)
+    {
+        return get_dev_entropy(buf, count);
+    }
+    else if (rand_source == RAND_EGD)
+    {
+        log(LOG_WARN, "%s: EGD Randomness source not yet implemented\n",
+                __FUNCTION__);
+        return -1;
+    }
+    else
+    {
+        log(LOG_WARN, "%s: Invalid Randomness source specified (%d)\n",
+                __FUNCTION__, rand_source);
+        return -1;
+    }
 }

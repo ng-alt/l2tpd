@@ -1,0 +1,151 @@
+.TH "l2tpd.conf" "5" "" "Jean-Francois Dive" ""
+.SH "NAME"
+l2tpd.conf \- L2TPD configuration file
+.SH "DESCRIPTION"
+The l2tpd.conf file contains configuration information for l2tpd, the implementation of l2tp protocol.
+
+The configuration file is composed of sections and parameters. Each section
+have a given name which will be used when using the configuration FIFO 
+(normaly /var/run/l2tpd\-control). See l2tpd.8  for more details.
+
+The specific given name 
+.B default
+will specifies parameters applicables for all the following sections.
+.SH "GLOBAL SECTION"
+.TP 
+.B auth file
+Specify where to find the authentication file used to authenticate
+ppp sessions. The default is /etc/l2tp/l2tp\-secrets.
+
+.TP 
+.B Port
+Specify which udp port l2tpd should use. The default is 1701.
+
+.TP 
+.B access control
+If set to use, the l2tpd process will only accept connections from
+peers addresses specified in the following sections. CHECK
+
+.SH "LNS SECTION"
+.TP 
+.B exclusive
+If set to yes, only one control tunnel will be allowed to be built
+between 2 peers. CHECK
+
+.TP 
+.B (no) ip range
+Specify the range of ip addresses the LNS will assign to the connecting
+LAC PPP tunnels. Multiple ranges definitions is a legal configuration,
+using the 'no' statement disallow the use of that particular range.
+Ranges are defined using the format IP \- IP (expl: 1.1.1.1 \- 1.1.1.10)
+
+.TP 
+.B (no) lac
+Specify the ip addresses of LAC's which are allowed to connect to l2tpd
+acting as a LNS. The format is the same as the 
+.B ip range 
+option.
+
+.TP 
+.B hidden bit
+If set to yes, the private AVP's will be used by l2tpd. To get more information
+about hidden AVP's and AVP in general, refere to (FIXME)
+
+.TP 
+.B local ip
+use the following ip as the l2tpd own ip address.
+
+.TP 
+.B lenght bit
+If set to yes, the lenght bit present in the l2tp packet payload
+will be used.
+
+.TP 
+.B (refuse | require) chap
+Will require or refuse the remote peer to get authenticated via CHAP for the 
+ppp authentication.
+
+.TP 
+.B (refuse | require) pap
+Will require or refuse the remote peer to get authenticated via PAP for the 
+ppp authentication.
+
+.TP 
+.B (refuse | require) authentication
+Will require or refuse the remote peer to authenticate itself.
+
+.TP 
+.B unix authentication
+If set to yes, /etc/passwd will be used for remote peer ppp authentication.
+
+.TP 
+.B hostname
+Will report this as the l2tpd hostname in negociation.
+
+.TP 
+.B ppp debug
+This will enable the debug for pppd.
+
+.TP 
+.B pppoptfile
+Specify the path for a file which contains pppd configuration parameters
+to be used.
+
+.TP 
+.B call rws
+This does something FIXME
+
+.TP 
+.B tunnel rws
+This does something FIXME
+
+.TP 
+.B flow bits
+If set to yes, sequence numbers will be included in the communication.
+
+.TP 
+.B challenge
+If set to yes, challenge authenticate peer (FIXME)
+
+
+.SH "LAC SECTION"
+The following are LAC specific configuration flags. Most of those
+described in the LNS section may be used in a LAC context, where
+it make common sense (essentially l2tp procotols tuning flags and
+authentication / ppp related ones).
+
+.TP 
+.B lns
+Set the dns name or ip address to the LNS to connect to.
+
+.TP 
+.B redial
+If set to yes, l2tpd will attemps to redial if the call get disconected.
+
+.TP 
+.B redial timeout
+wait X seconds before redial. The redial option must be set to yes
+to use this option.
+
+.TP 
+.B max redial 
+Will give up redial tries after X attempts.
+
+.SH "FILES"
+
+\fB\fR/etc/l2tp/l2tpd.conf \fB\fR/etc/l2tp/l2tp\-secrets 
+\fB\fR/var/run/l2tpd\-control
+.SH "BUGS"
+
+Please address bugs and comment to l2tpd\-dev@l2tpd.org
+.SH "SEE ALSO"
+
+\fB\fRl2tpd(8)
+.SH "AUTHORS"
+Scott Balmos <sbalmos@iglou.com>
+Jeff McAdams <jeffm@iglou.com>
+David Stipp <dstipp@one.net>
+
+Based off of l2tpd version 0.60
+Copyright (C)1998 Adtran, Inc.
+Mark Spencer <markster@marko.net>

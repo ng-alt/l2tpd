@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *

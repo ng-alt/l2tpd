@@ -12,6 +12,12 @@
 ; port = 1701						 	; * Bind to port 1701
 ; auth file = /etc/l2tp/l2tp-secrets 	; * Where our challenge secrets are
 ; access control = yes					; * Refuse connections without IP match
+; rand source = dev                     ; Source for entropy for random
+;                                       ; numbers, options are:
+;                                       ; dev - reads of /dev/urandom
+;                                       ; sys - uses rand()
+;                                       ; egd - reads from egd socket
+;                                       ; egd is not yet implemented
 ;
 ; [lns default]							; Our fallthrough LNS definition
 ; exclusive = no						; * Only permit one tunnel per host

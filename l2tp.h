@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -35,11 +36,11 @@ typedef unsigned long long _u64;
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
 #define BINARY "l2tpd"
-#define SERVER_VERSION "0.67"
-#define VENDOR_NAME "Adtran, l2tpd"
+#define SERVER_VERSION "0.68"
+#define VENDOR_NAME "l2tpd.org"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
-#define FIRMWARE_REV	0x0670  /* Revision of our firmware (software, in this case) */
+#define FIRMWARE_REV	0x0680  /* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32      /* By default only allow this many
                                    tunnels to exist */
 
@@ -179,6 +180,12 @@ struct tunnel_list
 #define PPP_GOODFCS 0xf0b8
 #define PPP_FCS(fcs,c) (((fcs) >> 8) ^ fcstab[((fcs) ^ (c)) & 0xff])
 
+/* Values for Randomness sources */
+#define RAND_DEV 0x0
+#define RAND_SYS 0x1
+#define RAND_EGD 0x2
+
+
 /* Error Values */
 
 extern struct tunnel_list tunnels;
@@ -206,6 +213,8 @@ extern int switch_io;           /* jz */
 extern int control_fd;
 extern int start_pppd (struct call *c, struct ppp_opts *);
 extern void magic_lac_dial (void *);
+extern int get_entropy (char *, int);
+
 #ifndef MIN
 #define MIN(a,b) (((a)<(b)) ? (a) : (b))
 #endif

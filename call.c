@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -402,8 +403,12 @@ void destroy_call (struct call *c)
 /*	if (c->dethrottle) deschedule(c->dethrottle); */
     if (c->zlb_xmit)
         deschedule (c->zlb_xmit);
+
+#ifdef IP_ALLOCATION
     if (c->addr)
         unreserve_addr (c->addr);
+#endif
+
     /*
      * Kill off pppd and wait for it to 
      * return to us.  This should only be called
@@ -472,6 +477,7 @@ void destroy_call (struct call *c)
 
 struct call *new_call (struct tunnel *parent)
 {
+    char entropy_buf[2] = "\0";
     struct call *tmp = malloc (sizeof (struct call));
     if (!tmp)
         return NULL;
@@ -504,7 +510,16 @@ struct call *new_call (struct tunnel *parent)
 #endif
 /*	while(get_call(parent->ourtid, (tmp->ourcid = (rand() && 0xFFFF)),0,0)); */
             /* FIXME: What about possibility of multiple random #'s??? */
-            tmp->ourcid = (rand () & 0xFFFF);
+            /* tmp->ourcid = (rand () & 0xFFFF); */
+            get_entropy(entropy_buf, 2);
+        {
+            int *temp;
+            temp = (int *)entropy_buf;
+            tmp->ourcid = *temp & 0xFFFF;
+#ifdef DEBUG_ENTROPY
+            log(LOG_DEBUG, "ourcid = %u, entropy_buf = %hx\n", tmp->ourcid, *temp);
+#endif
+        }
 #else
         tmp->ourcid = 0x6227;
 #endif
@@ -621,8 +636,8 @@ struct call *get_call (int tunnel, int call, unsigned int addr, int port)
             return NULL;
         }
         /*
-           * Well, nothing appropriate...  Let's add a new tunnel, if
-           * we are not at capacity.
+         * Well, nothing appropriate...  Let's add a new tunnel, if
+         * we are not at capacity.
          */
         if (debug_tunnel)
         {

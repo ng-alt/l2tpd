@@ -4,79 +4,80 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.2.2	//
-ADDR_HASH_SIZE	aaa.h	19;"	d
-AHBIT	avp.h	53;"	d
-ALENGTH	avp.h	60;"	d
-ALT_DEFAULT_AUTH_FILE	file.h	52;"	d
-ALT_DEFAULT_CONFIG_FILE	file.h	54;"	d
-AMBIT	avp.h	49;"	d
-ANALOG_BEARER	avp.h	71;"	d
-ASYNC_FRAMING	avp.h	68;"	d
-AVP_MAX	avp.c	20;"	d	file:
-AZBITS	avp.h	56;"	d
+ADDR_HASH_SIZE	aaa.h	20;"	d
+AHBIT	avp.h	54;"	d
+ALENGTH	avp.h	61;"	d
+ALT_DEFAULT_AUTH_FILE	file.h	53;"	d
+ALT_DEFAULT_CONFIG_FILE	file.h	55;"	d
+AMBIT	avp.h	50;"	d
+ANALOG_BEARER	avp.h	72;"	d
+ASYNC_FRAMING	avp.h	69;"	d
+AVP_MAX	avp.c	21;"	d	file:
+AZBITS	avp.h	57;"	d
 BIN	Makefile	/^BIN=l2tpd$/;"	m
-BINARY	l2tp.h	37;"	d
+BINARY	l2tp.h	38;"	d
 BINDIR	Makefile	/^BINDIR=\/usr\/sbin$/;"	m
-CALL_CACHE_SIZE	call.h	17;"	d
-CALL_PPP_OPTS	l2tp.h	41;"	d
-CDN	control.h	41;"	d
-CFBIT	l2tp.h	65;"	d
-CFLAGS	Makefile	/^CFLAGS= $(DFLAGS) -Wall -DSANITY $(OSFLAGS)$/;"	m
-CLBIT	l2tp.h	59;"	d
-CONTEXT_DEFAULT	file.h	46;"	d
-CONTEXT_GLOBAL	file.h	43;"	d
-CONTEXT_LAC	file.h	45;"	d
-CONTEXT_LNS	file.h	44;"	d
-CONTROL_PIPE	l2tp.h	35;"	d
-CTBIT	l2tp.h	58;"	d
-CVER	l2tp.h	68;"	d
-CZBITS	l2tp.h	62;"	d
-DEBUG	misc.h	44;"	d
-DEFAULT_AUTH_FILE	file.h	51;"	d
-DEFAULT_CONFIG_FILE	file.h	53;"	d
-DEFAULT_MAX_BPS	l2tp.h	95;"	d
-DEFAULT_MAX_RETRIES	l2tp.h	90;"	d
-DEFAULT_MIN_BPS	l2tp.h	96;"	d
-DEFAULT_PID_FILE	file.h	55;"	d
-DEFAULT_RWS_SIZE	l2tp.h	91;"	d
-DEFAULT_RX_BPS	l2tp.h	94;"	d
-DEFAULT_TX_BPS	l2tp.h	93;"	d
-DEF_MAX_TUNNELS	l2tp.h	43;"	d
-DFLAGS	Makefile	/^DFLAGS= -g -O2 -DDEBUG_PPPD -DDEBUG_CONTROL$/;"	m
-DIGITAL_BEARER	avp.h	72;"	d
-ERROR_INVALID	avp.h	80;"	d
-ERROR_LENGTH	avp.h	77;"	d
-ERROR_NORES	avp.h	79;"	d
-ERROR_NOTEXIST	avp.h	78;"	d
-ERROR_RESERVED	avp.h	76;"	d
+CALL_CACHE_SIZE	call.h	18;"	d
+CALL_PPP_OPTS	l2tp.h	42;"	d
+CDN	control.h	42;"	d
+CFBIT	l2tp.h	66;"	d
+CFLAGS	Makefile	/^CFLAGS= $(DFLAGS) -Wall -DSANITY $(OSFLAGS) $(FFLAGS)$/;"	m
+CLBIT	l2tp.h	60;"	d
+CONTEXT_DEFAULT	file.h	47;"	d
+CONTEXT_GLOBAL	file.h	44;"	d
+CONTEXT_LAC	file.h	46;"	d
+CONTEXT_LNS	file.h	45;"	d
+CONTROL_PIPE	l2tp.h	36;"	d
+CTBIT	l2tp.h	59;"	d
+CVER	l2tp.h	69;"	d
+CZBITS	l2tp.h	63;"	d
+DEBUG	misc.h	45;"	d
+DEFAULT_AUTH_FILE	file.h	52;"	d
+DEFAULT_CONFIG_FILE	file.h	54;"	d
+DEFAULT_MAX_BPS	l2tp.h	96;"	d
+DEFAULT_MAX_RETRIES	l2tp.h	91;"	d
+DEFAULT_MIN_BPS	l2tp.h	97;"	d
+DEFAULT_PID_FILE	file.h	56;"	d
+DEFAULT_RWS_SIZE	l2tp.h	92;"	d
+DEFAULT_RX_BPS	l2tp.h	95;"	d
+DEFAULT_TX_BPS	l2tp.h	94;"	d
+DEF_MAX_TUNNELS	l2tp.h	44;"	d
+DFLAGS	Makefile	/^DFLAGS= -g -O2 -DDEBUG_PPPD -DDEBUG_CONTROL -DDEBUG_ENTROPY$/;"	m
+DIGITAL_BEARER	avp.h	73;"	d
+ERROR_INVALID	avp.h	81;"	d
+ERROR_LENGTH	avp.h	78;"	d
+ERROR_NORES	avp.h	80;"	d
+ERROR_NOTEXIST	avp.h	79;"	d
+ERROR_RESERVED	avp.h	77;"	d
 ETCDIR	Makefile	/^ETCDIR=\/etc$/;"	m
 F1	md5.c	175;"	d	file:
 F2	md5.c	176;"	d	file:
 F3	md5.c	177;"	d	file:
 F4	md5.c	178;"	d	file:
-FBIT	control.h	52;"	d
-FIRMWARE_REV	l2tp.h	42;"	d
-HBIT	avp.h	66;"	d
+FBIT	control.h	53;"	d
+FFLAGS	Makefile	/^FFLAGS= -DIP_ALLOCATION $/;"	m
+FIRMWARE_REV	l2tp.h	43;"	d
+HBIT	avp.h	67;"	d
 HDRS	Makefile	/^HDRS=l2tp.h avp.h misc.h control.h call.h scheduler.h file.h aaa.h md5.h$/;"	m
-HELLO_DELAY	l2tp.h	46;"	d
+HELLO_DELAY	l2tp.h	47;"	d
 HIGHFIRST	md5.c	9;"	d	file:
-Hello	control.h	32;"	d
-ICCN	control.h	39;"	d
-ICRP	control.h	38;"	d
-ICRQ	control.h	37;"	d
-IPADDY	misc.h	42;"	d
-LBIT	control.h	50;"	d
+Hello	control.h	33;"	d
+ICCN	control.h	40;"	d
+ICRP	control.h	39;"	d
+ICRQ	control.h	38;"	d
+IPADDY	misc.h	43;"	d
+LBIT	control.h	51;"	d
 LIBS	Makefile	/^LIBS= $(OSLIB) # -lefence # efence for malloc checking$/;"	m
-LOG_CRIT	misc.h	61;"	d
-LOG_DEBUG	misc.h	58;"	d
-LOG_LOG	misc.h	59;"	d
-LOG_WARN	misc.h	60;"	d
-MAXSTRLEN	l2tp.h	21;"	d
-MAXTIME	avp.h	62;"	d
-MAX_MSG	control.h	47;"	d
-MAX_RECV_SIZE	l2tp.h	102;"	d
-MAX_VECTOR_SIZE	aaa.h	21;"	d
-MBIT	avp.h	65;"	d
+LOG_CRIT	misc.h	62;"	d
+LOG_DEBUG	misc.h	59;"	d
+LOG_LOG	misc.h	60;"	d
+LOG_WARN	misc.h	61;"	d
+MAXSTRLEN	l2tp.h	22;"	d
+MAXTIME	avp.h	63;"	d
+MAX_MSG	control.h	48;"	d
+MAX_RECV_SIZE	l2tp.h	103;"	d
+MAX_VECTOR_SIZE	aaa.h	22;"	d
+MBIT	avp.h	66;"	d
 MD5Context	md5.h	/^struct MD5Context$/;"	s
 MD5Final	md5.c	/^void MD5Final (unsigned char digest[16], struct MD5Context *ctx)$/;"	f
 MD5Init	md5.c	/^void MD5Init (struct MD5Context *ctx)$/;"	f
@@ -85,85 +86,88 @@ MD5Transform	md5.c	/^void MD5Transform (uint32 buf[4], uint32 const in[16])$/;"	
 MD5Update	md5.c	/^void MD5Update (struct MD5Context *ctx, unsigned char const *buf,$/;"	f
 MD5_CTX	md5.h	/^typedef struct MD5Context MD5_CTX;$/;"	t
 MD5_H	md5.h	2;"	d
-MD_SIG_SIZE	aaa.h	20;"	d
-MIN	l2tp.h	210;"	d
-MIN_PAYLOAD_HDR_LEN	l2tp.h	98;"	d
-NZL_TIMEOUT_DIVISOR	l2tp.h	83;"	d
+MD_SIG_SIZE	aaa.h	21;"	d
+MIN	l2tp.h	219;"	d
+MIN_PAYLOAD_HDR_LEN	l2tp.h	99;"	d
+NZL_TIMEOUT_DIVISOR	l2tp.h	84;"	d
 Nr	l2tp.h	/^    _u16 Nr;                    \/* Next received *\/$/;"	m	struct:control_hdr
 Nr	l2tp.h	/^    _u16 Nr;                    \/* Optional next received *\/$/;"	m	struct:payload_hdr
 Ns	l2tp.h	/^    _u16 Ns;                    \/* Next sent *\/$/;"	m	struct:control_hdr
 Ns	l2tp.h	/^    _u16 Ns;                    \/* Optional next sent *\/$/;"	m	struct:payload_hdr
 OBJS	Makefile	/^OBJS=l2tpd.o pty.o misc.o control.o avp.o call.o network.o avpsend.o scheduler.o file.o aaa.o md5.o$/;"	m
-OCCN	control.h	36;"	d
-OCRP	control.h	35;"	d
-OCRQ	control.h	34;"	d
+OCCN	control.h	37;"	d
+OCRP	control.h	36;"	d
+OCRQ	control.h	35;"	d
 OSFLAGS	Makefile	/^OSFLAGS= -DLINUX -I\/usr\/include$/;"	m
-OUR_L2TP_VERSION	l2tp.h	104;"	d
-PAYLOAD_BUF	l2tp.h	87;"	d
-PAYLOAD_FUDGE	l2tp.h	97;"	d
-PFBIT	l2tp.h	108;"	d
-PLBIT	l2tp.h	107;"	d
-PPBIT	l2tp.h	113;"	d
-PPPD	l2tp.h	40;"	d
-PPP_ESCAPE	l2tp.h	175;"	d
-PPP_FCS	l2tp.h	180;"	d
-PPP_FLAG	l2tp.h	174;"	d
-PPP_GOODFCS	l2tp.h	179;"	d
-PPP_INITFCS	l2tp.h	178;"	d
-PPP_TRANS	l2tp.h	176;"	d
-PRBIT	l2tp.h	111;"	d
-PSBIT	l2tp.h	112;"	d
-PTBIT	l2tp.h	106;"	d
-PTY00	pty.c	20;"	d	file:
-PTY00	pty.c	26;"	d	file:
-PTY00	pty.c	32;"	d	file:
-PTY01	pty.c	22;"	d	file:
-PTY01	pty.c	28;"	d	file:
-PTY01	pty.c	34;"	d	file:
-PTY10	pty.c	21;"	d	file:
-PTY10	pty.c	27;"	d	file:
-PTY10	pty.c	33;"	d	file:
-PVER	l2tp.h	109;"	d
-PZBITS	l2tp.h	110;"	d
-RBIT	control.h	51;"	d
-RESULT_CLEAR	avp.h	81;"	d
-RESULT_ERROR	avp.h	82;"	d
-RESULT_EXISTS	avp.h	83;"	d
-SCCCN	control.h	29;"	d
-SCCRP	control.h	28;"	d
-SCCRQ	control.h	27;"	d
-SENSE_ALLOW	file.h	48;"	d
-SENSE_DENY	file.h	49;"	d
-SERVER_VERSION	l2tp.h	38;"	d
-SLI	control.h	45;"	d
-STATE_CHALLENGED	aaa.h	25;"	d
-STATE_COMPLETE	aaa.h	26;"	d
-STATE_NONE	aaa.h	24;"	d
-STRLEN	file.h	18;"	d
-SWAPS	misc.h	47;"	d
-SYNC_FRAMING	avp.h	69;"	d
-StopCCN	control.h	30;"	d
-TBIT	control.h	49;"	d
-TVGT	scheduler.h	70;"	d
-TVLESS	scheduler.h	64;"	d
-TVLESSEQ	scheduler.h	67;"	d
-UDP_LISTEN_PORT	l2tp.h	100;"	d
-USE_KERNEL	l2tp.h	224;"	d
-VECTOR_SIZE	aaa.h	22;"	d
-VENDOR_ERROR	avp.h	74;"	d
-VENDOR_ID	avp.h	41;"	d
-VENDOR_NAME	l2tp.h	39;"	d
-VER_L2TP	l2tp.h	168;"	d
-VER_PPTP	l2tp.h	169;"	d
-WEN	control.h	43;"	d
-_AAA_H	aaa.h	16;"	d
-_COMMON_H_	common.h	14;"	d
-_CONTROL_H	control.h	22;"	d
-_FILE_H	file.h	16;"	d
-_L2TP_H	l2tp.h	19;"	d
-_MISC_H	misc.h	15;"	d
-_OSPORT_H_	osport.h	17;"	d
-_SCHEDULER_H	scheduler.h	16;"	d
+OUR_L2TP_VERSION	l2tp.h	105;"	d
+PAYLOAD_BUF	l2tp.h	88;"	d
+PAYLOAD_FUDGE	l2tp.h	98;"	d
+PFBIT	l2tp.h	109;"	d
+PLBIT	l2tp.h	108;"	d
+PPBIT	l2tp.h	114;"	d
+PPPD	l2tp.h	41;"	d
+PPP_ESCAPE	l2tp.h	176;"	d
+PPP_FCS	l2tp.h	181;"	d
+PPP_FLAG	l2tp.h	175;"	d
+PPP_GOODFCS	l2tp.h	180;"	d
+PPP_INITFCS	l2tp.h	179;"	d
+PPP_TRANS	l2tp.h	177;"	d
+PRBIT	l2tp.h	112;"	d
+PSBIT	l2tp.h	113;"	d
+PTBIT	l2tp.h	107;"	d
+PTY00	pty.c	21;"	d	file:
+PTY00	pty.c	27;"	d	file:
+PTY00	pty.c	33;"	d	file:
+PTY01	pty.c	23;"	d	file:
+PTY01	pty.c	29;"	d	file:
+PTY01	pty.c	35;"	d	file:
+PTY10	pty.c	22;"	d	file:
+PTY10	pty.c	28;"	d	file:
+PTY10	pty.c	34;"	d	file:
+PVER	l2tp.h	110;"	d
+PZBITS	l2tp.h	111;"	d
+RAND_DEV	l2tp.h	184;"	d
+RAND_EGD	l2tp.h	186;"	d
+RAND_SYS	l2tp.h	185;"	d
+RBIT	control.h	52;"	d
+RESULT_CLEAR	avp.h	82;"	d
+RESULT_ERROR	avp.h	83;"	d
+RESULT_EXISTS	avp.h	84;"	d
+SCCCN	control.h	30;"	d
+SCCRP	control.h	29;"	d
+SCCRQ	control.h	28;"	d
+SENSE_ALLOW	file.h	49;"	d
+SENSE_DENY	file.h	50;"	d
+SERVER_VERSION	l2tp.h	39;"	d
+SLI	control.h	46;"	d
+STATE_CHALLENGED	aaa.h	26;"	d
+STATE_COMPLETE	aaa.h	27;"	d
+STATE_NONE	aaa.h	25;"	d
+STRLEN	file.h	19;"	d
+SWAPS	misc.h	48;"	d
+SYNC_FRAMING	avp.h	70;"	d
+StopCCN	control.h	31;"	d
+TBIT	control.h	50;"	d
+TVGT	scheduler.h	71;"	d
+TVLESS	scheduler.h	65;"	d
+TVLESSEQ	scheduler.h	68;"	d
+UDP_LISTEN_PORT	l2tp.h	101;"	d
+USE_KERNEL	l2tp.h	233;"	d
+VECTOR_SIZE	aaa.h	23;"	d
+VENDOR_ERROR	avp.h	75;"	d
+VENDOR_ID	avp.h	42;"	d
+VENDOR_NAME	l2tp.h	40;"	d
+VER_L2TP	l2tp.h	169;"	d
+VER_PPTP	l2tp.h	170;"	d
+WEN	control.h	44;"	d
+_AAA_H	aaa.h	17;"	d
+_COMMON_H_	common.h	15;"	d
+_CONTROL_H	control.h	23;"	d
+_FILE_H	file.h	17;"	d
+_L2TP_H	l2tp.h	20;"	d
+_MISC_H	misc.h	16;"	d
+_OSPORT_H_	osport.h	18;"	d
+_SCHEDULER_H	scheduler.h	17;"	d
 _u16	common.h	/^typedef unsigned short _u16;$/;"	t
 _u64	common.h	/^typedef unsigned long long _u64;$/;"	t
 accesscontrol	file.h	/^    int accesscontrol;          \/* Use access control? *\/$/;"	m	struct:global
@@ -222,8 +226,8 @@ avp	avp.h	/^struct avp$/;"	s
 avp_hdr	avp.h	/^struct avp_hdr$/;"	s
 avps	avp.c	/^struct avp avps[] = {$/;"	v
 bc	l2tp.h	/^    int bc;                     \/* Peer's bearer channels *\/$/;"	m	struct:tunnel
-bcmp	osport.h	24;"	d
-bcopy	osport.h	22;"	d
+bcmp	osport.h	25;"	d
+bcopy	osport.h	23;"	d
 bearer	call.h	/^    int bearer;                 \/* Bearer type of call *\/$/;"	m	struct:call
 bearer_caps_avp	avp.c	/^int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,$/;"	f
 bearer_type_avp	avp.c	/^int bearer_type_avp (struct tunnel *t, struct call *c, void *data,$/;"	f
@@ -231,10 +235,10 @@ bits	md5.h	/^    uint32 bits[2];$/;"	m	struct:MD5Context
 buf	md5.h	/^    uint32 buf[4];$/;"	m	struct:MD5Context
 buffer	misc.h	/^struct buffer$/;"	s
 bufferDump	misc.c	/^void bufferDump (char *buf, int buflen)$/;"	f
-bufferDumpWIDTH	misc.c	78;"	d	file:
+bufferDumpWIDTH	misc.c	85;"	d	file:
 byteReverse	md5.c	/^void byteReverse (unsigned char *buf, unsigned longs)$/;"	f
 byteReverse	md5.c	32;"	d	file:
-bzero	osport.h	23;"	d
+bzero	osport.h	24;"	d
 c	file.h	/^    struct call *c;             \/* Our call *\/$/;"	m	struct:lac
 cLr	l2tp.h	/^    int cLr;                    \/* Last packet received by peer *\/$/;"	m	struct:tunnel
 call	call.h	/^struct call$/;"	s
@@ -322,7 +326,7 @@ expand_payload	control.c	/^inline int expand_payload (struct buffer *buf, struct
 extract	network.c	/^inline void extract (void *buf, int *tunnel, int *call)$/;"	f
 fbit	call.h	/^    int fbit;                   \/* Use sequence numbers? *\/$/;"	m	struct:call
 fc	l2tp.h	/^    int fc;                     \/* Framing capabilities of peer *\/$/;"	m	struct:tunnel
-fcstab	l2tp.h	172;"	d
+fcstab	l2tp.h	173;"	d
 fd	call.h	/^    int fd;                     \/* File descriptor for pty *\/$/;"	m	struct:call
 filerr	file.c	/^char filerr[STRLEN];$/;"	v
 firmware	l2tp.h	/^    int firmware;               \/* Peer's firmware revision *\/$/;"	m	struct:tunnel
@@ -338,12 +342,16 @@ gconfig	file.c	/^struct global gconfig;$/;"	v
 getPtyMaster	pty.c	/^int getPtyMaster (char *tty10, char *tty01)$/;"	f
 get_addr	aaa.c	/^unsigned int get_addr (struct iprange *ipr)$/;"	f
 get_call	call.c	/^struct call *get_call (int tunnel, int call, unsigned int addr, int port)$/;"	f
+get_dev_entropy	misc.c	/^int get_dev_entropy(char *buf, int count)$/;"	f
+get_egd_entropy	misc.c	/^int get_egd_entropy(char *buf, int count)$/;"	f
+get_entropy	misc.c	/^int get_entropy (char *buf, int count)$/;"	f
 get_lns	aaa.c	/^struct lns *get_lns (struct tunnel *t)$/;"	f
 get_secret	aaa.c	/^int get_secret (char *us, char *them, char *secret, int size)$/;"	f
+get_sys_entropy	misc.c	/^int get_sys_entropy(char *buf, int count)$/;"	f
 get_tunnel	call.c	/^struct call *get_tunnel (int tunnel, unsigned int addr, int port)$/;"	f
 global	file.h	/^struct global$/;"	s
 global_serno	control.c	/^int global_serno = 1;$/;"	v
-halt	misc.h	63;"	d
+halt	misc.h	64;"	d
 handle_avps	avp.c	/^int handle_avps (struct buffer *buf, struct tunnel *t, struct call *c)$/;"	f
 handle_challenge	aaa.c	/^int handle_challenge (struct tunnel *t, struct challenge *chal)$/;"	f
 handle_packet	control.c	/^inline int handle_packet (struct buffer *buf, struct tunnel *t,$/;"	f
@@ -363,14 +371,14 @@ hostname	file.h	/^    char hostname[STRLEN];$/;"	m	struct:host
 hostname	l2tp.h	/^    char hostname[MAXSTRLEN];   \/* Remote hostname *\/$/;"	m	struct:tunnel
 hostname	network.c	/^char hostname[256];$/;"	v
 hostname_avp	avp.c	/^int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)$/;"	f
-htons	misc.h	49;"	d
-htons	misc.h	52;"	d
-htons	misc.h	54;"	d
+htons	misc.h	50;"	d
+htons	misc.h	53;"	d
+htons	misc.h	55;"	d
 idle	file.h	/^    int idle;                   \/* Idle timeout in seconds *\/$/;"	m	struct:lac
 idle	file.h	/^    int idle;                   \/* Idle timeout in seconds *\/$/;"	m	struct:lns
 ignore_avp	avp.c	/^int ignore_avp (struct tunnel *t, struct call *c, void *data, int datalen)$/;"	f
 in	md5.h	/^    unsigned char in[64];$/;"	m	struct:MD5Context
-index	osport.h	21;"	d
+index	osport.h	22;"	d
 init	l2tpd.c	/^void init (int argc,char *argv[])$/;"	f
 init_addr	aaa.c	/^void init_addr ()$/;"	f
 init_args	l2tpd.c	/^void init_args(int argc, char *argv[]) {$/;"	f
@@ -440,7 +448,7 @@ next	file.h	/^    struct lns *next;$/;"	m	struct:lns
 next	l2tp.h	/^    struct tunnel *next;        \/* Allows us to be linked easily *\/$/;"	m	struct:tunnel
 next	misc.h	/^    struct ppp_opts *next;$/;"	m	struct:ppp_opts
 next	scheduler.h	/^    struct schedule_entry *next;        \/* Next entry in queue *\/$/;"	m	struct:schedule_entry
-ntohs	misc.h	55;"	d
+ntohs	misc.h	56;"	d
 null_handler	l2tpd.c	/^void null_handler(int sig)$/;"	f
 num	avp.h	/^    int num;                    \/* Number of AVP *\/$/;"	m	struct:avp
 o_pad	l2tp.h	/^    _u16 o_pad;                 \/* Optional offset padding *\/$/;"	m	struct:payload_hdr
@@ -491,8 +499,9 @@ proxyauth	file.h	/^    int proxyauth;              \/* Allow proxy authenticatio
 prx	call.h	/^    int prx;                    \/* What was the last packet we sent$/;"	m	struct:call
 qcid	call.h	/^    int qcid;                   \/* Quitting CID *\/$/;"	m	struct:call
 qtid	l2tp.h	/^    int qtid;                   \/* TID for disconnection *\/$/;"	m	struct:tunnel
+rand_source	common.h	/^int rand_source;$/;"	v
 rand_vector_avp	avp.c	/^int rand_vector_avp (struct tunnel *t, struct call *c, void *data,$/;"	f
-random	osport.h	31;"	d
+random	osport.h	32;"	d
 range	file.h	/^    struct iprange *range;      \/* Range of IP's we provide *\/$/;"	m	struct:lns
 read_packet	call.c	/^int read_packet (struct buffer *buf, int fd, int convert)$/;"	f
 receive_window_size_avp	avp.c	/^int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,$/;"	f
@@ -560,6 +569,10 @@ set_papchap	file.c	/^int set_papchap (char *word, char *value, int context, void
 set_passwdauth	file.c	/^int set_passwdauth (char *word, char *value, int context, void *item)$/;"	f
 set_port	file.c	/^int set_port (char *word, char *value, int context, void *item)$/;"	f
 set_pppoptfile	file.c	/^int set_pppoptfile (char *word, char *value, int context, void *item)$/;"	f
+set_rand_dev	file.c	/^int set_rand_dev ()$/;"	f
+set_rand_egd	file.c	/^int set_rand_egd (char *value)$/;"	f
+set_rand_source	file.c	/^int set_rand_source (char *word, char *value, int context, void *item)$/;"	f
+set_rand_sys	file.c	/^int set_rand_sys ()$/;"	f
 set_range	file.c	/^struct iprange *set_range (char *word, char *value, struct iprange *in)$/;"	f
 set_redial	file.c	/^int set_redial (char *word, char *value, int context, void *item)$/;"	f
 set_remoteaddr	file.c	/^int set_remoteaddr (char *word, char *value, int context, void *item)$/;"	f
@@ -569,7 +582,7 @@ set_rws	file.c	/^int set_rws (char *word, char *value, int context, void *item)$
 set_string	file.c	/^int set_string (char *word, char *value, char *ptr, int len)$/;"	f
 set_userspace	file.c	/^int set_userspace (char *word, char *value, int context, void *item)$/;"	f
 show_status	l2tpd.c	/^void show_status (int fd)$/;"	f
-srandom	osport.h	32;"	d
+srandom	osport.h	33;"	d
 ss	aaa.h	/^    unsigned char ss;           \/* State we're sending in *\/$/;"	m	struct:challenge
 start	file.h	/^    unsigned int start;$/;"	m	struct:iprange
 start	misc.h	/^    void *start;$/;"	m	struct:buffer

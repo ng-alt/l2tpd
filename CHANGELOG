@@ -1,3 +1,13 @@
+0.68
+--
+Updated copyright notice on all relevent files
+Changed vendor name as it appears in AVP's
+Add new sources of randomness, reading /dev/urandom
+Seed rand() with time()
+Stubs available for egd randomness source, not implemented yet though
+Don't close fd 0 as workaround for signal problems in daemon mode
+Fix some off by 6 errors in avp handling
+
 0.67
 --
 close pty connecting to pppd in child_handler()

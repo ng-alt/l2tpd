@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -716,6 +717,8 @@ int control_finish (struct tunnel *t, struct call *c)
 			call_close(p);
 			return -EINVAL;
 		} */
+
+#ifdef IP_ALLOCATION
         p->addr = get_addr (t->lns->range);
         if (!p->addr)
         {
@@ -725,6 +728,8 @@ int control_finish (struct tunnel *t, struct call *c)
                  __FUNCTION__, t->tid);
             return -EINVAL;
         }
+#endif
+
         reserve_addr (p->addr);
         p->state = ICRP;
         buf = new_outgoing (t);
@@ -821,8 +826,10 @@ int control_finish (struct tunnel *t, struct call *c)
                 po = add_opt (po, "defaultroute");
             strncpy (ip1, IPADDY (c->lac->localaddr), sizeof (ip1));
             strncpy (ip2, IPADDY (c->lac->remoteaddr), sizeof (ip2));
+#ifdef IP_ALLOCATION
             po = add_opt (po, "%s:%s", c->lac->localaddr ? ip1 : "",
                           c->lac->remoteaddr ? ip2 : "");
+#endif
             if (c->lac->authself)
             {
                 if (c->lac->pap_refuse)

@@ -11,5 +11,6 @@
 #ifndef _COMMON_H_
 typedef unsigned short _u16;
 typedef unsigned long long _u64;
+int rand_source;
 #define _COMMON_H_
 #endif

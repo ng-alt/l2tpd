@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -48,10 +49,12 @@ static int ip_used (unsigned int addr)
 
 void mk_challenge (char *c, int length)
 {
-    int x;
+    get_entropy(c, length);
+
+    /* int x;
     int *s = (int *) c;
     for (x = 0; x < length / sizeof (int); x++)
-        s[x] = rand ();
+        s[x] = rand (); */
 }
 
 void reserve_addr (unsigned int addr)

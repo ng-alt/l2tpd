@@ -1,7 +1,13 @@
-l2tpd version 0.65
+l2tpd version 0.68
 ==================
+Now maintained at:
+http://www.l2tpd.org
+by:
+Jeff McAdams <jeffm@iglou.com>
+
+Maintained for a time at:
 http://sourceforge.net/projects/l2tpd
-Now maintained by:
+by:
 Scott Balmos <sbalmos@iglou.com>
 Jeff McAdams <jeffm@iglou.com>
 David Stipp <dstipp@one.net>
@@ -29,10 +35,10 @@ familiar with the GPL before using the product.
 Bugs, Patches, and Code Contribution:
 -------------------------------------
 Please send bug reports and patches to either the l2tp mailng list
-(l2tpd-devel@sourceforge.net).
+(l2tpd-devel@l2tpd.org).
 
 In order to contribute code, either with patches, or by direct access to
-the CVS tree for l2tpd, send e-mail to (l2tpd-devel@sourceforge.net).
+the CVS tree for l2tpd, send e-mail to (l2tpd-devel@l2tpd.org).
 
 The word "FIXME" is a place holder for code that needs to be in place,
 or checks that need to be done, but haven't been coded yet.  Feel free
@@ -40,10 +46,8 @@ to fix the fixme's and submit patches!
 
 Release Notes
 -------------
-Version 0.65 should be considered ALPHA.  It does NOT completely
-implement the l2tp specification (RFC 2661).  Work on the high-speed
-kernel implementation has already begun, but a relase date is not
-available.
+Version 0.68 should be considered ALPHA.  It does NOT completely
+implement the l2tp specification (RFC 2661), but its pretty close!
 
 The primary use of this ALPHA level code is to test the ability of l2tpd
 to talk with other LAC and LNS implementations.  I hope that everyone
@@ -100,6 +104,8 @@ c <tid> or <entry> - originate an l2tp call on the tunnel identified
 h <cid> - hang up a call with the local identifier <cid>
 d <tid> or <entry> - disconnect the tunnel locally identified by <tid>
                      or a lac entry <entry>
+s - print out a status summary of currently connected tunnels and
+                     sessions
 
 For example, to establish a tunnel to marko.net, one might do:
 
@@ -118,7 +124,7 @@ Mailing List
 ------------
 If you would like to contribute to discussions of the architecture of
 l2tpd, file formats, etc, we encourage you to join the l2tpd mailing
-list by visiting http://sourceforge.net/projects/l2tpd and subscribing
+list by visiting http://www.l2tpd.org/ and subscribing
 to our mailing lists.
 
 Original Project Legal Information: 
@@ -130,8 +136,3 @@ familiar with the GPL before using the product.
 If you distribute l2tpd, a modified version, or a derivative product,
 you MUST not remove Adtran's name from the product nor modify the terms
 of the copyright.
-
-Adtran may license l2tpd under other terms in addition to the GPL.  This
-way, companies who wish to use l2tpd for embedded systems or commercial
-applications and find the GPL too restrictive can license the technology
-from Adtran under more favorable terms. 

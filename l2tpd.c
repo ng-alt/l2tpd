@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -682,6 +683,7 @@ void lac_disconnect (int tid)
 struct tunnel *new_tunnel ()
 {
     struct tunnel *tmp = malloc (sizeof (struct tunnel));
+    char entropy_buf[2] = "\0";
     if (!tmp)
         return NULL;
     tmp->control_seq_num = 0;
@@ -699,7 +701,17 @@ struct tunnel *new_tunnel ()
         tmp->ourtid = ioctl (server_socket, L2TPIOCADDTUNNEL, 0);
     else
 #endif
-        tmp->ourtid = rand () & 0xFFFF;
+/*        tmp->ourtid = rand () & 0xFFFF; */
+        /* get_entropy((char *)&tmp->ourtid, 2); */
+        get_entropy(entropy_buf, 2);
+        {
+            int *temp;
+            temp = (int *)entropy_buf;
+            tmp->ourtid = *temp & 0xFFFF;
+#ifdef DEBUG_ENTROPY
+            log(LOG_DEBUG, "ourtid = %u, entropy_buf = %hx\n", tmp->ourtid, *temp);
+#endif
+        }
 #else
     tmp->ourtid = 0x6227;
 #endif
@@ -981,7 +993,9 @@ void daemonize() {
     else if (pid)
         exit(0);
 
-    close(0);
+    /* close(0); */   /* This is a hack to "fix" problems with the
+                         daemonization code...more work will be forthcoming 
+                         to do a proper fix for this */
     close(1);
     close(2);
 
@@ -1035,6 +1049,7 @@ void init (int argc,char *argv[])
 {
     struct lac *lac;
     init_args (argc,argv);
+    rand_source = 0;
     init_addr ();
     if (init_config ())
     {
@@ -1071,6 +1086,7 @@ void init (int argc,char *argv[])
     log (LOG_LOG,
          "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
     log (LOG_LOG, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
+    log (LOG_LOG, "Inhereted by Jeff McAdams, (C) 2002\n");
     log (LOG_LOG, "%s version %s on a %s, port %d\n", uts.sysname,
          uts.release, uts.machine, gconfig.port);
     lac = laclist;

@@ -1,6 +1,7 @@
 /*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
+ * Copyright (C) 2002 Jeff McAdams
  *
  * Mark Spencer
  *
@@ -836,7 +837,7 @@ int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->hostname, (char *) &raw[3], size);
+    safe_copy (t->hostname, (char *) &raw[3], size - 6);
     if (debug_avp)
     {
         if (DEBUG)
