@@ -490,7 +490,8 @@ void lac_hangup(int cid)
 			if (tmp->ourcid == cid) {
 				log(LOG_LOG, "%s :Hanging up call %d, Local: %d, Remote: %d\n",__FUNCTION__,tmp->serno, tmp->ourcid, tmp->cid);
 				strcpy(tmp->errormsg,"Goodbye!");
-				tmp->needclose = -1;
+/*				tmp->needclose = -1; */
+				kill(tmp->pppd,SIGTERM);
 				return;
 			}
 			tmp=tmp->next;

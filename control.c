@@ -878,16 +878,6 @@ inline int check_control(const struct buffer *buf, struct tunnel *t, struct call
 			}
 			return -EINVAL;
 		}
-		if (CZBITS(h->ver)) {
-			if (DEBUG) {
-				log(LOG_DEBUG,
-				"%s: Reserved bits set -- must toss.\n",__FUNCTION__);
-			}
-			c->error = ERROR_RESERVED;
-			c->result = RESULT_ERROR;
-			c->needclose = -1;
-			return -EINVAL;
-		}
 		if (CVER(h->ver)!=VER_L2TP) {
 			if (DEBUG) {
 				if (CVER(h->ver) == VER_PPTP) {
@@ -933,12 +923,6 @@ inline int check_payload(struct buffer *buf, struct tunnel *t, struct call *c) {
 	}
 #ifdef SANITY
 	if (t->sanity) {
-/*		if (PZBITS(h->ver)) {
-			if (DEBUG) {
-				log(LOG_DEBUG,"%s: Reserved bits set -- must toss\n",__FUNCTION__);
-			}
-			return -EINVAL;
-		}  */
 		if (PTBIT(h->ver)) {
 			if (DEBUG) {
 				log(LOG_DEBUG,"%s Control bit set\n",__FUNCTION__);

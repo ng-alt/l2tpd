@@ -105,7 +105,8 @@ int read_packet(struct buffer *buf, int fd, int convert) {
 				* Hmm..  Nothing to read.  It happens
 				*/
 				return 0;
-			} else if ((errno == EINTR ) || (errno == EAGAIN)) {
+/*			} else if ((errno == EINTR ) || (errno == EAGAIN)) { */
+			} else if ((errno == EIO) || (errno == EINTR ) || (errno == EAGAIN)) {
 				
 				 /*
 				* Oops, we were interrupted!
@@ -344,7 +345,7 @@ void destroy_call(struct call *c)
 	if (pid) {
 		/* Set c->pppd to zero to prevent recursion with child_handler */
 		c->pppd = 0;
-		kill(pid,SIGKILL);
+		kill(pid,SIGTERM);
 		waitpid(pid,NULL,0);
 	}
 	if (c->container) {

@@ -32,7 +32,7 @@ typedef unsigned long long _u64;
 
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
-#define SERVER_VERSION "0.61-jmca1"
+#define SERVER_VERSION "0.61-jmca2"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"

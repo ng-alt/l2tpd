@@ -25,8 +25,7 @@
 # Also look at the top of network.c for some other (eventually to 
 # become runtime options) debugging flags
 #
-DFLAGS= 
-
+DFLAGS= -g
 #
 # Uncomment the next line for Linux
 #
@@ -48,7 +47,7 @@ OSFLAGS= -DLINUX -I/usr/include
 #OSFLAGS= -DSOLARIS
 #OSLIBS= -lnsl -lsocket
 
-CFLAGS= $(DFLAGS) -O3 -Wall -DSANITY $(OSFLAGS)
+CFLAGS= $(DFLAGS) -O2 -Wall -DSANITY $(OSFLAGS)
 HDRS=l2tp.h avp.h misc.h control.h call.h scheduler.h file.h aaa.h md5.h
 OBJS=l2tpd.o pty.o misc.o control.o avp.o call.o network.o avpsend.o scheduler.o file.o aaa.o md5.o
 LIBS= $(OSLIB) # -lefence # efence for malloc checking
