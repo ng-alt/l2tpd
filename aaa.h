@@ -11,7 +11,7 @@
  * Authorization, Accounting, and Access control
  *
  */
- 
+
 #ifndef _AAA_H
 #define _AAA_H
 #include "md5.h"
@@ -25,29 +25,31 @@
 #define STATE_CHALLENGED 1
 #define STATE_COMPLETE	 2
 
-struct addr_ent {
-	unsigned int addr;
-	struct addr_ent *next;
+struct addr_ent
+{
+    unsigned int addr;
+    struct addr_ent *next;
 };
 
-struct challenge {
-	struct MD5Context md5;
-	unsigned char ss;						/* State we're sending in */
-	unsigned char secret[MAXSTRLEN];		/* The shared secret */
-	unsigned char challenge[MD_SIG_SIZE];	/* The original challenge */
-	unsigned char response[MD_SIG_SIZE];	/* What we expect as a respsonse */
-	unsigned char reply[MD_SIG_SIZE];		/* What the peer sent */
-	unsigned char *vector;
-	unsigned int vector_len;
-	int state;								/* What state is challenge in? */
+struct challenge
+{
+    struct MD5Context md5;
+    unsigned char ss;		/* State we're sending in */
+    unsigned char secret[MAXSTRLEN];	/* The shared secret */
+    unsigned char challenge[MD_SIG_SIZE];	/* The original challenge */
+    unsigned char response[MD_SIG_SIZE];	/* What we expect as a respsonse */
+    unsigned char reply[MD_SIG_SIZE];	/* What the peer sent */
+    unsigned char *vector;
+    unsigned int vector_len;
+    int state;			/* What state is challenge in? */
 };
 
-extern struct lns *get_lns(struct tunnel *);
+extern struct lns *get_lns (struct tunnel *);
 extern struct addr_ent *uaddr[];
-extern unsigned int get_addr(struct iprange *);
-extern void reserve_addr(unsigned int);
-extern void unreserve_addr(unsigned int);
-extern void init_addr();
-extern int handle_challenge(struct tunnel *, struct challenge *);
-extern void mk_challenge(char *, int);
+extern unsigned int get_addr (struct iprange *);
+extern void reserve_addr (unsigned int);
+extern void unreserve_addr (unsigned int);
+extern void init_addr ();
+extern int handle_challenge (struct tunnel *, struct challenge *);
+extern void mk_challenge (char *, int);
 #endif

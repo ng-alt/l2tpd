@@ -30,7 +30,7 @@
 # if SOLARIS < 260
 #  define random(X)          ((int)rand(X))
 #  define srandom(X)         ((void)srand(X))
-# endif /* SOLARIS < 260 */
+# endif	/* SOLARIS < 260 */
 
 #endif /* defined(SOLARIS) */
 

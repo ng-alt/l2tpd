@@ -11,7 +11,7 @@
  * Scheduler structures and functions
  *
  */
- 
+
 #ifndef _SCHEDULER_H
 #define _SCHEDULER_H
 #include <sys/time.h>
@@ -21,11 +21,12 @@
  * events to be run periodically
  */
 
-struct schedule_entry {
-	struct timeval tv;				/* Scheduled time to execute */
-	void (*func)(void *); 			/* Function to execute */
-	void *data;						/* Data to be passed to func */
-	struct schedule_entry *next;	/* Next entry in queue */
+struct schedule_entry
+{
+    struct timeval tv;		/* Scheduled time to execute */
+    void (*func) (void *);	/* Function to execute */
+    void *data;			/* Data to be passed to func */
+    struct schedule_entry *next;	/* Next entry in queue */
 };
 
 extern struct schedule_entry *events;
@@ -33,28 +34,30 @@ extern struct schedule_entry *events;
 /* Schedule func to be executed with argument data sometime
    tv in the future. */
 
-struct schedule_entry *schedule(struct timeval tv, void (*func)(void *), void *data);
+struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
+				 void *data);
 
 /* Like schedule() but tv represents an absolute time in the future */
 
-struct schedule_entry *aschedule(struct timeval tv, void (*func)(void *), void *data);
+struct schedule_entry *aschedule (struct timeval tv, void (*func) (void *),
+				  void *data);
 
 /* Remove a scheduled event from the queue */
 
-void deschedule(struct schedule_entry *);
+void deschedule (struct schedule_entry *);
 
 /* The alarm handler */
 
-void alarm_handler(int);
+void alarm_handler (int);
 
 /* Initialization function */
-void init_scheduler(void);
+void init_scheduler (void);
 
 /* Prevent the scheduler from running */
-void schedule_lock();
+void schedule_lock ();
 
 /* Restore normal scheduling functions */
-void schedule_unlock();
+void schedule_unlock ();
 
 /* Compare two timeval functions and see if a <= b */
 

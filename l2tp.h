@@ -35,47 +35,49 @@ typedef unsigned long long _u64;
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
 #define BINARY "l2tpd"
-#define SERVER_VERSION "0.65"
+#define SERVER_VERSION "0.65.1"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
-#define FIRMWARE_REV	0x0650	/* Revision of our firmware (software, in this case) */
+#define FIRMWARE_REV	0x0651	/* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32	/* By default only allow this many
 				   tunnels to exist */
 
-#define HELLO_DELAY 60	/* How often to send a Hello message */
+#define HELLO_DELAY 60		/* How often to send a Hello message */
 
-struct control_hdr {
-	_u16 ver;		/* Version and more */
-	_u16 length;		/* Length field */
-	_u16 tid;		/* Tunnel ID */
-	_u16 cid;		/* Call ID */
-	_u16 Ns;		/* Next sent */
-	_u16 Nr;		/* Next received */
+struct control_hdr
+{
+    _u16 ver;			/* Version and more */
+    _u16 length;		/* Length field */
+    _u16 tid;			/* Tunnel ID */
+    _u16 cid;			/* Call ID */
+    _u16 Ns;			/* Next sent */
+    _u16 Nr;			/* Next received */
 };
 
 #define CTBIT(ver) (ver & 0x8000)	/* Determins if control or not */
 #define CLBIT(ver) (ver & 0x4000)	/* Length bit present.  Must be 1
-				   for control messages */
+					   for control messages */
 
 #define CZBITS(ver) (ver &0x37F8)	/* Reserved bits:  We must drop 
-				   anything with these there */
+					   anything with these there */
 
-#define CFBIT(ver) (ver & 0x0800) /* Presence of Ns and Nr fields
-				   flow bit? */
+#define CFBIT(ver) (ver & 0x0800)	/* Presence of Ns and Nr fields
+					   flow bit? */
 
-#define CVER(ver) (ver & 0x0007)  /* Version of encapsulation */
+#define CVER(ver) (ver & 0x0007)	/* Version of encapsulation */
 
 
-struct payload_hdr {
-	_u16 ver;		/* Version and friends */
-	_u16 length;		/* Optional Length */
-	_u16 tid;		/* Tunnel ID */	
-	_u16 cid;		/* Caller ID */
-	_u16 Ns;		/* Optional next sent */
-	_u16 Nr;		/* Optional next received */
-	_u16 o_size;		/* Optional offset size */
-	_u16 o_pad;		/* Optional offset padding */
+struct payload_hdr
+{
+    _u16 ver;			/* Version and friends */
+    _u16 length;		/* Optional Length */
+    _u16 tid;			/* Tunnel ID */
+    _u16 cid;			/* Caller ID */
+    _u16 Ns;			/* Optional next sent */
+    _u16 Nr;			/* Optional next received */
+    _u16 o_size;		/* Optional offset size */
+    _u16 o_pad;			/* Optional offset padding */
 };
 
 #define NZL_TIMEOUT_DIVISOR 4	/* Divide TIMEOUT by this and
@@ -91,7 +93,7 @@ struct payload_hdr {
 #define DEFAULT_TX_BPS		10000000	/* For outgoing calls, report this speed */
 #define DEFAULT_RX_BPS		10000000
 #define DEFAULT_MAX_BPS		10000000	/* jz: outgoing calls max bps */
-#define DEFAULT_MIN_BPS		10000		/* jz: outgoing calls min bps */
+#define DEFAULT_MIN_BPS		10000	/* jz: outgoing calls min bps */
 #define PAYLOAD_FUDGE		2	/* How many packets we're willing to drop */
 #define MIN_PAYLOAD_HDR_LEN 6
 
@@ -105,59 +107,61 @@ struct payload_hdr {
 #define PLBIT(ver) CLBIT(ver)	/* Length specified? */
 #define PFBIT(ver) CFBIT(ver)	/* Flow control specified? */
 #define PVER(ver) CVER(ver)	/* Version */
-#define PZBITS(ver) (ver & 0x14F8) /* Reserved bits */
-#define PRBIT(ver) (ver & 0x2000) /* Reset Sr bit */
-#define PSBIT(ver) (ver & 0x0200) /* Offset size bit */
-#define PPBIT(ver) (ver & 0x0100) /* Preference bit */
+#define PZBITS(ver) (ver & 0x14F8)	/* Reserved bits */
+#define PRBIT(ver) (ver & 0x2000)	/* Reset Sr bit */
+#define PSBIT(ver) (ver & 0x0200)	/* Offset size bit */
+#define PPBIT(ver) (ver & 0x0100)	/* Preference bit */
 
-struct tunnel {
-	struct call *call_head;	/* Member calls */
-	struct tunnel *next;	/* Allows us to be linked easily */
+struct tunnel
+{
+    struct call *call_head;	/* Member calls */
+    struct tunnel *next;	/* Allows us to be linked easily */
 
-	int fc;			/* Framing capabilities of peer */
-	struct schedule_entry *hello;
-	int ourfc;		/* Our framing capabilities */
-	int bc;			/* Peer's bearer channels */
-	int hbit;		/* Allow hidden AVP's? */
-	int ourbc;		/* Our bearer channels */
-	_u64 tb;		/* Their tie breaker */
-	_u64 ourtb;		/* Our tie breaker */
-	int tid;		/* Peer's tunnel identifier */
-	int ourtid;		/* Our tunnel identifier */
-	int qtid;		/* TID for disconnection */
-	int firmware;		/* Peer's firmware revision */
+    int fc;			/* Framing capabilities of peer */
+    struct schedule_entry *hello;
+    int ourfc;			/* Our framing capabilities */
+    int bc;			/* Peer's bearer channels */
+    int hbit;			/* Allow hidden AVP's? */
+    int ourbc;			/* Our bearer channels */
+    _u64 tb;			/* Their tie breaker */
+    _u64 ourtb;			/* Our tie breaker */
+    int tid;			/* Peer's tunnel identifier */
+    int ourtid;			/* Our tunnel identifier */
+    int qtid;			/* TID for disconnection */
+    int firmware;		/* Peer's firmware revision */
 #if 0
-	unsigned int addr;	/* Remote address */
-	unsigned short port;	/* Port on remote end */
+    unsigned int addr;		/* Remote address */
+    unsigned short port;	/* Port on remote end */
 #else
-	struct sockaddr_in peer; /* Peer's Address */
+    struct sockaddr_in peer;	/* Peer's Address */
 #endif
-	int debug;		/* Are we debugging or not? */
-	int nego;		/* Show Negotiation? */
-	int count;		/* How many membmer calls? */
-	int state;		/* State of tunnel */
-	_u16 cSs;		/* Sequence for next packet */
-	_u16 cSr;		/* Next expected to receive */
-	int  cLr;		/* Last packet received by peer */
-	char hostname[MAXSTRLEN];	/* Remote hostname */
-	char vendor[MAXSTRLEN];		/* Vendor of remote product */
-	struct challenge chal_us; /* Their Challenge to us */
-	struct challenge chal_them; /* Our challenge to them */
-	char secret[MAXSTRLEN]; /* Secret to use */
+    int debug;			/* Are we debugging or not? */
+    int nego;			/* Show Negotiation? */
+    int count;			/* How many membmer calls? */
+    int state;			/* State of tunnel */
+    _u16 cSs;			/* Sequence for next packet */
+    _u16 cSr;			/* Next expected to receive */
+    int cLr;			/* Last packet received by peer */
+    char hostname[MAXSTRLEN];	/* Remote hostname */
+    char vendor[MAXSTRLEN];	/* Vendor of remote product */
+    struct challenge chal_us;	/* Their Challenge to us */
+    struct challenge chal_them;	/* Our challenge to them */
+    char secret[MAXSTRLEN];	/* Secret to use */
 #ifdef SANITY
-	int sanity;		/* check for sanity? */
+    int sanity;			/* check for sanity? */
 #endif
-	int rws;		/* Peer's Receive Window Size */
-	int ourrws;		/* Receive Window Size */
-	struct call *self;
-	struct lns *lns;	/* LNS that owns us */
-	struct lac *lac;	/* LAC that owns us */
+    int rws;			/* Peer's Receive Window Size */
+    int ourrws;			/* Receive Window Size */
+    struct call *self;
+    struct lns *lns;		/* LNS that owns us */
+    struct lac *lac;		/* LAC that owns us */
 };
 
-struct tunnel_list {
-	struct tunnel *head;
-	int count;
-	int calls;
+struct tunnel_list
+{
+    struct tunnel *head;
+    int count;
+    int calls;
 };
 
 /* Values for version */
@@ -178,9 +182,9 @@ struct tunnel_list {
 /* Error Values */
 
 extern struct tunnel_list tunnels;
-extern void tunnel_close(struct tunnel *t);
-extern void network_thread();
-extern int init_network();
+extern void tunnel_close (struct tunnel *t);
+extern void network_thread ();
+extern int init_network ();
 extern int debug_tunnel;
 extern int packet_dump;
 extern int debug_avp;
@@ -188,26 +192,26 @@ extern int debug_state;
 extern int max_tunnels;
 extern int kernel_support;
 extern int server_socket;
-extern struct tunnel *new_tunnel();
+extern struct tunnel *new_tunnel ();
 extern struct packet_queue xmit_udp;
-extern void destroy_tunnel(struct tunnel *);
-extern struct buffer *new_payload(struct sockaddr_in);
-extern void recycle_payload(struct buffer *, struct sockaddr_in);
-extern void add_payload_hdr(struct tunnel *, struct call *, struct buffer *);
-extern int read_packet(struct buffer *, int, int);
-extern void udp_xmit(struct buffer *);
-extern void control_xmit(void *);
+extern void destroy_tunnel (struct tunnel *);
+extern struct buffer *new_payload (struct sockaddr_in);
+extern void recycle_payload (struct buffer *, struct sockaddr_in);
+extern void add_payload_hdr (struct tunnel *, struct call *, struct buffer *);
+extern int read_packet (struct buffer *, int, int);
+extern void udp_xmit (struct buffer *);
+extern void control_xmit (void *);
 extern int ppd;
 extern int switch_io;		/* jz */
 extern int control_fd;
-extern int start_pppd(struct call *c, struct ppp_opts *);
-extern void magic_lac_dial(void *);
+extern int start_pppd (struct call *c, struct ppp_opts *);
+extern void magic_lac_dial (void *);
 #ifndef MIN
 #define MIN(a,b) (((a)<(b)) ? (a) : (b))
 #endif
 #endif
 
- 
+
 /* 
  * This is just some stuff to take
  * care of kernel definitions

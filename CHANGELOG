@@ -1,3 +1,7 @@
+0.65.1
+--
+Reformatted all .c and .h files using GNU indent
+
 0.65
 --
 Fix to handling SLI packets
