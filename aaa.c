@@ -171,9 +171,10 @@ int handle_challenge(struct tunnel *t, struct challenge *chal)
 {
 	char *us;
 	char *them;
-	if (!t->lns && !t->lac) {
-		log(LOG_DEBUG, "%s: No LNS or LAC to handle
-challenge!\n",__FUNCTION__); 		return -1;
+	if (!t->lns && !t->lac) 
+    {
+		log(LOG_DEBUG, "%s: No LNS or LAC to handle challenge!\n",__FUNCTION__);
+        return -1;
 	}
 #ifdef DEBUG_AUTH
 	log(LOG_DEBUG, "%s: making response for tunnel%d\n",__FUNCTION__,t->ourtid); 
@@ -195,8 +196,9 @@ challenge!\n",__FUNCTION__); 		return -1;
 		else them = t->hostname;
 	}
 	if (!get_secret(us,them,chal->secret, sizeof(chal->secret))) {
-		log(LOG_DEBUG, "%s: no secret found for us='%s' and
-them='%s'\n",__FUNCTION__,us,them); 		return -1;
+		log(LOG_DEBUG, "%s: no secret found for us='%s' and them='%s'\n"
+            ,__FUNCTION__,us,them);
+            return -1;
 	}
 
 #if DEBUG_AUTH

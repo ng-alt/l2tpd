@@ -12,6 +12,8 @@
  *
  */
 
+#include "common.h"
+
 /* Declaration of FIFO used for maintaining
    a reliable control connection, as well
    as for queueing stuff for the individual

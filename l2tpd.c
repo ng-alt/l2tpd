@@ -796,6 +796,7 @@ void init() {
 			log(LOG_DEBUG, "%s: Autodialing '%s'\n",__FUNCTION__, lac->entname[0] ? lac->entname : "(unnamed)");
 #endif
 			lac->active=-1;
+            switch_io = 1;      /* If we're a LAC, autodials will be ICRQ's */
 			magic_lac_dial(lac);
 		}
 		lac=lac->next;

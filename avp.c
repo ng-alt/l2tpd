@@ -83,11 +83,29 @@ char *msgtypes[] = {
 	"Set-Link-Info"
 };
 
-char *result_codes[] = {
-	NULL,
-	"General request to clear",
-	"General error",
-	"Control channel already exists"
+char *stopccn_result_codes[] = {
+	"Reserved",
+	"General request to clear control connection",
+	"General error--Error Code indicates the problem",
+	"Control channel already exists",
+    "Requester is not authorized to establish a control channel",
+    "The protocol version of the requester is not supported--Error Code indicates the highest version supported",
+    "Requester is being shut down",
+    "Finite State Machine error"
+};
+
+char *cdn_result_codes[] = {
+    "Reserved",
+    "Call disconnected due to loss of carrier",
+    "Call disconnected for the reason indicated in error code",
+    "Call disconnected for administrative reasons",
+    "Call failed due to lack of appropriate facilities being available (temporary condition)",
+    "Call failed due to lack of appropriate facilities being available (permanent condition)",
+    "Invalid destination",
+    "Call failed due to no carrier detected",
+    "Call failed due to lack of a dial tone",
+    "Call was no established within time allotted by LAC",
+    "Call was connected but no appropriate framing was detect"
 };
 
 void wrong_length(struct call *c, char *field, int expected, int found, int min) 
@@ -195,22 +213,26 @@ if (debug_avp)
 				if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate SLI when state != ICCN\n", __FUNCTION__);
 				return -EINVAL;
 			}
+            break;
 		case OCRP:		/* jz: case for ORCP */
-			if (t->state != SCCCN) {
-                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP on tunnel!=SCCCN\n",__FUNCTION__);
-                                return -EINVAL;
-                        }                        if (c->state != OCRQ) {
-                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP when state != OCRQ\n",__FUNCTION__);
-                                return -EINVAL;
-			 }
-                         break;
-		case OCCN:		/* jz: case for OCCN */
+            if (t->state != SCCCN) 
+            {
+                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP on tunnel!=SCCCN\n",__FUNCTION__);
+                return -EINVAL;
+            }
+            if (c->state != OCRQ)
+            {
+                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP when state != OCRQ\n",__FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case OCCN:		/* jz: case for OCCN */
 
-                        if (c->state != OCRQ) {
-                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCCN when state != OCRQ\n",__FUNCTION__);
-                                return -EINVAL;
-			 }
-                         break;
+            if (c->state != OCRQ) {
+                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCCN when state != OCRQ\n",__FUNCTION__);
+                return -EINVAL;
+            }
+            break;
 		case StopCCN:
 		case CDN:
 		case Hello:
@@ -221,14 +243,16 @@ if (debug_avp)
 		}
 	}
 #endif
-	if (c->msgtype == ICRQ) {
-		struct call *tmp;
-if (debug_avp) {
-		if (DEBUG) 
-			log(LOG_DEBUG, "%s: new incoming call\n",__FUNCTION__);
-}
+    if (c->msgtype == ICRQ) {
+        struct call *tmp;
+        if (debug_avp)
+        {
+            if (DEBUG) 
+                log(LOG_DEBUG, "%s: new incoming call\n",__FUNCTION__);
+        }
 		tmp = new_call(t);
-		if (!tmp) {
+		if (!tmp)
+        {
 			log(LOG_WARN, "%s: unable to create new call\n",__FUNCTION__);
 			return -EINVAL;
 		}
@@ -353,17 +377,37 @@ int result_code_avp(struct tunnel *t, struct call *c, void *data, int datalen) {
 #endif
 	result = ntohs(raw[3]);
 	error = ntohs(raw[4]);
-	if ((result>3) || (result < 1)) {
-		if (DEBUG) log(LOG_DEBUG, "%s: result code out of range (%d %d %d).  Ignoring.\n",__FUNCTION__,result,error,datalen);
+	if ((c->msgtype == StopCCN) && ((result>7) || (result < 1)))
+    {
+		if (DEBUG) log(LOG_DEBUG, 
+                       "%s: result code out of range (%d %d %d).  Ignoring.\n"
+                       ,__FUNCTION__,result,error,datalen);
 		return 0;
 	}
+
+	if ((c->msgtype == CDN) && ((result>11) || (result < 1)))
+    {
+		if (DEBUG) log(LOG_DEBUG, 
+                       "%s: result code out of range (%d %d %d).  Ignoring.\n"
+                       ,__FUNCTION__,result,error,datalen);
+		return 0;
+	}
+
 	c->error = error;
 	c->result = result;
 	safe_copy(c->errormsg, (char *)&raw[5],datalen-10);
 if (debug_avp) {
-	if (DEBUG) log(LOG_DEBUG, 
-			"%s: peer closing for reason %d (%s), error = %d (%s)\n",__FUNCTION__,
-			result,result_codes[result],error,c->errormsg);
+	if (DEBUG && (c->msgtype == StopCCN)) 
+    {
+        log(LOG_DEBUG, "%s: peer closing for reason %d (%s), error = %d (%s)\n"
+                        ,__FUNCTION__, result,stopccn_result_codes[result]
+                        ,error, c->errormsg);
+    } else
+    {
+        log(LOG_DEBUG, "%s: peer closing for reason %d (%s), error = %d (%s)\n"
+                       ,__FUNCTION__, result, cdn_result_codes[result]
+                       , error, c->errormsg);
+    }
 }
 	return 0;
 }

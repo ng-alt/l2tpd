@@ -12,6 +12,7 @@
  */
 #include <sys/time.h>
 #include "misc.h"
+#include "common.h"
 
 #define CALL_CACHE_SIZE 256
 

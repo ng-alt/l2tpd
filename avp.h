@@ -12,6 +12,8 @@
  * definitions
  */
 
+#include "common.h"
+
 struct avp_hdr {
 	_u16 length;
 	_u16 vendorid;

@@ -35,15 +35,29 @@ int init_config()
 	int returnedValue;
 
 	gconfig.port=UDP_LISTEN_PORT;
-	strncpy(gconfig.authfile,DEFAULT_AUTH_FILE, sizeof(gconfig.authfile));
 	lnslist=NULL;
 	laclist=NULL;
 	deflac=(struct lac *)malloc(sizeof(struct lac));
 	f=fopen(CONFIG_FILE, "r");
-	if (!f) {
-		log(LOG_CRIT, "%s: Unable to open config file %s\n",__FUNCTION__,CONFIG_FILE);
-		return -1;
-	}
+    if (f)
+    {
+        strncpy(gconfig.authfile,DEFAULT_AUTH_FILE, sizeof(gconfig.authfile));
+    }
+    else
+    {
+        f=fopen(ALT_CONFIG_FILE, "r");
+        if (f)
+        {
+            strncpy(gconfig.authfile,ALT_DEFAULT_AUTH_FILE, sizeof(gconfig.authfile));
+        }
+        else
+        {
+            log(LOG_CRIT, "%s: Unable to open config file %s or %s\n",
+                    __FUNCTION__,CONFIG_FILE,ALT_CONFIG_FILE);
+            return -1;
+        }
+
+    }
 	returnedValue =  parse_config(f);
 	fclose(f);
 	return(returnedValue);

@@ -11,10 +11,10 @@
  * Protocol and implementation information,
  * structures and constants.
  */
-
+/*
 typedef unsigned short _u16;
 typedef unsigned long long _u64;
-
+ */
 #ifndef _L2TP_H
 #define _L2TP_H
 
@@ -30,15 +30,16 @@ typedef unsigned long long _u64;
 #include "avp.h"
 #include "control.h"
 #include "aaa.h"
+#include "common.h"
 
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
 #define BINARY "l2tpd"
-#define SERVER_VERSION "0.64"
+#define SERVER_VERSION "0.65"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
-#define FIRMWARE_REV	0x0640	/* Revision of our firmware (software, in this case) */
+#define FIRMWARE_REV	0x0650	/* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32	/* By default only allow this many
 				   tunnels to exist */
 

@@ -46,7 +46,9 @@ struct host {
 #define SENSE_DENY 0
 
 #define DEFAULT_AUTH_FILE "/etc/l2tp/l2tp-secrets"
+#define ALT_DEFAULT_AUTH_FILE "/etc/l2tpd/l2tp-secrets"
 #define CONFIG_FILE "/etc/l2tp/l2tpd.conf"
+#define ALT_CONFIG_FILE "/etc/l2tpd/l2tpd.conf"
 
 /* Definition of an LNS */
 struct lns {

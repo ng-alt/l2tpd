@@ -1,4 +1,4 @@
-l2tpd version 0.61
+l2tpd version 0.65
 ==================
 http://sourceforge.net/projects/l2tpd
 Now maintained by:
@@ -13,25 +13,42 @@ Mark Spencer <markster@marko.net>
 Introduction:
 -------------
 
-l2tpd is an implementation of the layer two tunneling protocol. It works in userspace completely (although kernel work is planned after the userspace version is stablized).  l2tpd works by opening a pseudo-tty for communicating with pppd.  Although l2tpd was written for Linux, the current version should be highly portable to other UNIX's supported by pppd.
+l2tpd is an implementation of the layer two tunneling protocol. It works
+in userspace completely (although kernel work is planned after the
+userspace version is stablized).  l2tpd works by opening a pseudo-tty
+for communicating with pppd.  Although l2tpd was written for Linux, the
+current version should be highly portable to other UNIX's supported by
+pppd.
 
 Legal Information: 
 ------------------
-l2tpd is free software, distributed under the GNU General Public License (GPL) and you should read the LICENSE File if you are not already familiar with the GPL before using the product.
+l2tpd is free software, distributed under the GNU General Public License
+(GPL) and you should read the LICENSE File if you are not already
+familiar with the GPL before using the product.
 
 Bugs, Patches, and Code Contribution:
 -------------------------------------
-Please send bug reports and patches to either the l2tp mailng list (l2tpd-devel@sourceforge.net).
+Please send bug reports and patches to either the l2tp mailng list
+(l2tpd-devel@sourceforge.net).
 
-In order to contribute code, either with patches, or by direct access to the CVS tree for l2tpd, send e-mail to (l2tpd-devel@sourceforge.net).
+In order to contribute code, either with patches, or by direct access to
+the CVS tree for l2tpd, send e-mail to (l2tpd-devel@sourceforge.net).
 
-The word "FIXME" is a place holder for code that needs to be in place, or checks that need to be done, but haven't been coded yet.  Feel free to fix the fixme's and submit patches!
+The word "FIXME" is a place holder for code that needs to be in place,
+or checks that need to be done, but haven't been coded yet.  Feel free
+to fix the fixme's and submit patches!
 
 Release Notes
 -------------
-Version 0.61 should be considered ALPHA.  It does NOT completely implement the l2tp specification (RFC 2661).  Work on the high-speed kernel implementation has already begun, but a relase date is not available.
+Version 0.65 should be considered ALPHA.  It does NOT completely
+implement the l2tp specification (RFC 2661).  Work on the high-speed
+kernel implementation has already begun, but a relase date is not
+available.
 
-The primary use of this ALPHA level code is to test the ability of l2tpd to talk with other LAC and LNS implementations.  I hope that everyone who tests the software will send me results on how it worked or failed to work for them.  
+The primary use of this ALPHA level code is to test the ability of l2tpd
+to talk with other LAC and LNS implementations.  I hope that everyone
+who tests the software will send me results on how it worked or failed
+to work for them.  
 
 (theoretically) implemented features
 ------------------------------------
@@ -73,12 +90,16 @@ Usage notes on /var/run/l2tp-control
 ------------------------------------
 There aren't any command line options to l2tpd yet.
 
-Upon running l2tpd, a pipe is created in /var/run/l2tp-control.  Simple commands can then be echoed to this pipe to control l2tp on the fly.  The commands are:  
+Upon running l2tpd, a pipe is created in /var/run/l2tp-control.  Simple
+commands can then be echoed to this pipe to control l2tp on the fly.
+The commands are:  
 
 t <host> - create a tunnel to <host>
-c <tid> or <entry> - originate an l2tp call on the tunnel identified locally by <tid>, or dial the entry <entry>
+c <tid> or <entry> - originate an l2tp call on the tunnel identified
+                     locally by <tid>, or dial the entry <entry>
 h <cid> - hang up a call with the local identifier <cid>
-d <tid> or <entry> - disconnect the tunnel locally identified by <tid> or a lac entry <entry>
+d <tid> or <entry> - disconnect the tunnel locally identified by <tid>
+                     or a lac entry <entry>
 
 For example, to establish a tunnel to marko.net, one might do:
 
@@ -95,12 +116,22 @@ Sending a SIGUSR1 to l2tpd will cause it to dump its status.
 
 Mailing List
 ------------
-If you would like to contribute to discussions of the architecture of l2tpd, file formats, etc, we encourage you to join the l2tpd mailing list by visiting http://sourceforge.net/projects/l2tpd and subscribing to our mailing lists.
+If you would like to contribute to discussions of the architecture of
+l2tpd, file formats, etc, we encourage you to join the l2tpd mailing
+list by visiting http://sourceforge.net/projects/l2tpd and subscribing
+to our mailing lists.
 
 Original Project Legal Information: 
 -----------------------------------
-l2tpd is free software, distributed under the GNU General Public License (GPL)and you should read the LICENSE File if you are not already familiar with the GPL before using the product.
+l2tpd is free software, distributed under the GNU General Public License
+(GPL)and you should read the LICENSE File if you are not already
+familiar with the GPL before using the product.
 
-If you distribute l2tpd, a modified version, or a derivative product,  you MUST not remove Adtran's name from the product nor modify the terms of the copyright.
+If you distribute l2tpd, a modified version, or a derivative product,
+you MUST not remove Adtran's name from the product nor modify the terms
+of the copyright.
 
-Adtran may license l2tpd under other terms in addition to the GPL.  This way, companies who wish to use l2tpd for embedded systems or commercial applications and find the GPL too restrictive can license the technology from Adtran under more favorable terms. 
+Adtran may license l2tpd under other terms in addition to the GPL.  This
+way, companies who wish to use l2tpd for embedded systems or commercial
+applications and find the GPL too restrictive can license the technology
+from Adtran under more favorable terms. 

@@ -1,3 +1,16 @@
+0.65
+--
+Fix to handling SLI packets
+reformatted some code in a few small places
+Added valid, new (since L2TP draft days) result codes
+autodialed calls switched to be "Incoming calls" rather than "Outgoing"
+Re-arranged some header declarations
+Remote systems may use the same Tunnel ID...this is OK
+Look for l2tpd.conf in /etc/l2tp and in /etc/l2tpd...look for
+    l2tp-secrets int he same directory
+Portability enhancement (act.sa_restorer only used on i386?)
+    (Jean-Francois Dive)
+
 0.64
 --
 Too many that I lost track...

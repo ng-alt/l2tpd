@@ -350,9 +350,16 @@ int control_finish(struct tunnel *t, struct call *c) {
 		}
 		y=tunnels.head;
 		while(y) {
-			if ((y->tid == t->tid) && (y!=t)) {
+			if ((y->tid == t->tid) && 
+                (y->peer.sin_addr.s_addr == t->peer.sin_addr.s_addr) && 
+                (y!=t)) 
+            {
 				/* This can happen if we get a duplicate
 				 StartCCN or if they don't get our ack packet */
+                /*
+                 * But it is legitimate for two different remote systems
+                 * to use the same tid
+                 */
 				log(LOG_DEBUG, "%s: Peer requested tunnel %d twice, ignoring second one.\n",__FUNCTION__,t->tid);
 				c->needclose = 0;
 				c->closing = -1;
