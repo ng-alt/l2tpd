@@ -16,7 +16,6 @@ Other:
   either not installed, or no kernel support (if possible)
 
 Niceties:
-* Send notices to a syslog
 * Command-line tunnel control program, instead of using echo commands
 
 Way-down-the-line:

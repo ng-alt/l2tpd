@@ -53,10 +53,10 @@ struct ppp_opts {
 #define ntohs(a) SWAPS(a)
 #endif
 
-#define LOG_DEBUG 1
-#define LOG_LOG   2
+#define LOG_DEBUG 7
+#define LOG_LOG   6
 #define LOG_WARN  4
-#define LOG_CRIT  8
+#define LOG_CRIT  2
 
 #define halt() printf("Halted.\n") ; for(;;)
 

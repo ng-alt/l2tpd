@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <syslog.h>
 #if defined(SOLARIS)
 # include <varargs.h>
 #endif
@@ -24,12 +25,14 @@
 
 void log(int level, const char *fmt,...)
 {
-	/* FIXME: I should really log */
-	
+	char buf[256];
 	va_list args;
 	va_start(args, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, args);
 	vfprintf(stderr,fmt, args);
 	fflush(stderr);
+	openlog(BINARY, LOG_PID, LOG_DAEMON);
+	syslog(level, "%s", buf);
 	va_end(args);
 }
 

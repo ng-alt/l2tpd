@@ -1,3 +1,16 @@
+0.63
+--
+Syslog support added!!!
+Improved data sequencing & flow control serial number checking
+Removed call flow/session control serial number checking in ICRQ
+  -- Did we do this already and we're going mindless? :D
+Removed checking of now-defunct R bit
+Changed PPP framing to always sync
+Various and asundry other fixes
+
+NOW OPERABLE WITH CISCO IOS 12.1
+Continued interoperability improvements with Windows 2000 clients
+
 0.62
 --
 Removed call flow/session control (inapplicable as of RFC spec draft 13)

@@ -356,7 +356,8 @@ tunnel = %d, call = %d\n",__FUNCTION__,inet_ntoa(from.sin_addr),recvsize,tunnel,
 						tv.tv_usec = 0;
 						sc->dethrottle = schedule(tv, dethrottle, sc); 					
 					} else */
-					while ((result=read_packet(buf,sc->fd,sc->frame & SYNC_FRAMING))>0) {
+/*					while ((result=read_packet(buf,sc->fd,sc->frame & SYNC_FRAMING))>0) { */
+					while ((result=read_packet(buf,sc->fd,SYNC_FRAMING))>0) {
 						add_payload_hdr(sc->container, sc, buf); 						
 						if (packet_dump) {
 							do_packet_dump(buf);

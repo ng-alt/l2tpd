@@ -556,12 +556,17 @@ int control_finish(struct tunnel *t, struct call *c) {
 			z=z->next;
 		}
 		p=t->call_head;
-		if (p->serno<1) {
+		/* FIXME:  by commenting this out, we're not checking whether the serial
+		 * number avp is included in the ICRQ at all which its required to be.
+		 * Since the serial number is only used for human debugging aid, this
+		 * isn't a big deal, but it would be nice to have *some* sort of check
+		 * for it and perhaps just log it and go on.  */
+/*    JLM	if (p->serno<1) {
 			if (DEBUG) log(LOG_DEBUG,
 			"%s: Peer did not specify serial number when initiating call\n", __FUNCTION__);
 			call_close(p);
 			return -EINVAL;
-		}
+		} */
 		p->addr = get_addr(t->lns->range);
 		if (!p->addr) {
 			set_error(p,ERROR_NORES, "No available IP address");
@@ -834,7 +839,8 @@ inline int check_control(const struct buffer *buf, struct tunnel *t, struct call
 		if (DEBUG) log(LOG_DEBUG,
 			"%s: Received out of order control packet on tunnel %d (%d != %d)\n",
 			__FUNCTION__, t->tid, h->Ns, t->cSr);
-		if (h->Ns < t->cSr) {
+		if (((h->Ns < t->cSr) && ((t->cSr - h->Ns) < 32768 )) ||
+		    ((h->Ns > t->cSr) && ((t->cSr - h->Ns) > 32768 ))) {
 			/*
 			* Woopsies, they sent us a message we should have already received
 			* so we should send them a ZLB so they know
@@ -1043,7 +1049,7 @@ inline int expand_payload(struct buffer *buf, struct tunnel *t, struct call *c) 
 	* Handle sequence numbers
 	*
 	*/
-	if (PRBIT(new_hdr->ver)) {
+/*  JLM	if (PRBIT(new_hdr->ver)) {
 		if (c->pSr > new_hdr->Ns) {
 			log(LOG_DEBUG, "%s: R-bit set with Ns < pSr!\n",__FUNCTION__);
 			return -EINVAL;
@@ -1052,18 +1058,20 @@ inline int expand_payload(struct buffer *buf, struct tunnel *t, struct call *c) 
 		log(LOG_DEBUG, "%s: R-bit set on packet %d\n",__FUNCTION__,new_hdr->Ns);
 #endif
 		c->pSr=new_hdr->Ns;
-	}
+	} */
 #ifdef DEBUG_PAYLOAD
 	log(LOG_DEBUG, "%s: payload, cid = %d, Ns = %d, Nr = %d\n",__FUNCTION__,c->cid,new_hdr->Ns, new_hdr->Nr); 
 #endif
 	if (new_hdr->Ns != c->pSr) {
-		if (new_hdr->Ns < c->pSr) {
+		 /* RFC1982-esque comparison of serial numbers */
+		if (((new_hdr->Ns < c->pSr) && ((c->pSr - new_hdr->Ns) < 32768)) ||
+		    ((new_hdr->Ns > c->pSr) && ((c->pSr - new_hdr->Ns) > 32768))) {
 #ifdef DEBUG_FLOW
 			if (DEBUG) log(LOG_DEBUG,
 				"%s: Already seen this packet before (%d < %d)\n",__FUNCTION__
 				,new_hdr->Ns, c->pSr);
-			return -EINVAL;
 #endif
+			return -EINVAL;
 		} else if (new_hdr->Ns <= c->pSr + PAYLOAD_FUDGE) {
 			/* FIXME: I should buffer for out of order packets */
 #ifdef DEBUG_FLOW
@@ -1303,7 +1311,8 @@ inline int handle_packet(struct buffer *buf, struct tunnel *t, struct call *c) {
 							c->throttle = 0;
 						}
 					} */
-					res = write_packet(buf,t,c, c->frame & SYNC_FRAMING);
+/*	JLM				res = write_packet(buf,t,c, c->frame & SYNC_FRAMING); */
+					res = write_packet(buf,t,c,SYNC_FRAMING);
 					if (res) return res;
 					/* 
 				   * Assuming we wrote to the ppp driver okay, we should
