@@ -43,12 +43,12 @@
 struct tunnel_list tunnels;
 int max_tunnels = DEF_MAX_TUNNELS;
 struct utsname uts;
-int ppd = 1;			/* Packet processing delay */
-int control_fd;			/* descriptor of control area */
+int ppd = 1;                    /* Packet processing delay */
+int control_fd;                 /* descriptor of control area */
 char *args;
 
-char *dial_no_tmp;		/* jz: Dialnumber for Outgoing Call */
-int switch_io = 0;		/* jz: Switch for Incoming or Outgoing Call */
+char *dial_no_tmp;              /* jz: Dialnumber for Outgoing Call */
+int switch_io = 0;              /* jz: Switch for Incoming or Outgoing Call */
 
 void init_tunnel_list (struct tunnel_list *t)
 {
@@ -70,39 +70,39 @@ void show_status (int fd)
     FILE *f = fdopen (fd2, "a");
     if (!f)
     {
-	log (LOG_WARN, "show_status: fdopen() failed on fd %d\n", fd);
-	return;
+        log (LOG_WARN, "show_status: fdopen() failed on fd %d\n", fd);
+        return;
     }
     fprintf (f, "====== l2tpd statistics ========\n");
     fprintf (f, " Scheduler entries:\n");
     se = events;
     while (se)
     {
-	s++;
-	t = (struct tunnel *) se->data;
-	tlac = (struct lac *) se->data;
-	c = (struct call *) se->data;
-	if (se->func == &hello)
-	{
-	    fprintf (f, "%d: HELLO to %d\n", s, t->tid);
-	}
-	else if (se->func == &magic_lac_dial)
-	{
-	    fprintf (f, "%d: Magic dial on %s\n", s, tlac->entname);
-	}
-	else if (se->func == &send_zlb)
-	{
-	    fprintf (f, "%d: Send payload ZLB on call %d:%d\n", s,
-		     c->container->tid, c->cid);
-	}
-	else if (se->func == &dethrottle)
-	{
-	    fprintf (f, "%d: Dethrottle call %d:%d\n", s, c->container->tid,
-		     c->cid);
-	}
-	else
-	    fprintf (f, "%d: Unknown event\n", s);
-	se = se->next;
+        s++;
+        t = (struct tunnel *) se->data;
+        tlac = (struct lac *) se->data;
+        c = (struct call *) se->data;
+        if (se->func == &hello)
+        {
+            fprintf (f, "%d: HELLO to %d\n", s, t->tid);
+        }
+        else if (se->func == &magic_lac_dial)
+        {
+            fprintf (f, "%d: Magic dial on %s\n", s, tlac->entname);
+        }
+        else if (se->func == &send_zlb)
+        {
+            fprintf (f, "%d: Send payload ZLB on call %d:%d\n", s,
+                     c->container->tid, c->cid);
+        }
+        else if (se->func == &dethrottle)
+        {
+            fprintf (f, "%d: Dethrottle call %d:%d\n", s, c->container->tid,
+                     c->cid);
+        }
+        else
+            fprintf (f, "%d: Unknown event\n", s);
+        se = se->next;
     };
     fprintf (f, "Total Events scheduled: %d\n", s);
     fprintf (f, "Number of tunnels open: %d\n", tunnels.count);
@@ -110,51 +110,54 @@ void show_status (int fd)
     t = tunnels.head;
     while (t)
     {
-	fprintf (f, "Tunnel %s, ID = %d (local), %d (remote) to %s:%d\n"
-		 "   cSs = %d, cSr = %d, cLr = %d\n",
-		 (t->lac ? t->lac->entname : (t->lns ? t->lns->entname : "")),
-		 t->ourtid, t->tid, IPADDY (t->peer.sin_addr),
-		 ntohs (t->peer.sin_port), t->cSs, t->cSr, t->cLr);
-	c = t->call_head;
-	while (c)
-	{
-	    fprintf (f,
-		     "    Call %s, ID = %d (local), %d (remote), serno = %d\n"
-		     "          pSs = %d, pSr = %d, pLr = %d, tx = %d bytes (%d), rx= %d bytes (%d)\n",
-		     (c->lac ? c->lac->
-		      entname : (c->lns ? c->lns->entname : "")), c->ourcid,
-		     c->cid, c->serno, c->pSs, c->pSr, c->pLr, c->tx_bytes,
-		     c->tx_pkts, c->rx_bytes, c->rx_pkts);
-	    c = c->next;
-	}
-	t = t->next;
+        fprintf (f, "Tunnel %s, ID = %d (local), %d (remote) to %s:%d\n"
+                 "   control_seq_num = %d, control_rec_seq_num = %d,\n"
+                 "   cLr = %d\n",
+                 (t->lac ? t->lac->entname : (t->lns ? t->lns->entname : "")),
+                 t->ourtid, t->tid, IPADDY (t->peer.sin_addr),
+                 ntohs (t->peer.sin_port), t->control_seq_num,
+                 t->control_rec_seq_num, t->cLr);
+        c = t->call_head;
+        while (c)
+        {
+            fprintf (f,
+                     "Call %s, ID = %d (local), %d (remote), serno = %d,\n"
+                     "      data_seq_num = %d, data_rec_seq_num = %d,\n"
+                     "      pLr = %d, tx = %d bytes (%d), rx= %d bytes (%d)\n",
+                     (c->lac ? c->lac->
+                      entname : (c->lns ? c->lns->entname : "")), c->ourcid,
+                     c->cid, c->serno, c->data_seq_num, c->data_rec_seq_num,
+                     c->pLr, c->tx_bytes, c->tx_pkts, c->rx_bytes, c->rx_pkts);
+            c = c->next;
+        }
+        t = t->next;
     }
     fprintf (f, "==========Config File===========\n");
     tlns = lnslist;
     while (tlns)
     {
-	fprintf (f, "LNS entry %s\n",
-		 tlns->entname[0] ? tlns->entname : "(unnamed)");
-	tlns = tlns->next;
+        fprintf (f, "LNS entry %s\n",
+                 tlns->entname[0] ? tlns->entname : "(unnamed)");
+        tlns = tlns->next;
     };
     tlac = laclist;
     while (tlac)
     {
-	fprintf (f, "LAC entry %s, LNS is/are:",
-		 tlac->entname[0] ? tlac->entname : "(unnamed)");
-	h = tlac->lns;
-	if (h)
-	{
-	    while (h)
-	    {
-		fprintf (f, " %s", h->hostname);
-		h = h->next;
-	    }
-	}
-	else
-	    fprintf (f, " [none]");
-	fprintf (f, "\n");
-	tlac = tlac->next;
+        fprintf (f, "LAC entry %s, LNS is/are:",
+                 tlac->entname[0] ? tlac->entname : "(unnamed)");
+        h = tlac->lns;
+        if (h)
+        {
+            while (h)
+            {
+                fprintf (f, " %s", h->hostname);
+                h = h->next;
+            }
+        }
+        else
+            fprintf (f, " [none]");
+        fprintf (f, "\n");
+        tlac = tlac->next;
     };
     fprintf (f, "================================\n");
     fclose (f);
@@ -182,28 +185,28 @@ void child_handler (int signal)
     pid = waitpid (-1, &status, WNOHANG);
     if (pid < 1)
     {
-	/*
-	   * Oh well, nobody there.  Maybe we reaped it
-	   * somewhere else already
-	 */
-	return;
+        /*
+           * Oh well, nobody there.  Maybe we reaped it
+           * somewhere else already
+         */
+        return;
     }
     while (t)
     {
-	c = t->call_head;
-	while (c)
-	{
-	    if (c->pppd == pid)
-	    {
-		log (LOG_DEBUG, "%s : pppd died for call %d\n", __FUNCTION__,
-		     c->cid);
+        c = t->call_head;
+        while (c)
+        {
+            if (c->pppd == pid)
+            {
+                log (LOG_DEBUG, "%s : pppd died for call %d\n", __FUNCTION__,
+                     c->cid);
 
-		c->needclose = -1;
-		return;
-	    }
-	    c = c->next;
-	}
-	t = t->next;
+                c->needclose = -1;
+                return;
+            }
+            c = c->next;
+        }
+        t = t->next;
     }
 }
 
@@ -221,18 +224,18 @@ void death_handler (int signal)
     st = tunnels.head;
     while (st)
     {
-	st2 = st->next;
-	strcpy (st->self->errormsg, "Server closing");
-	sec = st->self->closing;
-	if (st->lac)
-	    st->lac->redial = 0;
-	call_close (st->self);
-	if (!sec)
-	{
-	    st->self->closing = -1;
-	    call_close (st->self);
-	}
-	st = st2;
+        st2 = st->next;
+        strcpy (st->self->errormsg, "Server closing");
+        sec = st->self->closing;
+        if (st->lac)
+            st->lac->redial = 0;
+        call_close (st->self);
+        if (!sec)
+        {
+            st->self->closing = -1;
+            call_close (st->self);
+        }
+        st = st2;
     }
     exit (1);
 }
@@ -257,54 +260,54 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     stropt[0] = strdup (PPPD);
     while (p)
     {
-	stropt[pos] = (char *) malloc (strlen (p->option) + 1);
-	strncpy (stropt[pos], p->option, strlen (p->option) + 1);
-	pos++;
-	p = p->next;
+        stropt[pos] = (char *) malloc (strlen (p->option) + 1);
+        strncpy (stropt[pos], p->option, strlen (p->option) + 1);
+        pos++;
+        p = p->next;
     }
     stropt[pos] = NULL;
     if (c->pppd > 0)
     {
-	log (LOG_WARN, "%s: PPP already started on call!\n", __FUNCTION__);
-	return -EINVAL;
+        log (LOG_WARN, "%s: PPP already started on call!\n", __FUNCTION__);
+        return -EINVAL;
     }
     if (c->fd > -1)
     {
-	log (LOG_WARN, "%s: file descriptor already assigned!\n",
-	     __FUNCTION__);
-	return -EINVAL;
+        log (LOG_WARN, "%s: file descriptor already assigned!\n",
+             __FUNCTION__);
+        return -EINVAL;
     }
 #ifdef USE_KERNEL
     if (kernel_support)
     {
-	co.ourtid = c->container->ourtid;
-	co.ourcid = c->ourcid;
-	ioctl (server_socket, L2TPIOCGETCALLOPTS, &co);
-	stropt[pos++] = strdup ("channel");
-	stropt[pos] = (char *) malloc (10);
-	snprintf (stropt[pos], 10, "%d", co.id);
-	pos++;
-	stropt[pos] = NULL;
+        co.ourtid = c->container->ourtid;
+        co.ourcid = c->ourcid;
+        ioctl (server_socket, L2TPIOCGETCALLOPTS, &co);
+        stropt[pos++] = strdup ("channel");
+        stropt[pos] = (char *) malloc (10);
+        snprintf (stropt[pos], 10, "%d", co.id);
+        pos++;
+        stropt[pos] = NULL;
     }
     else
     {
 #endif
-	if ((c->fd = getPtyMaster (&a, &b)) < 0)
-	{
-	    log (LOG_WARN, "%s: unable to allocate pty, abandoning!\n",
-		 __FUNCTION__);
-	    return -EINVAL;
-	}
+        if ((c->fd = getPtyMaster (&a, &b)) < 0)
+        {
+            log (LOG_WARN, "%s: unable to allocate pty, abandoning!\n",
+                 __FUNCTION__);
+            return -EINVAL;
+        }
 
-	/* set fd opened above to not echo so we don't see read our own packets
-	   back of the file descriptor that we just wrote them to */
-	tcgetattr (c->fd, &ptyconf);
-	*(c->oldptyconf) = ptyconf;
-	ptyconf.c_cflag &= ~(ICANON | ECHO);
-	tcsetattr (c->fd, TCSANOW, &ptyconf);
+        /* set fd opened above to not echo so we don't see read our own packets
+           back of the file descriptor that we just wrote them to */
+        tcgetattr (c->fd, &ptyconf);
+        *(c->oldptyconf) = ptyconf;
+        ptyconf.c_cflag &= ~(ICANON | ECHO);
+        tcsetattr (c->fd, TCSANOW, &ptyconf);
 
-	snprintf (tty, sizeof (tty), "/dev/tty%c%c", a, b);
-	fd2 = open (tty, O_RDWR);
+        snprintf (tty, sizeof (tty), "/dev/tty%c%c", a, b);
+        fd2 = open (tty, O_RDWR);
 
 #ifdef USE_KERNEL
     }
@@ -314,68 +317,68 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     log (LOG_DEBUG, "%s: I'm running:  ", __FUNCTION__);
     for (x = 0; stropt[x]; x++)
     {
-	log (LOG_DEBUG, "\"%s\" ", stropt[x]);
+        log (LOG_DEBUG, "\"%s\" ", stropt[x]);
     };
     log (LOG_DEBUG, "\n");
 #endif
     c->pppd = fork ();
     if (c->pppd < 0)
     {
-	log (LOG_WARN, "%s: unable to fork(), abandoning!\n", __FUNCTION__);
-	return -EINVAL;
+        log (LOG_WARN, "%s: unable to fork(), abandoning!\n", __FUNCTION__);
+        return -EINVAL;
     }
     else if (!c->pppd)
     {
-	struct call *sc;
-	struct tunnel *st;
+        struct call *sc;
+        struct tunnel *st;
 
-	close (0);
-	close (1);
-	close (2);
+        close (0);
+        close (1);
+        close (2);
 #ifdef USE_KERNEL
-	if (!kernel_support && (fd2 < 0))
+        if (!kernel_support && (fd2 < 0))
 #else
-	if (fd2 < 0)
+        if (fd2 < 0)
 #endif
-	{
-	    log (LOG_WARN, "%s: Unable to open %s to launch pppd!\n",
-		 __FUNCTION__, tty);
-	    exit (1);
-	}
-	dup2 (fd2, 0);
-	dup2 (fd2, 1);
+        {
+            log (LOG_WARN, "%s: Unable to open %s to launch pppd!\n",
+                 __FUNCTION__, tty);
+            exit (1);
+        }
+        dup2 (fd2, 0);
+        dup2 (fd2, 1);
 
 
-	/* close all the calls pty fds */
-	st = tunnels.head;
-	while (st)
-	{
-	    sc = st->call_head;
-	    while (sc)
-	    {
-		close (sc->fd);
-		sc = sc->next;
-	    }
-	    st = st->next;
-	}
+        /* close all the calls pty fds */
+        st = tunnels.head;
+        while (st)
+        {
+            sc = st->call_head;
+            while (sc)
+            {
+                close (sc->fd);
+                sc = sc->next;
+            }
+            st = st->next;
+        }
 
-	/* close the UDP socket fd */
-	close (server_socket);
+        /* close the UDP socket fd */
+        close (server_socket);
 
-	/* close the control pipe fd */
-	close (control_fd);
+        /* close the control pipe fd */
+        close (control_fd);
 
 
-	execv (PPPD, stropt);
-	log (LOG_WARN, "%s: Exec of %s failed!\n", PPPD);
-	exit (1);
+        execv (PPPD, stropt);
+        log (LOG_WARN, "%s: Exec of %s failed!\n", __FUNCTION__, PPPD);
+        exit (1);
     };
     close (fd2);
     pos = 0;
     while (stropt[pos])
     {
-	free (stropt[pos]);
-	pos++;
+        free (stropt[pos]);
+        pos++;
     };
     return 0;
 }
@@ -393,7 +396,7 @@ void destroy_tunnel (struct tunnel *t)
     struct tunnel *p;
     struct timeval tv;
     if (!t)
-	return;
+        return;
 
     /*
      * Save ourselves until the very
@@ -410,8 +413,8 @@ void destroy_tunnel (struct tunnel *t)
     c = t->call_head;
     while (c)
     {
-	destroy_call (c);
-	c = c->next;
+        destroy_call (c);
+        c = c->next;
     };
     /*
      * Remove ourselves from the list of tunnels
@@ -419,57 +422,57 @@ void destroy_tunnel (struct tunnel *t)
 
     if (tunnels.head == t)
     {
-	tunnels.head = t->next;
-	tunnels.count--;
+        tunnels.head = t->next;
+        tunnels.count--;
     }
     else
     {
-	p = tunnels.head;
-	if (p)
-	{
-	    while (p->next && (p->next != t))
-		p = p->next;
-	    if (p->next)
-	    {
-		p->next = t->next;
-		tunnels.count--;
-	    }
-	    else
-	    {
-		log (LOG_WARN,
-		     "%s: unable to locate tunnel in tunnel list\n",
-		     __FUNCTION__);
-	    }
-	}
-	else
-	{
-	    log (LOG_WARN, "%s: tunnel list is empty!\n", __FUNCTION__);
-	}
+        p = tunnels.head;
+        if (p)
+        {
+            while (p->next && (p->next != t))
+                p = p->next;
+            if (p->next)
+            {
+                p->next = t->next;
+                tunnels.count--;
+            }
+            else
+            {
+                log (LOG_WARN,
+                     "%s: unable to locate tunnel in tunnel list\n",
+                     __FUNCTION__);
+            }
+        }
+        else
+        {
+            log (LOG_WARN, "%s: tunnel list is empty!\n", __FUNCTION__);
+        }
     }
     if (t->lac)
     {
-	t->lac->t = NULL;
-	if (t->lac->redial && (t->lac->rtimeout > 0) && !t->lac->rsched &&
-	    t->lac->active)
-	{
-	    log (LOG_LOG, "%s: Will redial in %d seconds\n", __FUNCTION__,
-		 t->lac->rtimeout);
-	    tv.tv_sec = t->lac->rtimeout;
-	    tv.tv_usec = 0;
-	    t->lac->rsched = schedule (tv, magic_lac_dial, t->lac);
-	}
+        t->lac->t = NULL;
+        if (t->lac->redial && (t->lac->rtimeout > 0) && !t->lac->rsched &&
+            t->lac->active)
+        {
+            log (LOG_LOG, "%s: Will redial in %d seconds\n", __FUNCTION__,
+                 t->lac->rtimeout);
+            tv.tv_sec = t->lac->rtimeout;
+            tv.tv_usec = 0;
+            t->lac->rsched = schedule (tv, magic_lac_dial, t->lac);
+        }
     }
     /* XXX L2TP/IPSec: remove relevant SAs here?  NTB 20011010
      * XXX But what if another tunnel is using same SA?
      */
     if (t->lns)
-	t->lns->t = NULL;
+        t->lns->t = NULL;
     free (t);
     free (me);
 }
 
 struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
-			  struct lns *lns)
+                          struct lns *lns)
 {
     /*
      * Establish a tunnel from us to host
@@ -482,9 +485,9 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     hp = gethostbyname (host);
     if (!hp)
     {
-	log (LOG_WARN, "%s: gethostbyname() failed for %s.\n", __FUNCTION__,
-	     host);
-	return NULL;
+        log (LOG_WARN, "%s: gethostbyname() failed for %s.\n", __FUNCTION__,
+             host);
+        return NULL;
     }
     bcopy (hp->h_addr, &addr, hp->h_length);
     /* Force creation of a new tunnel
@@ -495,9 +498,9 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     tmp = get_call (0, 0, addr, port);
     if (!tmp)
     {
-	log (LOG_WARN, "%s: Unable to create tunnel to %s.\n", __FUNCTION__,
-	     host);
-	return NULL;
+        log (LOG_WARN, "%s: Unable to create tunnel to %s.\n", __FUNCTION__,
+             host);
+        return NULL;
     }
     tmp->container->tid = 0;
     tmp->container->lac = lac;
@@ -505,14 +508,14 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     tmp->lac = lac;
     tmp->lns = lns;
     if (lac)
-	lac->t = tmp->container;
+        lac->t = tmp->container;
     if (lns)
-	lns->t = tmp->container;
+        lns->t = tmp->container;
     /*
      * Since our state is 0, we will establish a tunnel now
      */
     log (LOG_LOG, "%s:Connecting to host %s, port %d\n", __FUNCTION__, host,
-	 ntohs (port));
+         ntohs (port));
     control_finish (tmp->container, tmp);
     return tmp->container;
 }
@@ -523,26 +526,26 @@ void magic_lac_tunnel (void *data)
     lac = (struct lac *) data;
     if (!lac)
     {
-	log (LOG_WARN, "%s: magic_lac_tunnel: called on NULL lac!\n",
-	     __FUNCTION__);
-	return;
+        log (LOG_WARN, "%s: magic_lac_tunnel: called on NULL lac!\n",
+             __FUNCTION__);
+        return;
     }
     if (lac->lns)
     {
-	/* FIXME: I should try different LNS's if I get failures */
-	l2tp_call (lac->lns->hostname, lac->lns->port, lac, NULL);
-	return;
+        /* FIXME: I should try different LNS's if I get failures */
+        l2tp_call (lac->lns->hostname, lac->lns->port, lac, NULL);
+        return;
     }
     else if (deflac && deflac->lns)
     {
-	l2tp_call (deflac->lns->hostname, deflac->lns->port, lac, NULL);
-	return;
+        l2tp_call (deflac->lns->hostname, deflac->lns->port, lac, NULL);
+        return;
     }
     else
     {
-	log (LOG_WARN, "%s: Unable to find hostname to dial for '%s'\n",
-	     __FUNCTION__, lac->entname);
-	return;
+        log (LOG_WARN, "%s: Unable to find hostname to dial for '%s'\n",
+             __FUNCTION__, lac->entname);
+        return;
     }
 }
 
@@ -552,32 +555,32 @@ struct call *lac_call (int tid, struct lac *lac, struct lns *lns)
     struct call *tmp;
     while (t)
     {
-	if (t->ourtid == tid)
-	{
-	    tmp = new_call (t);
-	    if (!tmp)
-	    {
-		log (LOG_WARN, "%s: unable to create new call\n",
-		     __FUNCTION__);
-		return NULL;
-	    }
-	    tmp->next = t->call_head;
-	    t->call_head = tmp;
-	    t->count++;
-	    tmp->cid = 0;
-	    tmp->lac = lac;
-	    tmp->lns = lns;
-	    if (lac)
-		lac->c = tmp;
-	    log (LOG_LOG, "%s: Calling on tunnel %d\n", __FUNCTION__, tid);
-	    strcpy (tmp->dial_no, dial_no_tmp);	/*  jz: copy dialnumber to tmp->dial_no  */
-	    control_finish (t, tmp);
-	    return tmp;
-	}
-	t = t->next;
+        if (t->ourtid == tid)
+        {
+            tmp = new_call (t);
+            if (!tmp)
+            {
+                log (LOG_WARN, "%s: unable to create new call\n",
+                     __FUNCTION__);
+                return NULL;
+            }
+            tmp->next = t->call_head;
+            t->call_head = tmp;
+            t->count++;
+            tmp->cid = 0;
+            tmp->lac = lac;
+            tmp->lns = lns;
+            if (lac)
+                lac->c = tmp;
+            log (LOG_LOG, "%s: Calling on tunnel %d\n", __FUNCTION__, tid);
+            strcpy (tmp->dial_no, dial_no_tmp); /*  jz: copy dialnumber to tmp->dial_no  */
+            control_finish (t, tmp);
+            return tmp;
+        }
+        t = t->next;
     };
     log (LOG_DEBUG, "%s: No such tunnel %d to generate call.\n", __FUNCTION__,
-	 tid);
+         tid);
     return NULL;
 }
 
@@ -587,28 +590,28 @@ void magic_lac_dial (void *data)
     lac = (struct lac *) data;
     if (!lac->active)
     {
-	log (LOG_DEBUG, "%s: LAC %s not active", __FUNCTION__, lac->entname);
-	return;
+        log (LOG_DEBUG, "%s: LAC %s not active", __FUNCTION__, lac->entname);
+        return;
     }
     lac->rsched = NULL;
     lac->rtries++;
     if (lac->rmax && (lac->rtries > lac->rmax))
     {
-	log (LOG_LOG, "%s: maximum retries exceeded.\n", __FUNCTION__);
-	return;
+        log (LOG_LOG, "%s: maximum retries exceeded.\n", __FUNCTION__);
+        return;
     }
     if (!lac)
     {
-	log (LOG_WARN, "%s : called on NULL lac!\n", __FUNCTION__);
-	return;
+        log (LOG_WARN, "%s : called on NULL lac!\n", __FUNCTION__);
+        return;
     }
     if (!lac->t)
     {
 #ifdef DEGUG_MAGIC
-	log (LOG_DEBUG, "%s : tunnel not up!  Connecting!\n", __FUNCTION__);
+        log (LOG_DEBUG, "%s : tunnel not up!  Connecting!\n", __FUNCTION__);
 #endif
-	magic_lac_tunnel (lac);
-	return;
+        magic_lac_tunnel (lac);
+        return;
     }
     lac_call (lac->t->ourtid, lac, NULL);
 }
@@ -619,22 +622,22 @@ void lac_hangup (int cid)
     struct call *tmp;
     while (t)
     {
-	tmp = t->call_head;
-	while (tmp)
-	{
-	    if (tmp->ourcid == cid)
-	    {
-		log (LOG_LOG,
-		     "%s :Hanging up call %d, Local: %d, Remote: %d\n",
-		     __FUNCTION__, tmp->serno, tmp->ourcid, tmp->cid);
-		strcpy (tmp->errormsg, "Goodbye!");
+        tmp = t->call_head;
+        while (tmp)
+        {
+            if (tmp->ourcid == cid)
+            {
+                log (LOG_LOG,
+                     "%s :Hanging up call %d, Local: %d, Remote: %d\n",
+                     __FUNCTION__, tmp->serno, tmp->ourcid, tmp->cid);
+                strcpy (tmp->errormsg, "Goodbye!");
 /*				tmp->needclose = -1; */
-		kill (tmp->pppd, SIGTERM);
-		return;
-	    }
-	    tmp = tmp->next;
-	}
-	t = t->next;
+                kill (tmp->pppd, SIGTERM);
+                return;
+            }
+            tmp = tmp->next;
+        }
+        t = t->next;
     };
     log (LOG_DEBUG, "%s : No such call %d to hang up.\n", __FUNCTION__, cid);
     return;
@@ -645,17 +648,17 @@ void lac_disconnect (int tid)
     struct tunnel *t = tunnels.head;
     while (t)
     {
-	if (t->ourtid == tid)
-	{
-	    log (LOG_LOG,
-		 "%s: Disconnecting from %s, Local: %d, Remote: %d\n",
-		 __FUNCTION__, IPADDY (t->peer.sin_addr), t->ourtid, t->tid);
-	    t->self->needclose = -1;
-	    strcpy (t->self->errormsg, "Goodbye!");
-	    call_close (t->self);
-	    return;
-	}
-	t = t->next;
+        if (t->ourtid == tid)
+        {
+            log (LOG_LOG,
+                 "%s: Disconnecting from %s, Local: %d, Remote: %d\n",
+                 __FUNCTION__, IPADDY (t->peer.sin_addr), t->ourtid, t->tid);
+            t->self->needclose = -1;
+            strcpy (t->self->errormsg, "Goodbye!");
+            call_close (t->self);
+            return;
+        }
+        t = t->next;
     };
     log (LOG_DEBUG, "%s: No such tunnel %d to hang up.\n", __FUNCTION__, tid);
     return;
@@ -665,9 +668,9 @@ struct tunnel *new_tunnel ()
 {
     struct tunnel *tmp = malloc (sizeof (struct tunnel));
     if (!tmp)
-	return NULL;
-    tmp->cSs = 0;
-    tmp->cSr = 0;
+        return NULL;
+    tmp->control_seq_num = 0;
+    tmp->control_rec_seq_num = 0;
     tmp->cLr = 0;
     tmp->call_head = NULL;
     tmp->next = NULL;
@@ -678,16 +681,16 @@ struct tunnel *new_tunnel ()
 /*	while(get_call((tmp->ourtid = rand() & 0xFFFF),0,0,0)); */
 #ifdef USE_KERNEL
     if (kernel_support)
-	tmp->ourtid = ioctl (server_socket, L2TPIOCADDTUNNEL, 0);
+        tmp->ourtid = ioctl (server_socket, L2TPIOCADDTUNNEL, 0);
     else
 #endif
-	tmp->ourtid = rand () & 0xFFFF;
+        tmp->ourtid = rand () & 0xFFFF;
 #else
     tmp->ourtid = 0x6227;
 #endif
     tmp->nego = 0;
     tmp->count = 0;
-    tmp->state = 0;		/* Nothing */
+    tmp->state = 0;             /* Nothing */
     tmp->peer.sin_family = AF_INET;
     tmp->peer.sin_port = 0;
     bzero (&(tmp->peer.sin_addr), sizeof (tmp->peer.sin_addr));
@@ -696,15 +699,15 @@ struct tunnel *new_tunnel ()
     tmp->ourfc = ASYNC_FRAMING | SYNC_FRAMING;
     tmp->ourbc = 0;
     tmp->ourtb = (((_u64) rand ()) << 32) | ((_u64) rand ());
-    tmp->fc = -1;		/* These really need to be specified by the peer */
-    tmp->bc = -1;		/* And we want to know if they forgot */
+    tmp->fc = -1;               /* These really need to be specified by the peer */
+    tmp->bc = -1;               /* And we want to know if they forgot */
     tmp->hostname[0] = 0;
     tmp->vendor[0] = 0;
     tmp->secret[0] = 0;
     if (!(tmp->self = new_call (tmp)))
     {
-	free (tmp);
-	return NULL;
+        free (tmp);
+        return NULL;
     };
     tmp->ourrws = DEFAULT_RWS_SIZE;
     tmp->self->ourfbit = FBIT;
@@ -729,164 +732,164 @@ void do_control ()
     char *tunstr;
     char *callstr;
 
-    char *sub_str;		/* jz: use by the strtok function */
-    char *tmp_ptr;		/* jz: use by the strtok function */
+    char *sub_str;              /* jz: use by the strtok function */
+    char *tmp_ptr;              /* jz: use by the strtok function */
     struct lac *lac;
     int call;
     int tunl;
     int cnt = -1;
     while (cnt)
     {
-	cnt = read (control_fd, buf, sizeof (buf));
-	if (cnt > 0)
-	{
-	    if (buf[cnt - 1] == '\n')
-		buf[--cnt] = 0;
+        cnt = read (control_fd, buf, sizeof (buf));
+        if (cnt > 0)
+        {
+            if (buf[cnt - 1] == '\n')
+                buf[--cnt] = 0;
 #ifdef DEBUG_CONTROL
-	    log (LOG_DEBUG, "%s: Got message %s (%d bytes long)\n",
-		 __FUNCTION__, buf, cnt);
+            log (LOG_DEBUG, "%s: Got message %s (%d bytes long)\n",
+                 __FUNCTION__, buf, cnt);
 #endif
-	    switch (buf[0])
-	    {
-	    case 't':
-		host = strchr (buf, ' ') + 1;
+            switch (buf[0])
+            {
+            case 't':
+                host = strchr (buf, ' ') + 1;
 #ifdef DEBUG_CONTROL
-		log (LOG_DEBUG, "%s: Attempting to tunnel to %s\n",
-		     __FUNCTION__, host);
+                log (LOG_DEBUG, "%s: Attempting to tunnel to %s\n",
+                     __FUNCTION__, host);
 #endif
-		l2tp_call (host, UDP_LISTEN_PORT, NULL, NULL);
-		break;
-	    case 'c':
+                l2tp_call (host, UDP_LISTEN_PORT, NULL, NULL);
+                break;
+            case 'c':
 
-		switch_io = 1;	/* jz: Switch for Incoming - Outgoing Calls */
+                switch_io = 1;  /* jz: Switch for Incoming - Outgoing Calls */
 
-		tunstr = strchr (buf, ' ') + 1;
-		lac = laclist;
-		while (lac)
-		{
-		    if (!strcasecmp (lac->entname, tunstr))
-		    {
-			lac->active = -1;
-			lac->rtries = 0;
-			if (!lac->c)
-			    magic_lac_dial (lac);
-			else
-			    log (LOG_DEBUG,
-				 "%s: Session '%s' already active!\n",
-				 __FUNCTION__, lac->entname);
-			break;
-		    }
-		    lac = lac->next;
-		}
-		if (lac)
-		    break;
-		tunl = atoi (tunstr);
-		if (!tunl)
-		{
-		    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
-			 tunstr);
-		    break;
-		}
+                tunstr = strchr (buf, ' ') + 1;
+                lac = laclist;
+                while (lac)
+                {
+                    if (!strcasecmp (lac->entname, tunstr))
+                    {
+                        lac->active = -1;
+                        lac->rtries = 0;
+                        if (!lac->c)
+                            magic_lac_dial (lac);
+                        else
+                            log (LOG_DEBUG,
+                                 "%s: Session '%s' already active!\n",
+                                 __FUNCTION__, lac->entname);
+                        break;
+                    }
+                    lac = lac->next;
+                }
+                if (lac)
+                    break;
+                tunl = atoi (tunstr);
+                if (!tunl)
+                {
+                    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
+                         tunstr);
+                    break;
+                }
 #ifdef DEBUG_CONTROL
-		log (LOG_DEBUG, "%s: Attempting to call on tunnel %d\n",
-		     __FUNCTION__, tunl);
+                log (LOG_DEBUG, "%s: Attempting to call on tunnel %d\n",
+                     __FUNCTION__, tunl);
 #endif
-		lac_call (tunl, NULL, NULL);
-		break;
+                lac_call (tunl, NULL, NULL);
+                break;
 
-	    case 'o':		/* jz: option 'o' for doing a outgoing call */
+            case 'o':          /* jz: option 'o' for doing a outgoing call */
 
-		switch_io = 0;	/* jz: Switch for incoming - outgoing Calls */
+                switch_io = 0;  /* jz: Switch for incoming - outgoing Calls */
 
-		sub_str = strchr (buf, ' ') + 1;
+                sub_str = strchr (buf, ' ') + 1;
 
-		tunstr = strtok (sub_str, " ");	/* jz: using strtok function to get */
-		tmp_ptr = strtok (NULL, " ");	/*     params out of the pipe       */
-		strcpy (dial_no_tmp, tmp_ptr);
+                tunstr = strtok (sub_str, " "); /* jz: using strtok function to get */
+                tmp_ptr = strtok (NULL, " ");   /*     params out of the pipe       */
+                strcpy (dial_no_tmp, tmp_ptr);
 
-		lac = laclist;
-		while (lac)
-		{
-		    if (!strcasecmp (lac->entname, tunstr))
-		    {
-			lac->active = -1;
-			lac->rtries = 0;
-			if (!lac->c)
-			    magic_lac_dial (lac);
-			else
-			    log (LOG_DEBUG,
-				 "%s: Session '%s' already active!\n",
-				 __FUNCTION__, lac->entname);
-			break;
-		    }
-		    lac = lac->next;
-		}
-		if (lac)
-		    break;
-		tunl = atoi (tunstr);
-		if (!tunl)
-		{
-		    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
-			 tunstr);
-		    break;
-		}
+                lac = laclist;
+                while (lac)
+                {
+                    if (!strcasecmp (lac->entname, tunstr))
+                    {
+                        lac->active = -1;
+                        lac->rtries = 0;
+                        if (!lac->c)
+                            magic_lac_dial (lac);
+                        else
+                            log (LOG_DEBUG,
+                                 "%s: Session '%s' already active!\n",
+                                 __FUNCTION__, lac->entname);
+                        break;
+                    }
+                    lac = lac->next;
+                }
+                if (lac)
+                    break;
+                tunl = atoi (tunstr);
+                if (!tunl)
+                {
+                    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
+                         tunstr);
+                    break;
+                }
 #ifdef DEBUG_CONTROL
-		log (LOG_DEBUG, "%s: Attempting to call on tunnel %d\n",
-		     __FUNCTION__, tunl);
+                log (LOG_DEBUG, "%s: Attempting to call on tunnel %d\n",
+                     __FUNCTION__, tunl);
 #endif
-		lac_call (tunl, NULL, NULL);
-		break;
+                lac_call (tunl, NULL, NULL);
+                break;
 
-	    case 'h':
-		callstr = strchr (buf, ' ') + 1;
-		call = atoi (callstr);
+            case 'h':
+                callstr = strchr (buf, ' ') + 1;
+                call = atoi (callstr);
 #ifdef DEBUG_CONTROL
-		log (LOG_DEBUG, "%s: Attempting to call %d\n", __FUNCTION__,
-		     call);
+                log (LOG_DEBUG, "%s: Attempting to call %d\n", __FUNCTION__,
+                     call);
 #endif
-		lac_hangup (call);
-		break;
-	    case 'd':
-		tunstr = strchr (buf, ' ') + 1;
-		lac = laclist;
-		while (lac)
-		{
-		    if (!strcasecmp (lac->entname, tunstr))
-		    {
-			lac->active = 0;
-			lac->rtries = 0;
-			if (lac->t)
-			    lac_disconnect (lac->t->ourtid);
-			else
-			    log (LOG_DEBUG, "%s: Session '%s' not up\n",
-				 __FUNCTION__, lac->entname);
-			break;
-		    }
-		    lac = lac->next;
-		}
-		if (lac)
-		    break;
-		tunl = atoi (tunstr);
-		if (!tunl)
-		{
-		    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
-			 tunstr);
-		    break;
-		}
+                lac_hangup (call);
+                break;
+            case 'd':
+                tunstr = strchr (buf, ' ') + 1;
+                lac = laclist;
+                while (lac)
+                {
+                    if (!strcasecmp (lac->entname, tunstr))
+                    {
+                        lac->active = 0;
+                        lac->rtries = 0;
+                        if (lac->t)
+                            lac_disconnect (lac->t->ourtid);
+                        else
+                            log (LOG_DEBUG, "%s: Session '%s' not up\n",
+                                 __FUNCTION__, lac->entname);
+                        break;
+                    }
+                    lac = lac->next;
+                }
+                if (lac)
+                    break;
+                tunl = atoi (tunstr);
+                if (!tunl)
+                {
+                    log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
+                         tunstr);
+                    break;
+                }
 #ifdef DEBUG_CONTROL
-		log (LOG_DEBUG, "%s: Attempting to disconnect tunnel %d\n",
-		     __FUNCTION__, tunl);
+                log (LOG_DEBUG, "%s: Attempting to disconnect tunnel %d\n",
+                     __FUNCTION__, tunl);
 #endif
-		lac_disconnect (tunl);
-		break;
-	    case 's':
-		show_status (1);
-		break;
-	    default:
-		log (LOG_DEBUG, "%s: Unknown command %c\n", __FUNCTION__,
-		     buf[0]);
-	    }
-	}
+                lac_disconnect (tunl);
+                break;
+            case 's':
+                show_status (1);
+                break;
+            default:
+                log (LOG_DEBUG, "%s: Unknown command %c\n", __FUNCTION__,
+                     buf[0]);
+            }
+        }
     }
     /* Otherwise select goes nuts */
     close (control_fd);
@@ -899,18 +902,18 @@ void init ()
     init_addr ();
     if (init_config ())
     {
-	log (LOG_CRIT, "%s: Unable to load config file\n", __FUNCTION__);
-	exit (1);
+        log (LOG_CRIT, "%s: Unable to load config file\n", __FUNCTION__);
+        exit (1);
     }
     if (uname (&uts))
     {
-	log (LOG_CRIT, "%s : Unable to determine host system\n",
-	     __FUNCTION__);
-	exit (1);
+        log (LOG_CRIT, "%s : Unable to determine host system\n",
+             __FUNCTION__);
+        exit (1);
     }
     init_tunnel_list (&tunnels);
     if (init_network ())
-	exit (1);
+        exit (1);
     signal (SIGTERM, &death_handler);
     signal (SIGINT, &death_handler);
     signal (SIGCHLD, &child_handler);
@@ -920,31 +923,31 @@ void init ()
     control_fd = open (CONTROL_PIPE, O_RDONLY | O_NONBLOCK, 0600);
     if (control_fd < 0)
     {
-	log (LOG_CRIT, "%s: Unable to open " CONTROL_PIPE " for reading.",
-	     __FUNCTION__);
-	exit (1);
+        log (LOG_CRIT, "%s: Unable to open " CONTROL_PIPE " for reading.",
+             __FUNCTION__);
+        exit (1);
     }
     log (LOG_LOG, "l2tpd version " SERVER_VERSION " started on %s PID:%d\n",
-	 hostname, getpid ());
+         hostname, getpid ());
     log (LOG_LOG,
-	 "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
+         "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
     log (LOG_LOG, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
     log (LOG_LOG, "%s version %s on a %s, port %d\n", uts.sysname,
-	 uts.release, uts.machine, gconfig.port);
+         uts.release, uts.machine, gconfig.port);
     lac = laclist;
     while (lac)
     {
-	if (lac->autodial)
-	{
+        if (lac->autodial)
+        {
 #ifdef DEBUG_MAGIC
-	    log (LOG_DEBUG, "%s: Autodialing '%s'\n", __FUNCTION__,
-		 lac->entname[0] ? lac->entname : "(unnamed)");
+            log (LOG_DEBUG, "%s: Autodialing '%s'\n", __FUNCTION__,
+                 lac->entname[0] ? lac->entname : "(unnamed)");
 #endif
-	    lac->active = -1;
-	    switch_io = 1;	/* If we're a LAC, autodials will be ICRQ's */
-	    magic_lac_dial (lac);
-	}
-	lac = lac->next;
+            lac->active = -1;
+            switch_io = 1;      /* If we're a LAC, autodials will be ICRQ's */
+            magic_lac_dial (lac);
+        }
+        lac = lac->next;
     }
 }
 

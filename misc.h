@@ -29,8 +29,8 @@ struct buffer
 #else
     struct sockaddr_in peer;
 #endif
-    struct tunnel *tunnel;	/* Who owns this packet, if it's a control */
-    int retries;		/* Again, if a control packet, how many retries? */
+    struct tunnel *tunnel;      /* Who owns this packet, if it's a control */
+    int retries;                /* Again, if a control packet, how many retries? */
 };
 
 struct ppp_opts

@@ -30,7 +30,7 @@ void init_addr ()
 {
     int x;
     for (x = 0; x < ADDR_HASH_SIZE; x++)
-	uaddr[x] = NULL;
+        uaddr[x] = NULL;
 }
 
 static int ip_used (unsigned int addr)
@@ -39,9 +39,9 @@ static int ip_used (unsigned int addr)
     tmp = uaddr[addr % ADDR_HASH_SIZE];
     while (tmp)
     {
-	if (tmp->addr == addr)
-	    return -1;
-	tmp = tmp->next;
+        if (tmp->addr == addr)
+            return -1;
+        tmp = tmp->next;
     }
     return 0;
 }
@@ -51,7 +51,7 @@ void mk_challenge (char *c, int length)
     int x;
     int *s = (int *) c;
     for (x = 0; x < length / sizeof (int); x++)
-	s[x] = rand ();
+        s[x] = rand ();
 }
 
 void reserve_addr (unsigned int addr)
@@ -60,7 +60,7 @@ void reserve_addr (unsigned int addr)
     struct addr_ent *tmp, *tmp2;
     addr = ntohl (addr);
     if (ip_used (addr))
-	return;
+        return;
     tmp = uaddr[addr % ADDR_HASH_SIZE];
     tmp2 = (struct addr_ent *) malloc (sizeof (struct addr_ent));
     uaddr[addr % ADDR_HASH_SIZE] = tmp2;
@@ -75,25 +75,25 @@ void unreserve_addr (unsigned int addr)
     tmp = uaddr[addr % ADDR_HASH_SIZE];
     while (tmp)
     {
-	if (tmp->addr == addr)
-	{
-	    if (last)
-	    {
-		last->next = tmp->next;
-	    }
-	    else
-	    {
-		uaddr[addr % ADDR_HASH_SIZE] = tmp->next;
-	    }
-	    z = tmp;
-	    tmp = tmp->next;
-	    free (z);
-	}
-	else
-	{
-	    last = tmp;
-	    tmp = tmp->next;
-	}
+        if (tmp->addr == addr)
+        {
+            if (last)
+            {
+                last->next = tmp->next;
+            }
+            else
+            {
+                uaddr[addr % ADDR_HASH_SIZE] = tmp->next;
+            }
+            z = tmp;
+            tmp = tmp->next;
+            free (z);
+        }
+        else
+        {
+            last = tmp;
+            tmp = tmp->next;
+        }
     }
 }
 
@@ -104,28 +104,28 @@ unsigned int get_addr (struct iprange *ipr)
     struct iprange *ipr2;
     while (ipr)
     {
-	if (ipr->sense == SENSE_ALLOW)
-	    for (x = ntohl (ipr->start); x <= ntohl (ipr->end); x++)
-	    {
-		/* Found an IP in an ALLOW range, check to be sure it is
-		   consistant through the remaining regions */
-		if (!ip_used (x))
-		{
-		    status = SENSE_ALLOW;
-		    ipr2 = ipr->next;
-		    while (ipr2)
-		    {
-			if ((x >= ntohl (ipr2->start))
-			    && (x <= ntohl (ipr2->end)))
-			    status = ipr2->sense;
-			ipr2 = ipr2->next;
-		    }
-		    y = htonl (x);
-		    if (status == SENSE_ALLOW)
-			return y;
-		}
-	    };
-	ipr = ipr->next;
+        if (ipr->sense == SENSE_ALLOW)
+            for (x = ntohl (ipr->start); x <= ntohl (ipr->end); x++)
+            {
+                /* Found an IP in an ALLOW range, check to be sure it is
+                   consistant through the remaining regions */
+                if (!ip_used (x))
+                {
+                    status = SENSE_ALLOW;
+                    ipr2 = ipr->next;
+                    while (ipr2)
+                    {
+                        if ((x >= ntohl (ipr2->start))
+                            && (x <= ntohl (ipr2->end)))
+                            status = ipr2->sense;
+                        ipr2 = ipr2->next;
+                    }
+                    y = htonl (x);
+                    if (status == SENSE_ALLOW)
+                        return y;
+                }
+            };
+        ipr = ipr->next;
     }
     return 0;
 }
@@ -139,73 +139,73 @@ int get_secret (char *us, char *them, char *secret, int size)
     f = fopen (gconfig.authfile, "r");
     if (!f)
     {
-	log (LOG_WARN, "%s : Unable to open '%s' for authentication\n",
-	     __FUNCTION__, gconfig.authfile);
-	return 0;
+        log (LOG_WARN, "%s : Unable to open '%s' for authentication\n",
+             __FUNCTION__, gconfig.authfile);
+        return 0;
     }
     while (!feof (f))
     {
-	num++;
-	fgets (buf, sizeof (buf), f);
-	if (feof (f))
-	    break;
-	/* Strip comments */
-	for (t = buf; *t; t++)
-	    *t = ((*t == '#') || (*t == ';')) ? 0 : *t;
-	/* Strip trailing whitespace */
-	for (t = buf + strlen (buf) - 1; (t >= buf) && (*t < 33); t--)
-	    *t = 0;
-	if (!strlen (buf))
-	    continue;		/* Empty line */
-	u = buf;
-	while (*u && (*u < 33))
-	    u++;
-	/* us */
-	if (!*u)
-	{
-	    log (LOG_WARN,
-		 "%s: Invalid authentication info (no us), line %d\n",
-		 __FUNCTION__, num);
-	    continue;
-	}
-	t = u;
-	while (*t > 32)
-	    t++;
-	*(t++) = 0;
-	while (*t && (*t < 33))
-	    t++;
-	/* them */
-	if (!*t)
-	{
-	    log (LOG_WARN,
-		 "%s: Invalid authentication info (nothem), line %d\n",
-		 __FUNCTION__, num);
-	    continue;
-	}
-	s = t;
-	while (*s > 33)
-	    s++;
-	*(s++) = 0;
-	while (*s && (*s < 33))
-	    s++;
-	if (!*s)
-	{
-	    log (LOG_WARN,
-		 "%s: Invalid authentication info (no secret), line %d\n",
-		 __FUNCTION__, num);
-	    continue;
-	}
-	if ((!strcasecmp (u, us) || !strcasecmp (u, "*")) &&
-	    (!strcasecmp (t, them) || !strcasecmp (t, "*")))
-	{
+        num++;
+        fgets (buf, sizeof (buf), f);
+        if (feof (f))
+            break;
+        /* Strip comments */
+        for (t = buf; *t; t++)
+            *t = ((*t == '#') || (*t == ';')) ? 0 : *t;
+        /* Strip trailing whitespace */
+        for (t = buf + strlen (buf) - 1; (t >= buf) && (*t < 33); t--)
+            *t = 0;
+        if (!strlen (buf))
+            continue;           /* Empty line */
+        u = buf;
+        while (*u && (*u < 33))
+            u++;
+        /* us */
+        if (!*u)
+        {
+            log (LOG_WARN,
+                 "%s: Invalid authentication info (no us), line %d\n",
+                 __FUNCTION__, num);
+            continue;
+        }
+        t = u;
+        while (*t > 32)
+            t++;
+        *(t++) = 0;
+        while (*t && (*t < 33))
+            t++;
+        /* them */
+        if (!*t)
+        {
+            log (LOG_WARN,
+                 "%s: Invalid authentication info (nothem), line %d\n",
+                 __FUNCTION__, num);
+            continue;
+        }
+        s = t;
+        while (*s > 33)
+            s++;
+        *(s++) = 0;
+        while (*s && (*s < 33))
+            s++;
+        if (!*s)
+        {
+            log (LOG_WARN,
+                 "%s: Invalid authentication info (no secret), line %d\n",
+                 __FUNCTION__, num);
+            continue;
+        }
+        if ((!strcasecmp (u, us) || !strcasecmp (u, "*")) &&
+            (!strcasecmp (t, them) || !strcasecmp (t, "*")))
+        {
 #ifdef DEBUG_AUTH
-	    log (LOG_DEBUG,
-		 "%s: we are '%s', they are '%s', secret is '%s'\n",
-		 __FUNCTION__, u, t, s);
+            log (LOG_DEBUG,
+                 "%s: we are '%s', they are '%s', secret is '%s'\n",
+                 __FUNCTION__, u, t, s);
 #endif
-	    strncpy (secret, s, size);
-	    return -1;
-	}
+            strncpy (secret, s, size);
+            return -1;
+        }
     }
     return 0;
 }
@@ -216,41 +216,41 @@ int handle_challenge (struct tunnel *t, struct challenge *chal)
     char *them;
     if (!t->lns && !t->lac)
     {
-	log (LOG_DEBUG, "%s: No LNS or LAC to handle challenge!\n",
-	     __FUNCTION__);
-	return -1;
+        log (LOG_DEBUG, "%s: No LNS or LAC to handle challenge!\n",
+             __FUNCTION__);
+        return -1;
     }
 #ifdef DEBUG_AUTH
-    log (LOG_DEBUG, "%s: making response for tunnel%d\n", __FUNCTION__,
-	 t->ourtid);
+    log (LOG_DEBUG, "%s: making response for tunnel: %d\n", __FUNCTION__,
+         t->ourtid);
 #endif
     if (t->lns)
     {
-	if (t->lns->hostname[0])
-	    us = t->lns->hostname;
-	else
-	    us = hostname;
-	if (t->lns->peername[0])
-	    them = t->lns->peername;
-	else
-	    them = t->hostname;
+        if (t->lns->hostname[0])
+            us = t->lns->hostname;
+        else
+            us = hostname;
+        if (t->lns->peername[0])
+            them = t->lns->peername;
+        else
+            them = t->hostname;
     }
     else
     {
-	if (t->lac->hostname[0])
-	    us = t->lac->hostname;
-	else
-	    us = hostname;
-	if (t->lac->peername[0])
-	    them = t->lac->peername;
-	else
-	    them = t->hostname;
+        if (t->lac->hostname[0])
+            us = t->lac->hostname;
+        else
+            us = hostname;
+        if (t->lac->peername[0])
+            them = t->lac->peername;
+        else
+            them = t->hostname;
     }
     if (!get_secret (us, them, chal->secret, sizeof (chal->secret)))
     {
-	log (LOG_DEBUG, "%s: no secret found for us='%s' and them='%s'\n",
-	     __FUNCTION__, us, them);
-	return -1;
+        log (LOG_DEBUG, "%s: no secret found for us='%s' and them='%s'\n",
+             __FUNCTION__, us, them);
+        return -1;
     }
 
 #if DEBUG_AUTH
@@ -261,26 +261,26 @@ int handle_challenge (struct tunnel *t, struct challenge *chal)
     bufferDump (chal->secret, strlen (chal->secret));
 
     log (LOG_DEBUG, "%s: Here comes the challenge\n", __FUNCTION__);
-    bufferDump (chal->challenge, MD_SIG_SIZE);
+    bufferDump (chal->challenge, strlen (chal->challenge));
 #endif
 
     memset (chal->response, 0, MD_SIG_SIZE);
     MD5Init (&chal->md5);
     MD5Update (&chal->md5, &chal->ss, 1);
     MD5Update (&chal->md5, chal->secret, strlen (chal->secret));
-    MD5Update (&chal->md5, chal->challenge, MD_SIG_SIZE);
+    MD5Update (&chal->md5, chal->challenge, strlen(chal->challenge));
     MD5Final (chal->response, &chal->md5);
 #ifdef DEBUG_AUTH
     log (LOG_DEBUG, "response is %X%X%X%X to '%s' and %X%X%X%X, %d\n",
-	 *((int *) &chal->response[0]),
-	 *((int *) &chal->response[4]),
-	 *((int *) &chal->response[8]),
-	 *((int *) &chal->response[12]),
-	 chal->secret,
-	 *((int *) &chal->challenge[0]),
-	 *((int *) &chal->challenge[4]),
-	 *((int *) &chal->challenge[8]),
-	 *((int *) &chal->challenge[12]), chal->ss);
+         *((int *) &chal->response[0]),
+         *((int *) &chal->response[4]),
+         *((int *) &chal->response[8]),
+         *((int *) &chal->response[12]),
+         chal->secret,
+         *((int *) &chal->challenge[0]),
+         *((int *) &chal->challenge[4]),
+         *((int *) &chal->challenge[8]),
+         *((int *) &chal->challenge[12]), chal->ss);
 #endif
     chal->state = STATE_CHALLENGED;
     return 0;
@@ -302,40 +302,40 @@ struct lns *get_lns (struct tunnel *t)
     lns = lnslist;
     if (!lns)
     {
-	lns = deflns;
-	checkdefault = -1;
+        lns = deflns;
+        checkdefault = -1;
     }
     while (lns)
     {
-	ipr = lns->lacs;
-	while (ipr)
-	{
-	    if ((ntohl (t->peer.sin_addr.s_addr) >= ntohl (ipr->start)) &&
-		(ntohl (t->peer.sin_addr.s_addr) <= ntohl (ipr->end)))
-	    {
+        ipr = lns->lacs;
+        while (ipr)
+        {
+            if ((ntohl (t->peer.sin_addr.s_addr) >= ntohl (ipr->start)) &&
+                (ntohl (t->peer.sin_addr.s_addr) <= ntohl (ipr->end)))
+            {
 #ifdef DEBUG_AAA
-		log (LOG_DEBUG,
-		     "get_lns: Rule %s to %s, sense %s matched %s\n",
-		     IPADDY (ipr->start), IPADDY (ipr->end),
-		     (ipr->sense ? "allow" : "deny"), IPADDY (t->addr));
+                log (LOG_DEBUG,
+                     "get_lns: Rule %s to %s, sense %s matched %s\n",
+                     IPADDY (ipr->start), IPADDY (ipr->end),
+                     (ipr->sense ? "allow" : "deny"), IPADDY (t->addr));
 #endif
-		allow = ipr->sense;
-	    }
-	    ipr = ipr->next;
-	}
-	if (allow)
-	    return lns;
-	lns = lns->next;
-	if (!lns && !checkdefault)
-	{
-	    lns = deflns;
-	    checkdefault = -1;
-	}
+                allow = ipr->sense;
+            }
+            ipr = ipr->next;
+        }
+        if (allow)
+            return lns;
+        lns = lns->next;
+        if (!lns && !checkdefault)
+        {
+            lns = deflns;
+            checkdefault = -1;
+        }
     }
     if (gconfig.accesscontrol)
-	return NULL;
+        return NULL;
     else
-	return deflns;
+        return deflns;
 }
 
 #ifdef DEBUG_HIDDEN
@@ -359,10 +359,10 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
        this is just a normal AVP that is about to be returned from
        an avpsend routine */
     struct avp_hdr *new_hdr =
-	(struct avp_hdr *) (buf->start + buf->len - len);
+        (struct avp_hdr *) (buf->start + buf->len - len);
     struct avp_hdr *old_hdr =
-	(struct avp_hdr *) (buf->start + buf->len - len + 2);
-    _u16 length, flags, attr;	/* New length, old flags */
+        (struct avp_hdr *) (buf->start + buf->len - len + 2);
+    _u16 length, flags, attr;   /* New length, old flags */
     char *ptr, *end;
     int cnt;
     unsigned char digest[MD_SIG_SIZE];
@@ -370,8 +370,8 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
 
     /* FIXME: Should I pad more randomly? Right now I pad to nearest 16 bytes */
     length =
-	((len - sizeof (struct avp_hdr) + 1) / 16 + 1) * 16 +
-	sizeof (struct avp_hdr);
+        ((len - sizeof (struct avp_hdr) + 1) / 16 + 1) * 16 +
+        sizeof (struct avp_hdr);
     flags = htons (old_hdr->length) & 0xF000;
     new_hdr->length = htons (length | flags | HBIT);
     new_hdr->vendorid = old_hdr->vendorid;
@@ -387,7 +387,7 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
     MD5Init (&t->chal_them.md5);
     MD5Update (&t->chal_them.md5, (void *) &attr, 2);
     MD5Update (&t->chal_them.md5, t->chal_them.secret,
-	       strlen (t->chal_them.secret));
+               strlen (t->chal_them.secret));
     MD5Update (&t->chal_them.md5, t->chal_them.vector, VECTOR_SIZE);
     MD5Final (digest, &t->chal_them.md5);
 
@@ -398,28 +398,28 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
     while (ptr < end)
     {
 #if DEBUG_HIDDEN
-	log (LOG_DEBUG, "%s: The digest to be XOR'ed\n", __FUNCTION__);
-	bufferDump (digest, MD_SIG_SIZE);
-	log (LOG_DEBUG, "%s: The plaintext to be XOR'ed\n", __FUNCTION__);
-	bufferDump (ptr, MD_SIG_SIZE);
+        log (LOG_DEBUG, "%s: The digest to be XOR'ed\n", __FUNCTION__);
+        bufferDump (digest, MD_SIG_SIZE);
+        log (LOG_DEBUG, "%s: The plaintext to be XOR'ed\n", __FUNCTION__);
+        bufferDump (ptr, MD_SIG_SIZE);
 #endif
-	for (cnt = 0; cnt < MD_SIG_SIZE; cnt++, ptr++)
-	{
-	    *ptr = *ptr ^ digest[cnt];
-	}
+        for (cnt = 0; cnt < MD_SIG_SIZE; cnt++, ptr++)
+        {
+            *ptr = *ptr ^ digest[cnt];
+        }
 #if DEBUG_HIDDEN
-	log (LOG_DEBUG, "%s: The result of XOR\n", __FUNCTION__);
-	bufferDump (previous_segment, MD_SIG_SIZE);
+        log (LOG_DEBUG, "%s: The result of XOR\n", __FUNCTION__);
+        bufferDump (previous_segment, MD_SIG_SIZE);
 #endif
-	if (ptr < end)
-	{
-	    MD5Init (&t->chal_them.md5);
-	    MD5Update (&t->chal_them.md5, t->chal_them.secret,
-		       strlen (t->chal_them.secret));
-	    MD5Update (&t->chal_them.md5, previous_segment, MD_SIG_SIZE);
-	    MD5Final (digest, &t->chal_them.md5);
-	}
-	previous_segment = ptr;
+        if (ptr < end)
+        {
+            MD5Init (&t->chal_them.md5);
+            MD5Update (&t->chal_them.md5, t->chal_them.secret,
+                       strlen (t->chal_them.secret));
+            MD5Update (&t->chal_them.md5, previous_segment, MD_SIG_SIZE);
+            MD5Final (digest, &t->chal_them.md5);
+        }
+        previous_segment = ptr;
     }
 }
 
@@ -435,16 +435,16 @@ int decrypt_avp (char *buf, struct tunnel *t)
     _u16 attr;
     struct avp_hdr *old_hdr = (struct avp_hdr *) buf;
     struct avp_hdr *new_hdr = (struct avp_hdr *) (buf + 2);
-    int saved_segment_len;	/* maybe less 16; may be used if the cipher is longer than 16 octets */
+    int saved_segment_len;      /* maybe less 16; may be used if the cipher is longer than 16 octets */
     char saved_segment[MD_SIG_SIZE];
     ptr = ((char *) old_hdr) + sizeof (struct avp_hdr);
     olen = old_hdr->length & 0x0FFF;
     end = buf + olen;
     if (!t->chal_us.vector)
     {
-	log (LOG_DEBUG,
-	     "decrypt_avp: Hidden bit set, but no random vector specified!\n");
-	return -EINVAL;
+        log (LOG_DEBUG,
+             "decrypt_avp: Hidden bit set, but no random vector specified!\n");
+        return -EINVAL;
     }
     /* First, let's decrypt all the data.  We're not guaranteed
        that it will be padded to a 16 byte boundary, so we
@@ -453,7 +453,7 @@ int decrypt_avp (char *buf, struct tunnel *t)
     MD5Init (&t->chal_us.md5);
     MD5Update (&t->chal_us.md5, (void *) &attr, 2);
     MD5Update (&t->chal_us.md5, t->chal_us.secret,
-	       strlen (t->chal_us.secret));
+               strlen (t->chal_us.secret));
     MD5Update (&t->chal_us.md5, t->chal_us.vector, t->chal_us.vector_len);
     MD5Final (digest, &t->chal_us.md5);
 #ifdef DEBUG_HIDDEN
@@ -464,26 +464,26 @@ int decrypt_avp (char *buf, struct tunnel *t)
 #endif
     while (ptr < end)
     {
-	if (cnt >= MD_SIG_SIZE)
-	{
-	    MD5Init (&t->chal_us.md5);
-	    MD5Update (&t->chal_us.md5, t->chal_us.secret,
-		       strlen (t->chal_us.secret));
-	    MD5Update (&t->chal_us.md5, saved_segment, MD_SIG_SIZE);
-	    MD5Final (digest, &t->chal_us.md5);
-	    cnt = 0;
-	}
-	/* at the beginning of each segment, we save the current segment (16 octets or less) of cipher 
-	 * so that the next round of MD5 (if there is a next round) hash could use it 
-	 */
-	if (cnt == 0)
-	{
-	    saved_segment_len =
-		(end - ptr < MD_SIG_SIZE) ? (end - ptr) : MD_SIG_SIZE;
-	    memcpy (saved_segment, ptr, saved_segment_len);
-	}
-	*ptr = *ptr ^ digest[cnt++];
-	ptr++;
+        if (cnt >= MD_SIG_SIZE)
+        {
+            MD5Init (&t->chal_us.md5);
+            MD5Update (&t->chal_us.md5, t->chal_us.secret,
+                       strlen (t->chal_us.secret));
+            MD5Update (&t->chal_us.md5, saved_segment, MD_SIG_SIZE);
+            MD5Final (digest, &t->chal_us.md5);
+            cnt = 0;
+        }
+        /* at the beginning of each segment, we save the current segment (16 octets or less) of cipher 
+         * so that the next round of MD5 (if there is a next round) hash could use it 
+         */
+        if (cnt == 0)
+        {
+            saved_segment_len =
+                (end - ptr < MD_SIG_SIZE) ? (end - ptr) : MD_SIG_SIZE;
+            memcpy (saved_segment, ptr, saved_segment_len);
+        }
+        *ptr = *ptr ^ digest[cnt++];
+        ptr++;
     }
     /* Hopefully we're all nice and decrypted now.  Let's rewrite the header. 
        First save the old flags, and get the new stuff */
@@ -491,10 +491,10 @@ int decrypt_avp (char *buf, struct tunnel *t)
     len = ntohs (new_hdr->attr) + sizeof (struct avp_hdr);
     if (len > olen - 2)
     {
-	log (LOG_DEBUG,
-	     "decrypt_avp: Decrypted length is too long (%d > %d)\n", len,
-	     olen - 2);
-	return -EINVAL;
+        log (LOG_DEBUG,
+             "decrypt_avp: Decrypted length is too long (%d > %d)\n", len,
+             olen - 2);
+        return -EINVAL;
     }
     new_hdr->attr = old_hdr->attr;
     new_hdr->vendorid = old_hdr->vendorid;

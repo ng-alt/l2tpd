@@ -23,47 +23,47 @@ struct avp_hdr
 
 struct avp
 {
-    int num;			/* Number of AVP */
-    int m;			/* Set M? */
+    int num;                    /* Number of AVP */
+    int m;                      /* Set M? */
     int (*handler) (struct tunnel *, struct call *, void *, int);
     /* This should handle the AVP
        taking a tunnel, call, the data,
        and the length of the AVP as
        parameters.  Should return 0
        upon success */
-    char *description;		/* A name, for debugging */
+    char *description;          /* A name, for debugging */
 };
 
 extern int handle_avps (struct buffer *buf, struct tunnel *t, struct call *c);
 
 extern char *msgtypes[];
 
-#define VENDOR_ID 0		/* We don't have any extensions
-				   so we shoouldn't have to
-				   worry about this */
+#define VENDOR_ID 0             /* We don't have any extensions
+                                   so we shoouldn't have to
+                                   worry about this */
 
 /*
  * Macros to extract information from length field of AVP
  */
 
-#define AMBIT(len) (len & 0x8000)	/* Mandatory bit: If this is
-					   set on an unknown AVP, 
-					   we MUST terminate */
+#define AMBIT(len) (len & 0x8000)       /* Mandatory bit: If this is
+                                           set on an unknown AVP, 
+                                           we MUST terminate */
 
-#define AHBIT(len) (len & 0x4000)	/* Hidden bit: Specifies
-					   information hiding */
+#define AHBIT(len) (len & 0x4000)       /* Hidden bit: Specifies
+                                           information hiding */
 
-#define AZBITS(len) (len & 0x3C00)	/* Reserved bits:  We must
-					   drop anything with any
-					   of these set.  */
+#define AZBITS(len) (len & 0x3C00)      /* Reserved bits:  We must
+                                           drop anything with any
+                                           of these set.  */
 
-#define ALENGTH(len) (len & 0x03FF)	/* Length:  Lenth of AVP */
+#define ALENGTH(len) (len & 0x03FF)     /* Length:  Lenth of AVP */
 
-#define MAXTIME 300		/* time to wait before checking
-				   Ns and Nr, in ms */
+#define MAXTIME 300             /* time to wait before checking
+                                   Ns and Nr, in ms */
 
-#define MBIT 0x8000		/* for setting */
-#define HBIT 0x4000		/* Set on hidden avp's */
+#define MBIT 0x8000             /* for setting */
+#define HBIT 0x4000             /* Set on hidden avp's */
 
 #define ASYNC_FRAMING 2
 #define SYNC_FRAMING 1
@@ -92,7 +92,7 @@ extern int hostname_avp (struct tunnel *, struct call *, void *, int);
 extern int vendor_avp (struct tunnel *, struct call *, void *, int);
 extern int assigned_tunnel_avp (struct tunnel *, struct call *, void *, int);
 extern int receive_window_size_avp (struct tunnel *, struct call *, void *,
-				    int);
+                                    int);
 extern int result_code_avp (struct tunnel *, struct call *, void *, int);
 extern int assigned_call_avp (struct tunnel *, struct call *, void *, int);
 extern int call_serno_avp (struct tunnel *, struct call *, void *, int);
@@ -136,6 +136,6 @@ extern int add_ppd_avp (struct buffer *, _u16);
 extern int add_seqreqd_avp (struct buffer *);
 extern int add_chalresp_avp (struct buffer *, char *, int);
 extern int add_randvect_avp (struct buffer *, char *, int);
-extern int add_minbps_avp (struct buffer *buf, int speed);	/* jz: needed for outgoing call */
-extern int add_maxbps_avp (struct buffer *buf, int speed);	/* jz: needed for outgoing call */
-extern int add_number_avp (struct buffer *buf, char *no);	/* jz: needed for outgoing call */
+extern int add_minbps_avp (struct buffer *buf, int speed);      /* jz: needed for outgoing call */
+extern int add_maxbps_avp (struct buffer *buf, int speed);      /* jz: needed for outgoing call */
+extern int add_number_avp (struct buffer *buf, char *no);       /* jz: needed for outgoing call */

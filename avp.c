@@ -109,14 +109,14 @@ char *cdn_result_codes[] = {
 };
 
 void wrong_length (struct call *c, char *field, int expected, int found,
-		   int min)
+                   int min)
 {
     if (min)
-	snprintf (c->errormsg, sizeof (c->errormsg),
-		  "%s: expected at least %d, got %d", field, expected, found);
+        snprintf (c->errormsg, sizeof (c->errormsg),
+                  "%s: expected at least %d, got %d", field, expected, found);
     else
-	snprintf (c->errormsg, sizeof (c->errormsg),
-		  "%s: expected %d, got %d", field, expected, found);
+        snprintf (c->errormsg, sizeof (c->errormsg),
+                  "%s: expected %d, got %d", field, expected, found);
 
     c->error = ERROR_LENGTH;
     c->result = RESULT_ERROR;
@@ -128,7 +128,7 @@ void wrong_length (struct call *c, char *field, int expected, int found,
  */
 
 int message_type_avp (struct tunnel *t, struct call *c, void *data,
-		      int datalen)
+                      int datalen)
 {
     /*
      * This will be with every control message.  It is critical that this
@@ -140,227 +140,227 @@ int message_type_avp (struct tunnel *t, struct call *c, void *data,
     c->msgtype = ntohs (raw[3]);
     if (datalen != 8)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: wrong size (%d != 8)\n", __FUNCTION__,
-		 datalen);
-	wrong_length (c, "Message Type", 8, datalen, 0);
-	return -EINVAL;
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: wrong size (%d != 8)\n", __FUNCTION__,
+                 datalen);
+        wrong_length (c, "Message Type", 8, datalen, 0);
+        return -EINVAL;
     }
     if ((c->msgtype > MAX_MSG) || (!msgtypes[c->msgtype]))
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: unknown message type %d\n", __FUNCTION__,
-		 c->msgtype);
-	return -EINVAL;
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: unknown message type %d\n", __FUNCTION__,
+                 c->msgtype);
+        return -EINVAL;
     }
     if (debug_avp)
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: message type %d (%s)\n", __FUNCTION__,
-		 c->msgtype, msgtypes[c->msgtype]);
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: message type %d (%s)\n", __FUNCTION__,
+                 c->msgtype, msgtypes[c->msgtype]);
 #ifdef SANITY
     if (t->sanity)
     {
-	/*
-	 * Look ou our state for each message and make sure everything
-	 * make sense...
-	 */
-	if ((c != t->self) && (c->msgtype < Hello))
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: attempting to negotiate tunnel inside a call!\n",
-		     __FUNCTION__);
-	    return -EINVAL;
-	}
+        /*
+         * Look ou our state for each message and make sure everything
+         * make sense...
+         */
+        if ((c != t->self) && (c->msgtype < Hello))
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: attempting to negotiate tunnel inside a call!\n",
+                     __FUNCTION__);
+            return -EINVAL;
+        }
 
-	switch (c->msgtype)
-	{
-	case SCCRQ:
-	    if ((t->state != 0) && (t->state != SCCRQ))
-	    {
-		/*
-		 * When we handle tie breaker AVP's, then we'll check
-		 * to see if we've both requested tunnels
-		 */
+        switch (c->msgtype)
+        {
+        case SCCRQ:
+            if ((t->state != 0) && (t->state != SCCRQ))
+            {
+                /*
+                 * When we handle tie breaker AVP's, then we'll check
+                 * to see if we've both requested tunnels
+                 */
 
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate SCCRQ with state != 0\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case SCCRP:
-	    if (t->state != SCCRQ)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate SCCRP with state != SCCRQ!\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case SCCCN:
-	    if (t->state != SCCRP)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate SCCCN with state != SCCRP!\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case ICRQ:
-	    if (t->state != SCCCN)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate ICRQ when state != SCCCN\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    if (c != t->self)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate ICRQ on a call!\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case ICRP:
-	    if (t->state != SCCCN)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate ICRP on tunnel!=SCCCN\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    if (c->state != ICRQ)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate ICRP when state != ICRQ\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case ICCN:
-	    if (c->state != ICRP)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate ICCN when state != ICRP\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case SLI:
-	    if (c->state != ICCN)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate SLI when state != ICCN\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case OCRP:		/* jz: case for ORCP */
-	    if (t->state != SCCCN)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate OCRP on tunnel!=SCCCN\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    if (c->state != OCRQ)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate OCRP when state != OCRQ\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case OCCN:		/* jz: case for OCCN */
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate SCCRQ with state != 0\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case SCCRP:
+            if (t->state != SCCRQ)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate SCCRP with state != SCCRQ!\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case SCCCN:
+            if (t->state != SCCRP)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate SCCCN with state != SCCRP!\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case ICRQ:
+            if (t->state != SCCCN)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate ICRQ when state != SCCCN\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            if (c != t->self)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate ICRQ on a call!\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case ICRP:
+            if (t->state != SCCCN)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate ICRP on tunnel!=SCCCN\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            if (c->state != ICRQ)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate ICRP when state != ICRQ\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case ICCN:
+            if (c->state != ICRP)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate ICCN when state != ICRP\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case SLI:
+            if (c->state != ICCN)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate SLI when state != ICCN\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case OCRP:             /* jz: case for ORCP */
+            if (t->state != SCCCN)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate OCRP on tunnel!=SCCCN\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            if (c->state != OCRQ)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate OCRP when state != OCRQ\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case OCCN:             /* jz: case for OCCN */
 
-	    if (c->state != OCRQ)
-	    {
-		if (DEBUG)
-		    log (LOG_DEBUG,
-			 "%s: attempting to negotiate OCCN when state != OCRQ\n",
-			 __FUNCTION__);
-		return -EINVAL;
-	    }
-	    break;
-	case StopCCN:
-	case CDN:
-	case Hello:
-	    break;
-	default:
-	    log (LOG_WARN, "%s: i don't know how to handle %s messages\n",
-		 __FUNCTION__, msgtypes[c->msgtype]);
-	    return -EINVAL;
-	}
+            if (c->state != OCRQ)
+            {
+                if (DEBUG)
+                    log (LOG_DEBUG,
+                         "%s: attempting to negotiate OCCN when state != OCRQ\n",
+                         __FUNCTION__);
+                return -EINVAL;
+            }
+            break;
+        case StopCCN:
+        case CDN:
+        case Hello:
+            break;
+        default:
+            log (LOG_WARN, "%s: i don't know how to handle %s messages\n",
+                 __FUNCTION__, msgtypes[c->msgtype]);
+            return -EINVAL;
+        }
     }
 #endif
     if (c->msgtype == ICRQ)
     {
-	struct call *tmp;
-	if (debug_avp)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG, "%s: new incoming call\n", __FUNCTION__);
-	}
-	tmp = new_call (t);
-	if (!tmp)
-	{
-	    log (LOG_WARN, "%s: unable to create new call\n", __FUNCTION__);
-	    return -EINVAL;
-	}
-	tmp->next = t->call_head;
-	t->call_head = tmp;
-	t->count++;
-	/*
-	   * Is this still safe to assume that the head will always
-	   * be the most recent call being negotiated?
-	   * Probably...  FIXME anyway...
-	 */
+        struct call *tmp;
+        if (debug_avp)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG, "%s: new incoming call\n", __FUNCTION__);
+        }
+        tmp = new_call (t);
+        if (!tmp)
+        {
+            log (LOG_WARN, "%s: unable to create new call\n", __FUNCTION__);
+            return -EINVAL;
+        }
+        tmp->next = t->call_head;
+        t->call_head = tmp;
+        t->count++;
+        /*
+           * Is this still safe to assume that the head will always
+           * be the most recent call being negotiated?
+           * Probably...  FIXME anyway...
+         */
 
     }
     return 0;
 }
 
 int rand_vector_avp (struct tunnel *t, struct call *c, void *data,
-		     int datalen)
+                     int datalen)
 {
     int size;
     _u16 *raw = (_u16 *) data;
     size = (raw[0] & 0x0FFF) - 6;
     if (t->sanity)
     {
-	if (size < 0)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG, "%s: Random vector too small (%d < 0)\n",
-		     __FUNCTION__, size);
-	    wrong_length (c, "Random Vector", 6, datalen, 1);
-	    return -EINVAL;
-	}
-	if (size > MAX_VECTOR_SIZE)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG, "%s: Random vector too large (%d > %d)\n",
-		     __FUNCTION__, datalen, MAX_VECTOR_SIZE);
-	    wrong_length (c, "Random Vector", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        if (size < 0)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG, "%s: Random vector too small (%d < 0)\n",
+                     __FUNCTION__, size);
+            wrong_length (c, "Random Vector", 6, datalen, 1);
+            return -EINVAL;
+        }
+        if (size > MAX_VECTOR_SIZE)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG, "%s: Random vector too large (%d > %d)\n",
+                     __FUNCTION__, datalen, MAX_VECTOR_SIZE);
+            wrong_length (c, "Random Vector", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
     if (debug_avp)
-	log (LOG_DEBUG, "%s: Random Vector of %d octets\n", __FUNCTION__,
-	     size);
+        log (LOG_DEBUG, "%s: Random Vector of %d octets\n", __FUNCTION__,
+             size);
     t->chal_us.vector = (unsigned char *) &raw[3];
     t->chal_us.vector_len = size;
     return 0;
@@ -381,8 +381,8 @@ int ignore_avp (struct tunnel *t, struct call *c, void *data, int datalen)
      */
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s : Ignoring AVP\n", __FUNCTION__);
+        if (DEBUG)
+            log (LOG_DEBUG, "%s : Ignoring AVP\n", __FUNCTION__);
     }
     return 0;
 }
@@ -392,39 +392,39 @@ int seq_reqd_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	if (datalen != 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Sequencing Required", 6, datalen, 1);
-	    return -EINVAL;
-	}
-	switch (c->msgtype)
-	{
-	case ICCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: sequencing required not appropriate for %s!\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return -EINVAL;
-	}
+        if (datalen != 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Sequencing Required", 6, datalen, 1);
+            return -EINVAL;
+        }
+        switch (c->msgtype)
+        {
+        case ICCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: sequencing required not appropriate for %s!\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return -EINVAL;
+        }
     }
 #endif
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: peer requires sequencing.\n", __FUNCTION__);
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: peer requires sequencing.\n", __FUNCTION__);
     }
     c->seq_reqd = -1;
     return 0;
 }
 
 int result_code_avp (struct tunnel *t, struct call *c, void *data,
-		     int datalen)
+                     int datalen)
 {
     /*
      * Find out what version of l2tp the other side is using.
@@ -437,47 +437,47 @@ int result_code_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	if (datalen < 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d < 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Result Code", 10, datalen, 1);
-	    return -EINVAL;
-	}
-	switch (c->msgtype)
-	{
-	case CDN:
-	case StopCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: result code not appropriate for %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
+        if (datalen < 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d < 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Result Code", 10, datalen, 1);
+            return -EINVAL;
+        }
+        switch (c->msgtype)
+        {
+        case CDN:
+        case StopCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: result code not appropriate for %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
     }
 #endif
     result = ntohs (raw[3]);
     error = ntohs (raw[4]);
     if ((c->msgtype == StopCCN) && ((result > 7) || (result < 1)))
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: result code out of range (%d %d %d).  Ignoring.\n",
-		 __FUNCTION__, result, error, datalen);
-	return 0;
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: result code out of range (%d %d %d).  Ignoring.\n",
+                 __FUNCTION__, result, error, datalen);
+        return 0;
     }
 
     if ((c->msgtype == CDN) && ((result > 11) || (result < 1)))
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: result code out of range (%d %d %d).  Ignoring.\n",
-		 __FUNCTION__, result, error, datalen);
-	return 0;
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: result code out of range (%d %d %d).  Ignoring.\n",
+                 __FUNCTION__, result, error, datalen);
+        return 0;
     }
 
     c->error = error;
@@ -485,26 +485,26 @@ int result_code_avp (struct tunnel *t, struct call *c, void *data,
     safe_copy (c->errormsg, (char *) &raw[5], datalen - 10);
     if (debug_avp)
     {
-	if (DEBUG && (c->msgtype == StopCCN))
-	{
-	    log (LOG_DEBUG,
-		 "%s: peer closing for reason %d (%s), error = %d (%s)\n",
-		 __FUNCTION__, result, stopccn_result_codes[result], error,
-		 c->errormsg);
-	}
-	else
-	{
-	    log (LOG_DEBUG,
-		 "%s: peer closing for reason %d (%s), error = %d (%s)\n",
-		 __FUNCTION__, result, cdn_result_codes[result], error,
-		 c->errormsg);
-	}
+        if (DEBUG && (c->msgtype == StopCCN))
+        {
+            log (LOG_DEBUG,
+                 "%s: peer closing for reason %d (%s), error = %d (%s)\n",
+                 __FUNCTION__, result, stopccn_result_codes[result], error,
+                 c->errormsg);
+        }
+        else
+        {
+            log (LOG_DEBUG,
+                 "%s: peer closing for reason %d (%s), error = %d (%s)\n",
+                 __FUNCTION__, result, cdn_result_codes[result], error,
+                 c->errormsg);
+        }
     }
     return 0;
 }
 
 int protocol_version_avp (struct tunnel *t, struct call *c, void *data,
-			  int datalen)
+                          int datalen)
 {
     /*
      * Find out what version of l2tp the other side is using.
@@ -516,42 +516,42 @@ int protocol_version_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Protocol Version", 8, datalen, 1);
-	    return -EINVAL;
-	}
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: protocol version not appropriate for %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Protocol Version", 8, datalen, 1);
+            return -EINVAL;
+        }
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: protocol version not appropriate for %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
     }
 #endif
     ver = ntohs (raw[3]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer is using version %d, revision %d.\n", __FUNCTION__,
-		 (ver >> 8), ver & 0xFF);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer is using version %d, revision %d.\n", __FUNCTION__,
+                 (ver >> 8), ver & 0xFF);
     }
     return 0;
 }
 
 int framing_caps_avp (struct tunnel *t, struct call *c, void *data,
-		      int datalen)
+                      int datalen)
 {
     /*
      * Retrieve the framing capabilities
@@ -564,42 +564,42 @@ int framing_caps_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: framing capabilities not appropriate for %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Framming Capabilities", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: framing capabilities not appropriate for %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Framming Capabilities", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     caps = ntohs (raw[4]);
     if (debug_avp)
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: supported peer frames:%s%s\n", __FUNCTION__,
-		 caps & ASYNC_FRAMING ? " async" : "",
-		 caps & SYNC_FRAMING ? " sync" : "");
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: supported peer frames:%s%s\n", __FUNCTION__,
+                 caps & ASYNC_FRAMING ? " async" : "",
+                 caps & SYNC_FRAMING ? " sync" : "");
     t->fc = caps & (ASYNC_FRAMING | SYNC_FRAMING);
     return 0;
 }
 
 int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,
-		     int datalen)
+                     int datalen)
 {
     /*
      * What kind of bearer channels does our peer support?
@@ -610,37 +610,41 @@ int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: bearer capabilities not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Bearer Capabilities", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: bearer capabilities not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Bearer Capabilities", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     caps = ntohs (raw[4]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: supported peer bearers:%s%s\n",
-		 caps & ANALOG_BEARER ? " analog" : "",
-		 caps & DIGITAL_BEARER ? " digital" : "");
+        if (DEBUG)
+        {
+            log (LOG_DEBUG,
+                 "%s: supported peer bearers:%s%s\n",
+                 __FUNCTION__,
+                 caps & ANALOG_BEARER ? " analog" : "",
+                 caps & DIGITAL_BEARER ? " digital" : "");
+        }
+
     }
     t->bc = caps & (ANALOG_BEARER | DIGITAL_BEARER);
     return 0;
@@ -650,7 +654,7 @@ int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,
 /* FIXME: I need to handle tie breakers eventually */
 
 int firmware_rev_avp (struct tunnel *t, struct call *c, void *data,
-		      int datalen)
+                      int datalen)
 {
     /*
      * Report and record remote firmware version
@@ -661,43 +665,43 @@ int firmware_rev_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: firmware revision not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Firmware Revision", 8, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: firmware revision not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Firmware Revision", 8, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     ver = ntohs (raw[3]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports firmware version %d (0x%.4x)\n",
-		 __FUNCTION__, ver, ver);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports firmware version %d (0x%.4x)\n",
+                 __FUNCTION__, ver, ver);
     }
     t->firmware = ver;
     return 0;
 }
 
 int bearer_type_avp (struct tunnel *t, struct call *c, void *data,
-		     int datalen)
+                     int datalen)
 {
     /*
      * What kind of bearer channel is the call on?
@@ -708,36 +712,36 @@ int bearer_type_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICRQ:
-	case OCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: bearer type not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Bearer Type", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICRQ:
+        case OCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: bearer type not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Bearer Type", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     b = ntohs (raw[4]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer bears:%s\n", __FUNCTION__,
-		 b & ANALOG_BEARER ? " analog" : "digital");
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer bears:%s\n", __FUNCTION__,
+                 b & ANALOG_BEARER ? " analog" : "digital");
     }
     t->call_head->bearer = b;
     return 0;
@@ -754,37 +758,37 @@ int frame_type_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICCN:
-	case OCRQ:
-	case OCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: frame type not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Frame Type", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICCN:
+        case OCRQ:
+        case OCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: frame type not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is incorrect size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Frame Type", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     b = ntohs (raw[4]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer uses:%s frames\n", __FUNCTION__,
-		 b & ASYNC_FRAMING ? " async" : "sync");
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer uses:%s frames\n", __FUNCTION__,
+                 b & ASYNC_FRAMING ? " async" : "sync");
     }
     c->frame = b;
     return 0;
@@ -801,50 +805,50 @@ int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: hostname not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Hostname", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: hostname not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Hostname", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     if (size > MAXSTRLEN - 1)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: truncating reported hostname (size is %d)\n",
-		 __FUNCTION__, size);
-	size = MAXSTRLEN - 1;
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: truncating reported hostname (size is %d)\n",
+                 __FUNCTION__, size);
+        size = MAXSTRLEN - 1;
     }
     safe_copy (t->hostname, (char *) &raw[3], size);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports hostname '%s'\n", __FUNCTION__,
-		 t->hostname);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports hostname '%s'\n", __FUNCTION__,
+                 t->hostname);
     }
     return 0;
 }
 
 int dialing_number_avp (struct tunnel *t, struct call *c, void *data,
-			int datalen)
+                        int datalen)
 {
     /*
      * What is the peer's name?
@@ -855,50 +859,50 @@ int dialing_number_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: dialing number not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Dialing Number", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: dialing number not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Dialing Number", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     if (size > MAXSTRLEN - 1)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: truncating reported dialing number (size is %d)\n",
-		 __FUNCTION__, size);
-	size = MAXSTRLEN - 1;
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: truncating reported dialing number (size is %d)\n",
+                 __FUNCTION__, size);
+        size = MAXSTRLEN - 1;
     }
     safe_copy (t->call_head->dialing, (char *) &raw[3], size);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports dialing number '%s'\n", __FUNCTION__,
-		 t->call_head->dialing);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports dialing number '%s'\n", __FUNCTION__,
+                 t->call_head->dialing);
     }
     return 0;
 }
 
 int dialed_number_avp (struct tunnel *t, struct call *c, void *data,
-		       int datalen)
+                       int datalen)
 {
     /*
      * What is the peer's name?
@@ -909,51 +913,51 @@ int dialed_number_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case OCRQ:
-	case ICRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: dialed number not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Dialed Number", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case OCRQ:
+        case ICRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: dialed number not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Dialed Number", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     if (size > MAXSTRLEN - 1)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: truncating reported dialed number (size is %d)\n",
-		 __FUNCTION__, size);
-	size = MAXSTRLEN - 1;
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: truncating reported dialed number (size is %d)\n",
+                 __FUNCTION__, size);
+        size = MAXSTRLEN - 1;
     }
     safe_copy (t->call_head->dialed, (char *) &raw[3], size);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports dialed number '%s'\n", __FUNCTION__,
-		 t->call_head->dialed);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports dialed number '%s'\n", __FUNCTION__,
+                 t->call_head->dialed);
     }
     return 0;
 }
 
 int sub_address_avp (struct tunnel *t, struct call *c, void *data,
-		     int datalen)
+                     int datalen)
 {
     /*
      * What is the peer's name?
@@ -964,45 +968,45 @@ int sub_address_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case OCRP:
-	case ICRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: sub_address not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Sub-address", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case OCRP:
+        case ICRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: sub_address not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Sub-address", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     if (size > MAXSTRLEN - 1)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: truncating reported sub address (size is %d)\n",
-		 __FUNCTION__, size);
-	size = MAXSTRLEN - 1;
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: truncating reported sub address (size is %d)\n",
+                 __FUNCTION__, size);
+        size = MAXSTRLEN - 1;
     }
     safe_copy (t->call_head->subaddy, (char *) &raw[3], size);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports subaddress '%s'\n", __FUNCTION__,
-		 t->call_head->subaddy);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports subaddress '%s'\n", __FUNCTION__,
+                 t->call_head->subaddy);
     }
     return 0;
 }
@@ -1018,43 +1022,43 @@ int vendor_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: vendor not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Vendor", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: vendor not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Vendor", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     if (size > MAXSTRLEN - 1)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG, "%s: truncating reported vendor (size is %d)\n",
-		 __FUNCTION__, size);
-	size = MAXSTRLEN - 1;
+        if (DEBUG)
+            log (LOG_DEBUG, "%s: truncating reported vendor (size is %d)\n",
+                 __FUNCTION__, size);
+        size = MAXSTRLEN - 1;
     }
     safe_copy (t->vendor, (char *) &raw[3], size);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer reports vendor '%s'\n", __FUNCTION__, t->vendor);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer reports vendor '%s'\n", __FUNCTION__, t->vendor);
     }
     return 0;
 }
@@ -1069,42 +1073,45 @@ int challenge_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: challenge not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "challenge", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: challenge not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "challenge", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
-    size = raw[0] & 0x0FFF;
+    /* size = raw[0] & 0x0FFF; */
+    /* length field of AVP's is only 10 bits long, not 12 */
+    size = raw[0] & 0x03FF;
     size -= sizeof (struct avp_hdr);
-    if (size != MD_SIG_SIZE)
+    /* if (size != MD_SIG_SIZE)
     {
-	log (LOG_DEBUG, "%s: Challenge is not the right length (%d != %d)\n",
-	     __FUNCTION__, size, MD_SIG_SIZE);
-	return -EINVAL;
-    }
-    bcopy (&raw[3], t->chal_us.challenge, size);
+        log (LOG_DEBUG, "%s: Challenge is not the right length (%d != %d)\n",
+             __FUNCTION__, size, MD_SIG_SIZE);
+        return -EINVAL;
+    } */
+    t->chal_us.challenge = malloc(size+1);
+    bcopy (&raw[3], (t->chal_us.challenge), size);
     t->chal_us.state = STATE_CHALLENGED;
     if (debug_avp)
     {
-	log (LOG_DEBUG, "%s: challenge avp found\n", __FUNCTION__);
+        log (LOG_DEBUG, "%s: challenge avp found\n", __FUNCTION__);
     }
     return 0;
 }
@@ -1119,48 +1126,48 @@ int chalresp_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: challenge response not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen < 6)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "challenge", 6, datalen, 1);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: challenge response not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen < 6)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is too small.  %d < 6\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "challenge", 6, datalen, 1);
+            return -EINVAL;
+        }
     }
 #endif
     size = raw[0] & 0x0FFF;
     size -= sizeof (struct avp_hdr);
     if (size != MD_SIG_SIZE)
     {
-	log (LOG_DEBUG, "%s: Challenge is not the right length (%d != %d)\n",
-	     __FUNCTION__, size, MD_SIG_SIZE);
-	return -EINVAL;
+        log (LOG_DEBUG, "%s: Challenge is not the right length (%d != %d)\n",
+             __FUNCTION__, size, MD_SIG_SIZE);
+        return -EINVAL;
     }
 
     bcopy (&raw[3], t->chal_them.reply, MD_SIG_SIZE);
     if (debug_avp)
     {
-	log (LOG_DEBUG, "%s: Challenge reply found\n", __FUNCTION__);
+        log (LOG_DEBUG, "%s: Challenge reply found\n", __FUNCTION__);
     }
     return 0;
 }
 
 int assigned_tunnel_avp (struct tunnel *t, struct call *c, void *data,
-			 int datalen)
+                         int datalen)
 {
     /*
      * What is their TID that we must use from now on?
@@ -1170,50 +1177,50 @@ int assigned_tunnel_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	case StopCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: tunnel ID not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Assigned Tunnel ID", 8, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+        case StopCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: tunnel ID not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Assigned Tunnel ID", 8, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     if (c->msgtype == StopCCN)
     {
-	t->qtid = ntohs (raw[3]);
+        t->qtid = ntohs (raw[3]);
     }
     else
     {
-	t->tid = ntohs (raw[3]);
+        t->tid = ntohs (raw[3]);
     }
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: using peer's tunnel %d\n", __FUNCTION__,
-		 ntohs (raw[3]));
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: using peer's tunnel %d\n", __FUNCTION__,
+                 ntohs (raw[3]));
     }
     return 0;
 }
 
 int assigned_call_avp (struct tunnel *t, struct call *c, void *data,
-		       int datalen)
+                       int datalen)
 {
     /*
      * What is their CID that we must use from now on?
@@ -1223,64 +1230,64 @@ int assigned_call_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case CDN:
-	case ICRP:
-	case ICRQ:
-	case OCRP:		/* jz: deleting the debug message */
-	    break;
-	case OCRQ:
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: call ID not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Assigned Call ID", 8, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case CDN:
+        case ICRP:
+        case ICRQ:
+        case OCRP:             /* jz: deleting the debug message */
+            break;
+        case OCRQ:
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: call ID not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Assigned Call ID", 8, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     if (c->msgtype == CDN)
     {
-	c->qcid = ntohs (raw[3]);
+        c->qcid = ntohs (raw[3]);
     }
     else if (c->msgtype == ICRQ)
     {
-	t->call_head->cid = ntohs (raw[3]);
+        t->call_head->cid = ntohs (raw[3]);
     }
     else if (c->msgtype == ICRP)
     {
-	c->cid = ntohs (raw[3]);
+        c->cid = ntohs (raw[3]);
     }
     else if (c->msgtype == OCRP)
-    {				/* jz: copy callid to c->cid */
-	c->cid = ntohs (raw[3]);
+    {                           /* jz: copy callid to c->cid */
+        c->cid = ntohs (raw[3]);
     }
     else
     {
-	log (LOG_DEBUG, "%s:  Dunno what to do when it's state %s!\n",
-	     __FUNCTION__, msgtypes[c->msgtype]);
+        log (LOG_DEBUG, "%s:  Dunno what to do when it's state %s!\n",
+             __FUNCTION__, msgtypes[c->msgtype]);
     }
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: using peer's call %d\n", __FUNCTION__, ntohs (raw[3]));
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: using peer's call %d\n", __FUNCTION__, ntohs (raw[3]));
     }
     return 0;
 }
 
 int packet_delay_avp (struct tunnel *t, struct call *c, void *data,
-		      int datalen)
+                      int datalen)
 {
     /*
      * What is their CID that we must use from now on?
@@ -1290,39 +1297,39 @@ int packet_delay_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICRP:
-	case OCRQ:
-	case ICCN:
-	case OCRP:
-	case OCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: packet delay not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Assigned Call ID", 8, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICRP:
+        case OCRQ:
+        case ICCN:
+        case OCRP:
+        case OCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: packet delay not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Assigned Call ID", 8, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     c->ppd = ntohs (raw[3]);
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer's delay is %d 1/10's of a second\n", __FUNCTION__,
-		 ntohs (raw[3]));
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer's delay is %d 1/10's of a second\n", __FUNCTION__,
+                 ntohs (raw[3]));
     }
     return 0;
 }
@@ -1337,44 +1344,44 @@ int call_serno_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICRQ:
-	case OCRQ:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: call ID not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
+        switch (c->msgtype)
+        {
+        case ICRQ:
+        case OCRQ:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: call ID not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
 #ifdef STRICT
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Serial Number", 10, datalen, 0);
-	    return -EINVAL;
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Serial Number", 10, datalen, 0);
+            return -EINVAL;
 #else
-	    log (LOG_DEBUG,
-		 "%s: peer is using old style serial number.  Will be invalid.\n",
-		 __FUNCTION__);
+            log (LOG_DEBUG,
+                 "%s: peer is using old style serial number.  Will be invalid.\n",
+                 __FUNCTION__);
 #endif
 
-	}
+        }
     }
 #endif
     t->call_head->serno = (((unsigned int) ntohs (raw[3])) << 16) |
-	((unsigned int) ntohs (raw[4]));
+        ((unsigned int) ntohs (raw[4]));
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: serial number is %d\n", __FUNCTION__,
-		 t->call_head->serno);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: serial number is %d\n", __FUNCTION__,
+                 t->call_head->serno);
     }
     return 0;
 }
@@ -1389,37 +1396,37 @@ int rx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICCN:
-	case OCCN:
-	case OCRP:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: rx connect speed not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Connect Speed (RX)", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICCN:
+        case OCCN:
+        case OCRP:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: rx connect speed not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Connect Speed (RX)", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     c->rxspeed = (((unsigned int) ntohs (raw[3])) << 16) |
-	((unsigned int) ntohs (raw[4]));
+        ((unsigned int) ntohs (raw[4]));
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: receive baud rate is %d\n", __FUNCTION__, c->rxspeed);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: receive baud rate is %d\n", __FUNCTION__, c->rxspeed);
     }
     return 0;
 }
@@ -1434,42 +1441,42 @@ int tx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICCN:
-	case OCCN:
-	case OCRP:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: tx connect speed not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Connect Speed (tx)", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICCN:
+        case OCCN:
+        case OCRP:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: tx connect speed not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Connect Speed (tx)", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     c->txspeed = (((unsigned int) ntohs (raw[3])) << 16) |
-	((unsigned int) ntohs (raw[4]));
+        ((unsigned int) ntohs (raw[4]));
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: transmit baud rate is %d\n", __FUNCTION__, c->txspeed);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: transmit baud rate is %d\n", __FUNCTION__, c->txspeed);
     }
     return 0;
 }
 int call_physchan_avp (struct tunnel *t, struct call *c, void *data,
-		       int datalen)
+                       int datalen)
 {
     /*
      * What is the physical channel?
@@ -1479,45 +1486,45 @@ int call_physchan_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case ICRQ:
-	case OCRQ:
-	case OCRP:
-	case OCCN:
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: physical channel not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 10)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Physical Channel", 10, datalen, 0);
-	    return -EINVAL;
-	}
+        switch (c->msgtype)
+        {
+        case ICRQ:
+        case OCRQ:
+        case OCRP:
+        case OCCN:
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: physical channel not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 10)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 10\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Physical Channel", 10, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     t->call_head->physchan = (((unsigned int) ntohs (raw[3])) << 16) |
-	((unsigned int) ntohs (raw[4]));
+        ((unsigned int) ntohs (raw[4]));
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: physical channel is %d\n", __FUNCTION__,
-		 t->call_head->physchan);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: physical channel is %d\n", __FUNCTION__,
+                 t->call_head->physchan);
     }
     return 0;
 }
 
 int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,
-			     int datalen)
+                             int datalen)
 {
     /*
      * What is their RWS?
@@ -1527,32 +1534,32 @@ int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,
 #ifdef SANITY
     if (t->sanity)
     {
-	switch (c->msgtype)
-	{
-	case SCCRP:
-	case SCCRQ:
-	case OCRP:		/* jz */
-	case OCCN:		/* jz */
-	case StopCCN:
+        switch (c->msgtype)
+        {
+        case SCCRP:
+        case SCCRQ:
+        case OCRP:             /* jz */
+        case OCCN:             /* jz */
+        case StopCCN:
 /*		case ICRP:
 		case ICCN: */
-	    break;
-	default:
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: RWS not appropriate for message %s.  Ignoring.\n",
-		     __FUNCTION__, msgtypes[c->msgtype]);
-	    return 0;
-	}
-	if (datalen != 8)
-	{
-	    if (DEBUG)
-		log (LOG_DEBUG,
-		     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
-		     datalen);
-	    wrong_length (c, "Receive Window Size", 8, datalen, 0);
-	    return -EINVAL;
-	}
+            break;
+        default:
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: RWS not appropriate for message %s.  Ignoring.\n",
+                     __FUNCTION__, msgtypes[c->msgtype]);
+            return 0;
+        }
+        if (datalen != 8)
+        {
+            if (DEBUG)
+                log (LOG_DEBUG,
+                     "%s: avp is wrong size.  %d != 8\n", __FUNCTION__,
+                     datalen);
+            wrong_length (c, "Receive Window Size", 8, datalen, 0);
+            return -EINVAL;
+        }
     }
 #endif
     t->rws = ntohs (raw[3]);
@@ -1560,10 +1567,10 @@ int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,
 		c->fbit = FBIT; */
     if (debug_avp)
     {
-	if (DEBUG)
-	    log (LOG_DEBUG,
-		 "%s: peer wants RWS of %d.  Will use flow control.\n",
-		 __FUNCTION__, t->rws);
+        if (DEBUG)
+            log (LOG_DEBUG,
+                 "%s: peer wants RWS of %d.  Will use flow control.\n",
+                 __FUNCTION__, t->rws);
     }
     return 0;
 }
@@ -1584,165 +1591,165 @@ int handle_avps (struct buffer *buf, struct tunnel *t, struct call *c)
     char *data = buf->start + sizeof (struct control_hdr);
     avp = (struct avp_hdr *) data;
     if (debug_avp)
-	log (LOG_DEBUG, "%s: handling avp's for tunnel %d, call %d\n",
-	     __FUNCTION__, t->ourtid, c->ourcid);
+        log (LOG_DEBUG, "%s: handling avp's for tunnel %d, call %d\n",
+             __FUNCTION__, t->ourtid, c->ourcid);
     while (len > 0)
     {
-	/* Go ahead and byte-swap the header */
-	swaps (avp, sizeof (struct avp_hdr));
-	if (avp->attr > AVP_MAX)
-	{
-	    if (AMBIT (avp->length))
-	    {
-		log (LOG_WARN,
-		     "%s:  dont know how to handle mandatory attribute %d.  Closing %s.\n"
-		     __FUNCTION__, avp->attr,
-		     (c != t->self) ? "call" : "tunnel");
-		set_error (c, VENDOR_ERROR,
-			   "mandatory attribute %d cannot be handled",
-			   avp->attr);
-		c->needclose = -1;
-		return -EINVAL;
-	    }
-	    else
-	    {
-		if (DEBUG)
-		    log (LOG_WARN,
-			 "%s:  dont know how to handle atribute %d.\n",
-			 __FUNCTION__, avp->attr);
-		goto next;
-	    }
-	}
-	if (ALENGTH (avp->length) > len)
-	{
-	    log (LOG_WARN,
-		 "%s: AVP received with length > remaining packet length!\n",
-		 __FUNCTION__);
-	    set_error (c, ERROR_LENGTH, "Invalid AVP length");
-	    c->needclose = -1;
-	    return -EINVAL;
-	}
-	if (avp->attr && firstavp)
-	{
-	    log (LOG_WARN, "%s: First AVP was not message type.\n",
-		 __FUNCTION__);
-	    set_error (c, VENDOR_ERROR, "First AVP must be message type");
-	    c->needclose = -1;
-	    return -EINVAL;
-	}
-	if (ALENGTH (avp->length) < sizeof (struct avp_hdr))
-	{
-	    log (LOG_WARN, "%s: AVP with too small of size (%d).\n",
-		 __FUNCTION__, ALENGTH (avp->length));
-	    set_error (c, ERROR_LENGTH, "AVP too small");
-	    c->needclose = -1;
-	    return -EINVAL;
-	}
-	if (AZBITS (avp->length))
-	{
-	    log (LOG_WARN, "%s: %sAVP has reserved bits set.\n", __FUNCTION__,
-		 AMBIT (avp->length) ? "Mandatory " : "");
-	    if (AMBIT (avp->length))
-	    {
-		set_error (c, ERROR_RESERVED, "reserved bits set in AVP");
-		c->needclose = -1;
-		return -EINVAL;
-	    }
-	    goto next;
-	}
-	if (AHBIT (avp->length))
-	{
+        /* Go ahead and byte-swap the header */
+        swaps (avp, sizeof (struct avp_hdr));
+        if (avp->attr > AVP_MAX)
+        {
+            if (AMBIT (avp->length))
+            {
+                log (LOG_WARN,
+                     "%s:  dont know how to handle mandatory attribute %d.  Closing %s.\n"
+                     __FUNCTION__, avp->attr,
+                     (c != t->self) ? "call" : "tunnel");
+                set_error (c, VENDOR_ERROR,
+                           "mandatory attribute %d cannot be handled",
+                           avp->attr);
+                c->needclose = -1;
+                return -EINVAL;
+            }
+            else
+            {
+                if (DEBUG)
+                    log (LOG_WARN,
+                         "%s:  dont know how to handle atribute %d.\n",
+                         __FUNCTION__, avp->attr);
+                goto next;
+            }
+        }
+        if (ALENGTH (avp->length) > len)
+        {
+            log (LOG_WARN,
+                 "%s: AVP received with length > remaining packet length!\n",
+                 __FUNCTION__);
+            set_error (c, ERROR_LENGTH, "Invalid AVP length");
+            c->needclose = -1;
+            return -EINVAL;
+        }
+        if (avp->attr && firstavp)
+        {
+            log (LOG_WARN, "%s: First AVP was not message type.\n",
+                 __FUNCTION__);
+            set_error (c, VENDOR_ERROR, "First AVP must be message type");
+            c->needclose = -1;
+            return -EINVAL;
+        }
+        if (ALENGTH (avp->length) < sizeof (struct avp_hdr))
+        {
+            log (LOG_WARN, "%s: AVP with too small of size (%d).\n",
+                 __FUNCTION__, ALENGTH (avp->length));
+            set_error (c, ERROR_LENGTH, "AVP too small");
+            c->needclose = -1;
+            return -EINVAL;
+        }
+        if (AZBITS (avp->length))
+        {
+            log (LOG_WARN, "%s: %sAVP has reserved bits set.\n", __FUNCTION__,
+                 AMBIT (avp->length) ? "Mandatory " : "");
+            if (AMBIT (avp->length))
+            {
+                set_error (c, ERROR_RESERVED, "reserved bits set in AVP");
+                c->needclose = -1;
+                return -EINVAL;
+            }
+            goto next;
+        }
+        if (AHBIT (avp->length))
+        {
 #ifdef DEBUG_HIDDEN
-	    log (LOG_DEBUG, "%s: Hidden bit set on AVP.\n", __FUNCTION__);
+            log (LOG_DEBUG, "%s: Hidden bit set on AVP.\n", __FUNCTION__);
 #endif
-	    /* We want to rewrite the AVP as an unhidden AVP
-	       and then pass it along as normal.  Remeber how
-	       long the AVP was in the first place though! */
-	    hidlen = avp->length;
-	    if (decrypt_avp (data, t))
-	    {
-		if (debug_avp)
-		    log (LOG_WARN, "%s: Unable to handle hidden %sAVP\n:",
-			 __FUNCTION__,
-			 (AMBIT (avp->length) ? "mandatory " : ""));
-		if (AMBIT (avp->length))
-		{
-		    set_error (c, VENDOR_ERROR, "Invalid Hidden AVP");
-		    c->needclose = -1;
-		    return -EINVAL;
-		}
-		goto next;
-	    };
-	    len -= 2;
-	    hidlen -= 2;
-	    data += 2;
-	    avp = (struct avp_hdr *) data;
-	    /* Now we should look like a normal AVP */
-	}
-	else
-	    hidlen = 0;
-	if (avps[avp->attr].handler)
-	{
-	    if (avps[avp->attr].handler (t, c, avp, ALENGTH (avp->length)))
-	    {
-		if (AMBIT (avp->length))
-		{
-		    log (LOG_WARN,
-			 "%s: Bad exit status handling attribute %d (%s) on mandatory packet.\n",
-			 __FUNCTION__, avp->attr,
-			 avps[avp->attr].description);
-		    c->needclose = -1;
-		    return -EINVAL;
-		}
-		else
-		{
-		    if (DEBUG)
-			log (LOG_DEBUG,
-			     "%s: Bad exit status handling attribute %d (%s).\n",
-			     __FUNCTION__, avp->attr,
-			     avps[avp->attr].description);
-		}
-	    }
-	}
-	else
-	{
-	    if (AMBIT (avp->length))
-	    {
-		log (LOG_WARN,
-		     "%s:  No handler for mandatory attribute %d (%s).  Closing %s.\n",
-		     __FUNCTION__, avp->attr, avps[avp->attr].description,
-		     (c != t->self) ? "call" : "tunnel");
-		set_error (c, VENDOR_ERROR, "No handler for attr %d (%s)\n",
-			   avp->attr, avps[avp->attr].description);
-		return -EINVAL;
-	    }
-	    else
-	    {
-		if (DEBUG)
-		    log (LOG_WARN, "%s:  no handler for atribute %d (%s).\n",
-			 __FUNCTION__, avp->attr,
-			 avps[avp->attr].description);
-	    }
-	}
+            /* We want to rewrite the AVP as an unhidden AVP
+               and then pass it along as normal.  Remeber how
+               long the AVP was in the first place though! */
+            hidlen = avp->length;
+            if (decrypt_avp (data, t))
+            {
+                if (debug_avp)
+                    log (LOG_WARN, "%s: Unable to handle hidden %sAVP\n:",
+                         __FUNCTION__,
+                         (AMBIT (avp->length) ? "mandatory " : ""));
+                if (AMBIT (avp->length))
+                {
+                    set_error (c, VENDOR_ERROR, "Invalid Hidden AVP");
+                    c->needclose = -1;
+                    return -EINVAL;
+                }
+                goto next;
+            };
+            len -= 2;
+            hidlen -= 2;
+            data += 2;
+            avp = (struct avp_hdr *) data;
+            /* Now we should look like a normal AVP */
+        }
+        else
+            hidlen = 0;
+        if (avps[avp->attr].handler)
+        {
+            if (avps[avp->attr].handler (t, c, avp, ALENGTH (avp->length)))
+            {
+                if (AMBIT (avp->length))
+                {
+                    log (LOG_WARN,
+                         "%s: Bad exit status handling attribute %d (%s) on mandatory packet.\n",
+                         __FUNCTION__, avp->attr,
+                         avps[avp->attr].description);
+                    c->needclose = -1;
+                    return -EINVAL;
+                }
+                else
+                {
+                    if (DEBUG)
+                        log (LOG_DEBUG,
+                             "%s: Bad exit status handling attribute %d (%s).\n",
+                             __FUNCTION__, avp->attr,
+                             avps[avp->attr].description);
+                }
+            }
+        }
+        else
+        {
+            if (AMBIT (avp->length))
+            {
+                log (LOG_WARN,
+                     "%s:  No handler for mandatory attribute %d (%s).  Closing %s.\n",
+                     __FUNCTION__, avp->attr, avps[avp->attr].description,
+                     (c != t->self) ? "call" : "tunnel");
+                set_error (c, VENDOR_ERROR, "No handler for attr %d (%s)\n",
+                           avp->attr, avps[avp->attr].description);
+                return -EINVAL;
+            }
+            else
+            {
+                if (DEBUG)
+                    log (LOG_WARN, "%s:  no handler for atribute %d (%s).\n",
+                         __FUNCTION__, avp->attr,
+                         avps[avp->attr].description);
+            }
+        }
       next:
-	if (hidlen)
-	{
-	    /* Skip over the complete length of the hidden AVP */
-	    len -= ALENGTH (hidlen);
-	    data += ALENGTH (hidlen);
-	}
-	else
-	{
-	    len -= ALENGTH (avp->length);
-	    data += ALENGTH (avp->length);	/* Next AVP, please */
-	}
-	avp = (struct avp_hdr *) data;
-	firstavp = 0;
+        if (hidlen)
+        {
+            /* Skip over the complete length of the hidden AVP */
+            len -= ALENGTH (hidlen);
+            data += ALENGTH (hidlen);
+        }
+        else
+        {
+            len -= ALENGTH (avp->length);
+            data += ALENGTH (avp->length);      /* Next AVP, please */
+        }
+        avp = (struct avp_hdr *) data;
+        firstavp = 0;
     }
     if (len != 0)
     {
-	log (LOG_WARN, "%s: negative overall packet length\n", __FUNCTION__);
-	return -EINVAL;
+        log (LOG_WARN, "%s: negative overall packet length\n", __FUNCTION__);
+        return -EINVAL;
     }
     return 0;
 }

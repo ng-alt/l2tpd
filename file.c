@@ -41,23 +41,23 @@ int init_config ()
     f = fopen (CONFIG_FILE, "r");
     if (f)
     {
-	strncpy (gconfig.authfile, DEFAULT_AUTH_FILE,
-		 sizeof (gconfig.authfile));
+        strncpy (gconfig.authfile, DEFAULT_AUTH_FILE,
+                 sizeof (gconfig.authfile));
     }
     else
     {
-	f = fopen (ALT_CONFIG_FILE, "r");
-	if (f)
-	{
-	    strncpy (gconfig.authfile, ALT_DEFAULT_AUTH_FILE,
-		     sizeof (gconfig.authfile));
-	}
-	else
-	{
-	    log (LOG_CRIT, "%s: Unable to open config file %s or %s\n",
-		 __FUNCTION__, CONFIG_FILE, ALT_CONFIG_FILE);
-	    return -1;
-	}
+        f = fopen (ALT_CONFIG_FILE, "r");
+        if (f)
+        {
+            strncpy (gconfig.authfile, ALT_DEFAULT_AUTH_FILE,
+                     sizeof (gconfig.authfile));
+        }
+        else
+        {
+            log (LOG_CRIT, "%s: Unable to open config file %s or %s\n",
+                 __FUNCTION__, CONFIG_FILE, ALT_CONFIG_FILE);
+            return -1;
+        }
 
     }
     returnedValue = parse_config (f);
@@ -72,9 +72,9 @@ struct lns *new_lns ()
     tmp = (struct lns *) malloc (sizeof (struct lns));
     if (!tmp)
     {
-	log (LOG_CRIT, "%s: Unable to allocate memory for new LNS\n",
-	     __FUNCTION__);
-	return NULL;
+        log (LOG_CRIT, "%s: Unable to allocate memory for new LNS\n",
+             __FUNCTION__);
+        return NULL;
     }
     tmp->next = NULL;
     tmp->exclusive = 0;
@@ -116,9 +116,9 @@ struct lac *new_lac ()
     tmp = (struct lac *) malloc (sizeof (struct lac));
     if (!tmp)
     {
-	log (LOG_CRIT, "%s: Unable to allocate memory for lac entry!\n",
-	     __FUNCTION__);
-	return NULL;
+        log (LOG_CRIT, "%s: Unable to allocate memory for lac entry!\n",
+             __FUNCTION__);
+        return NULL;
     }
     tmp->next = NULL;
     tmp->rsched = NULL;
@@ -156,13 +156,13 @@ struct lac *new_lac ()
 int yesno (char *value)
 {
     if (!strcasecmp (value, "yes") || !strcasecmp (value, "y") ||
-	!strcasecmp (value, "true"))
-	return 1;
+        !strcasecmp (value, "true"))
+        return 1;
     else if (!strcasecmp (value, "no") || !strcasecmp (value, "n") ||
-	     !strcasecmp (value, "false"))
-	return 0;
+             !strcasecmp (value, "false"))
+        return 0;
     else
-	return -1;
+        return -1;
 }
 
 int set_boolean (char *word, char *value, int *ptr)
@@ -170,12 +170,12 @@ int set_boolean (char *word, char *value, int *ptr)
     int val;
 #ifdef DEBUG_FILE
     log (LOG_DEBUG, "set_%s: %s  flag to '%s'\n", word, word, value);
-#endif	/* ; */
+#endif /* ; */
     if ((val = yesno (value)) < 0)
     {
-	snprintf (filerr, sizeof (filerr), "%s must be 'yes' or 'no'\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "%s must be 'yes' or 'no'\n",
+                  word);
+        return -1;
     }
     *ptr = val;
     return 0;
@@ -186,11 +186,11 @@ int set_int (char *word, char *value, int *ptr)
     int val;
 #ifdef DEBUG_FILE
     log (LOG_DEBUG, "set_%s: %s  flag to '%s'\n", word, word, value);
-#endif	/* ; */
+#endif /* ; */
     if ((val = atoi (value)) < 0)
     {
-	snprintf (filerr, sizeof (filerr), "%s must be a number\n", word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "%s must be a number\n", word);
+        return -1;
     }
     *ptr = val;
     return 0;
@@ -200,7 +200,7 @@ int set_string (char *word, char *value, char *ptr, int len)
 {
 #ifdef DEBUG_FILE
     log (LOG_DEBUG, "set_%s: %s  flag to '%s'\n", word, word, value);
-#endif	/* ; */
+#endif /* ; */
     strncpy (ptr, value, len);
     return 0;
 }
@@ -211,15 +211,15 @@ int set_port (char *word, char *value, int context, void *item)
     {
     case CONTEXT_GLOBAL:
 #ifdef DEBUG_FILE
-	log (LOG_DEBUG, "set_port: Setting global port number to %s\n",
-	     value);
+        log (LOG_DEBUG, "set_port: Setting global port number to %s\n",
+             value);
 #endif
-	set_int (word, value, &(((struct global *) item)->port));
-	break;
+        set_int (word, value, &(((struct global *) item)->port));
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -228,23 +228,23 @@ int set_rtimeout (char *word, char *value, int context, void *item)
 {
     if (atoi (value) < 1)
     {
-	snprintf (filerr, sizeof (filerr),
-		  "rtimeout value must be at least 1\n");
-	return -1;
+        snprintf (filerr, sizeof (filerr),
+                  "rtimeout value must be at least 1\n");
+        return -1;
     }
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
 #ifdef DEBUG_FILE
-	log (LOG_DEBUG, "set_rtimeout: Setting redial timeout to %s\n",
-	     value);
+        log (LOG_DEBUG, "set_rtimeout: Setting redial timeout to %s\n",
+             value);
 #endif
-	set_int (word, value, &(((struct lac *) item)->rtimeout));
-	break;
+        set_int (word, value, &(((struct lac *) item)->rtimeout));
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -253,44 +253,44 @@ int set_rws (char *word, char *value, int context, void *item)
 {
     if (atoi (value) < -1)
     {
-	snprintf (filerr, sizeof (filerr),
-		  "receive window size must be at least -1\n");
-	return -1;
+        snprintf (filerr, sizeof (filerr),
+                  "receive window size must be at least -1\n");
+        return -1;
     }
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (word[0] == 'c')
-	    set_int (word, value, &(((struct lac *) item)->call_rws));
-	if (word[0] == 't')
-	{
-	    set_int (word, value, &(((struct lac *) item)->tun_rws));
-	    if (((struct lac *) item)->tun_rws < 1)
-	    {
-		snprintf (filerr, sizeof (filerr),
-			  "receive window size for tunnels must be at least 1\n");
-		return -1;
-	    }
-	}
-	break;
+        if (word[0] == 'c')
+            set_int (word, value, &(((struct lac *) item)->call_rws));
+        if (word[0] == 't')
+        {
+            set_int (word, value, &(((struct lac *) item)->tun_rws));
+            if (((struct lac *) item)->tun_rws < 1)
+            {
+                snprintf (filerr, sizeof (filerr),
+                          "receive window size for tunnels must be at least 1\n");
+                return -1;
+            }
+        }
+        break;
     case CONTEXT_LNS:
-	if (word[0] == 'c')
-	    set_int (word, value, &(((struct lns *) item)->call_rws));
-	if (word[0] == 't')
-	{
-	    set_int (word, value, &(((struct lns *) item)->tun_rws));
-	    if (((struct lns *) item)->tun_rws < 1)
-	    {
-		snprintf (filerr, sizeof (filerr),
-			  "receive window size for tunnels must be at least 1\n");
-		return -1;
-	    }
-	}
-	break;
+        if (word[0] == 'c')
+            set_int (word, value, &(((struct lns *) item)->call_rws));
+        if (word[0] == 't')
+        {
+            set_int (word, value, &(((struct lns *) item)->tun_rws));
+            if (((struct lns *) item)->tun_rws < 1)
+            {
+                snprintf (filerr, sizeof (filerr),
+                          "receive window size for tunnels must be at least 1\n");
+                return -1;
+            }
+        }
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -299,21 +299,21 @@ int set_rmax (char *word, char *value, int context, void *item)
 {
     if (atoi (value) < 1)
     {
-	snprintf (filerr, sizeof (filerr), "rmax value must be at least 1\n");
-	return -1;
+        snprintf (filerr, sizeof (filerr), "rmax value must be at least 1\n");
+        return -1;
     }
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
 #ifdef DEBUG_FILE
-	log (LOG_DEBUG, "set_rmax: Setting max redials to %s\n", value);
+        log (LOG_DEBUG, "set_rmax: Setting max redials to %s\n", value);
 #endif
-	set_int (word, value, &(((struct lac *) item)->rmax));
-	break;
+        set_int (word, value, &(((struct lac *) item)->rmax));
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -322,24 +322,24 @@ int set_authfile (char *word, char *value, int context, void *item)
 {
     if (!strlen (value))
     {
-	snprintf (filerr, sizeof (filerr),
-		  "no filename specified for authentication\n");
-	return -1;
+        snprintf (filerr, sizeof (filerr),
+                  "no filename specified for authentication\n");
+        return -1;
     }
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_GLOBAL:
 #ifdef DEBUG_FILE
-	log (LOG_DEBUG, "set_authfile: Setting global auth file to '%s'\n",
-	     value);
-#endif	/* ; */
-	strncpy (((struct global *) item)->authfile, value,
-		 sizeof (((struct global *)item)->authfile));
-	break;
+        log (LOG_DEBUG, "set_authfile: Setting global auth file to '%s'\n",
+             value);
+#endif /* ; */
+        strncpy (((struct global *) item)->authfile, value,
+                 sizeof (((struct global *)item)->authfile));
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -349,13 +349,13 @@ int set_autodial (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->autodial)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->autodial)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -365,35 +365,35 @@ int set_flow (char *word, char *value, int context, void *item)
     int v;
     set_boolean (word, value, &v);
     if (v < 0)
-	return -1;
+        return -1;
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (v)
-	{
-	    if (((struct lac *) item)->call_rws < 0)
-		((struct lac *) item)->call_rws = 0;
-	}
-	else
-	{
-	    ((struct lac *) item)->call_rws = -1;
-	}
-	break;
+        if (v)
+        {
+            if (((struct lac *) item)->call_rws < 0)
+                ((struct lac *) item)->call_rws = 0;
+        }
+        else
+        {
+            ((struct lac *) item)->call_rws = -1;
+        }
+        break;
     case CONTEXT_LNS:
-	if (v)
-	{
-	    if (((struct lns *) item)->call_rws < 0)
-		((struct lns *) item)->call_rws = 0;
-	}
-	else
-	{
-	    ((struct lns *) item)->call_rws = -1;
-	}
-	break;
+        if (v)
+        {
+            if (((struct lns *) item)->call_rws < 0)
+                ((struct lns *) item)->call_rws = 0;
+        }
+        else
+        {
+            ((struct lns *) item)->call_rws = -1;
+        }
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -403,13 +403,13 @@ int set_defaultroute (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->defaultroute)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->defaultroute)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -421,17 +421,17 @@ int set_authname (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	if (set_string (word, value, n->authname, sizeof (n->authname)))
-	    return -1;
-	break;
+        if (set_string (word, value, n->authname, sizeof (n->authname)))
+            return -1;
+        break;
     case CONTEXT_LAC:
-	if (set_string (word, value, l->authname, sizeof (l->authname)))
-	    return -1;
-	break;
+        if (set_string (word, value, l->authname, sizeof (l->authname)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -443,17 +443,17 @@ int set_hostname (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	if (set_string (word, value, n->hostname, sizeof (n->hostname)))
-	    return -1;
-	break;
+        if (set_string (word, value, n->hostname, sizeof (n->hostname)))
+            return -1;
+        break;
     case CONTEXT_LAC:
-	if (set_string (word, value, l->hostname, sizeof (l->hostname)))
-	    return -1;
-	break;
+        if (set_string (word, value, l->hostname, sizeof (l->hostname)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -463,13 +463,13 @@ int set_passwdauth (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->passwdauth)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->passwdauth)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -479,17 +479,17 @@ int set_hbit (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->hbit)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->hbit)))
+            return -1;
+        break;
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->hbit)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->hbit)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -499,17 +499,17 @@ int set_challenge (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->challenge)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->challenge)))
+            return -1;
+        break;
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->challenge)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->challenge)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -519,17 +519,17 @@ int set_lbit (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->lbit)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->lbit)))
+            return -1;
+        break;
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->lbit)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->lbit)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -540,17 +540,17 @@ int set_debug (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->debug)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->debug)))
+            return -1;
+        break;
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->debug)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->debug)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -562,17 +562,17 @@ int set_pppoptfile (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	if (set_string (word, value, n->pppoptfile, sizeof (n->pppoptfile)))
-	    return -1;
-	break;
+        if (set_string (word, value, n->pppoptfile, sizeof (n->pppoptfile)))
+            return -1;
+        break;
     case CONTEXT_LAC:
-	if (set_string (word, value, l->pppoptfile, sizeof (l->pppoptfile)))
-	    return -1;
-	break;
+        if (set_string (word, value, l->pppoptfile, sizeof (l->pppoptfile)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -584,47 +584,47 @@ int set_papchap (char *word, char *value, int context, void *item)
     struct lac *l = (struct lac *) item;
     struct lns *n = (struct lns *) item;
     if (set_boolean (word, value, &result))
-	return -1;
+        return -1;
     c = strchr (word, ' ');
     c++;
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (c[0] == 'p')	/* PAP */
-	    if (word[2] == 'f')
-		l->pap_refuse = result;
-	    else
-		l->pap_require = result;
-	else if (c[0] == 'a')	/* Authentication */
-	    if (word[2] == 'f')
-		l->authself = result;
-	    else
-		l->authpeer = result;
-	else /* CHAP */ if (word[2] == 'f')
-	    l->chap_refuse = result;
-	else
-	    l->chap_require = result;
-	break;
+        if (c[0] == 'p')        /* PAP */
+            if (word[2] == 'f')
+                l->pap_refuse = result;
+            else
+                l->pap_require = result;
+        else if (c[0] == 'a')   /* Authentication */
+            if (word[2] == 'f')
+                l->authself = result;
+            else
+                l->authpeer = result;
+        else /* CHAP */ if (word[2] == 'f')
+            l->chap_refuse = result;
+        else
+            l->chap_require = result;
+        break;
     case CONTEXT_LNS:
-	if (c[0] == 'p')	/* PAP */
-	    if (word[2] == 'f')
-		n->pap_refuse = result;
-	    else
-		n->pap_require = result;
-	else if (c[0] == 'a')	/* Authentication */
-	    if (word[2] == 'f')
-		n->authself = !result;
-	    else
-		n->authpeer = result;
-	else /* CHAP */ if (word[2] == 'f')
-	    n->chap_refuse = result;
-	else
-	    n->chap_require = result;
-	break;
+        if (c[0] == 'p')        /* PAP */
+            if (word[2] == 'f')
+                n->pap_refuse = result;
+            else
+                n->pap_require = result;
+        else if (c[0] == 'a')   /* Authentication */
+            if (word[2] == 'f')
+                n->authself = !result;
+            else
+                n->authpeer = result;
+        else /* CHAP */ if (word[2] == 'f')
+            n->chap_refuse = result;
+        else
+            n->chap_require = result;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -634,13 +634,13 @@ int set_redial (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	if (set_boolean (word, value, &(((struct lac *) item)->redial)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lac *) item)->redial)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -650,14 +650,14 @@ int set_accesscontrol (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_GLOBAL:
-	if (set_boolean
-	    (word, value, &(((struct global *) item)->accesscontrol)))
-	    return -1;
-	break;
+        if (set_boolean
+            (word, value, &(((struct global *) item)->accesscontrol)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -667,14 +667,14 @@ int set_userspace (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_GLOBAL:
-	if (set_boolean
-	    (word, value, &(((struct global *) item)->forceuserspace)))
-	    return -1;
-	break;
+        if (set_boolean
+            (word, value, &(((struct global *) item)->forceuserspace)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -687,62 +687,62 @@ struct iprange *set_range (char *word, char *value, struct iprange *in)
     c = strchr (value, '-');
     if (c)
     {
-	d = c + 1;
-	*c = 0;
-	while ((c >= value) && (*c < 33))
-	    *(c--) = 0;
-	while (*d && (*d < 33))
-	    d++;
+        d = c + 1;
+        *c = 0;
+        while ((c >= value) && (*c < 33))
+            *(c--) = 0;
+        while (*d && (*d < 33))
+            d++;
     }
     if (!strlen (value) || (c && !strlen (d)))
     {
-	snprintf (filerr, sizeof (filerr),
-		  "format is '%s <host or ip> - <host or ip>'\n", word);
-	return NULL;
+        snprintf (filerr, sizeof (filerr),
+                  "format is '%s <host or ip> - <host or ip>'\n", word);
+        return NULL;
     }
     ipr = (struct iprange *) malloc (sizeof (struct iprange));
     ipr->next = NULL;
     hp = gethostbyname (value);
     if (!hp)
     {
-	snprintf (filerr, sizeof (filerr), "Unknown host %s\n", value);
-	free (ipr);
-	return NULL;
+        snprintf (filerr, sizeof (filerr), "Unknown host %s\n", value);
+        free (ipr);
+        return NULL;
     }
     bcopy (hp->h_addr, &ipr->start, sizeof (unsigned int));
     if (c)
     {
-	hp = gethostbyname (d);
-	if (!hp)
-	{
-	    snprintf (filerr, sizeof (filerr), "Unknown host %s\n", d);
-	    free (ipr);
-	    return NULL;
-	}
-	bcopy (hp->h_addr, &ipr->end, sizeof (unsigned int));
+        hp = gethostbyname (d);
+        if (!hp)
+        {
+            snprintf (filerr, sizeof (filerr), "Unknown host %s\n", d);
+            free (ipr);
+            return NULL;
+        }
+        bcopy (hp->h_addr, &ipr->end, sizeof (unsigned int));
     }
     else
-	ipr->end = ipr->start;
+        ipr->end = ipr->start;
     if (ntohl (ipr->start) > ntohl (ipr->end))
     {
-	snprintf (filerr, sizeof (filerr), "start is greater than end!\n");
-	free (ipr);
-	return NULL;
+        snprintf (filerr, sizeof (filerr), "start is greater than end!\n");
+        free (ipr);
+        return NULL;
     }
     if (word[0] == 'n')
-	ipr->sense = SENSE_DENY;
+        ipr->sense = SENSE_DENY;
     else
-	ipr->sense = SENSE_ALLOW;
+        ipr->sense = SENSE_ALLOW;
     p = in;
     if (p)
     {
-	while (p->next)
-	    p = p->next;
-	p->next = ipr;
-	return in;
+        while (p->next)
+            p = p->next;
+        p->next = ipr;
+        return in;
     }
     else
-	return ipr;
+        return ipr;
 }
 
 int set_iprange (char *word, char *value, int context, void *item)
@@ -751,18 +751,18 @@ int set_iprange (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	break;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     lns->range = set_range (word, value, lns->range);
     if (!lns->range)
-	return -1;
+        return -1;
 #ifdef DEBUG_FILE
     log (LOG_DEBUG, "range start = %x, end = %x, sense=%ud\n",
-	 ntohl (ipr->start), ntohl (ipr->end), ipr->sense);
+         ntohl (ipr->start), ntohl (ipr->end), ipr->sense);
 #endif
     return 0;
 }
@@ -773,18 +773,18 @@ int set_lac (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	break;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     lns->lacs = set_range (word, value, lns->lacs);
     if (!lns->lacs)
-	return -1;
+        return -1;
 #ifdef DEBUG_FILE
     log (LOG_DEBUG, "lac start = %x, end = %x, sense=%ud\n",
-	 ntohl (ipr->start), ntohl (ipr->end), ipr->sense);
+         ntohl (ipr->start), ntohl (ipr->end), ipr->sense);
 #endif
     return 0;
 }
@@ -794,13 +794,13 @@ int set_exclusive (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LNS:
-	if (set_boolean (word, value, &(((struct lns *) item)->exclusive)))
-	    return -1;
-	break;
+        if (set_boolean (word, value, &(((struct lns *) item)->exclusive)))
+            return -1;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -811,9 +811,9 @@ int set_ip (char *word, char *value, unsigned int *addr)
     hp = gethostbyname (value);
     if (!hp)
     {
-	snprintf (filerr, sizeof (filerr), "%s: host '%s' not found\n",
-		  __FUNCTION__, value);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "%s: host '%s' not found\n",
+                  __FUNCTION__, value);
+        return -1;
     }
     bcopy (hp->h_addr, addr, sizeof (unsigned int));
     return 0;
@@ -826,15 +826,15 @@ int set_localaddr (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	l = (struct lac *) item;
-	return set_ip (word, value, &(l->localaddr));
+        l = (struct lac *) item;
+        return set_ip (word, value, &(l->localaddr));
     case CONTEXT_LNS:
-	n = (struct lns *) item;
-	return set_ip (word, value, &(n->localaddr));
+        n = (struct lns *) item;
+        return set_ip (word, value, &(n->localaddr));
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -845,12 +845,12 @@ int set_remoteaddr (char *word, char *value, int context, void *item)
     switch (context & ~CONTEXT_DEFAULT)
     {
     case CONTEXT_LAC:
-	l = (struct lac *) item;
-	return set_ip (word, value, &(l->remoteaddr));
+        l = (struct lac *) item;
+        return set_ip (word, value, &(l->remoteaddr));
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -865,44 +865,44 @@ int set_lns (char *word, char *value, int context, void *item)
     {
     case CONTEXT_LAC:
 #ifdef DEBUG_FILE
-	log (LOG_DEBUG, "set_lns: setting LNS to '%s'\n", value);
+        log (LOG_DEBUG, "set_lns: setting LNS to '%s'\n", value);
 #endif
-	l = (struct lac *) item;
-	d = strchr (value, ':');
-	if (d)
-	{
-	    d[0] = 0;
-	    d++;
-	}
-	hp = gethostbyname (value);
-	if (!hp)
-	{
-	    snprintf (filerr, sizeof (filerr), "no such host '%s'\n", value);
-	    return -1;
-	}
-	ipr = malloc (sizeof (struct host));
-	ipr->next = NULL;
-	pos = l->lns;
-	if (!pos)
-	{
-	    l->lns = ipr;
-	}
-	else
-	{
-	    while (pos->next)
-		pos = pos->next;
-	    pos->next = ipr;
-	}
-	strncpy (ipr->hostname, value, sizeof (ipr->hostname));
-	if (d)
-	    ipr->port = atoi (d);
-	else
-	    ipr->port = UDP_LISTEN_PORT;
-	break;
+        l = (struct lac *) item;
+        d = strchr (value, ':');
+        if (d)
+        {
+            d[0] = 0;
+            d++;
+        }
+        hp = gethostbyname (value);
+        if (!hp)
+        {
+            snprintf (filerr, sizeof (filerr), "no such host '%s'\n", value);
+            return -1;
+        }
+        ipr = malloc (sizeof (struct host));
+        ipr->next = NULL;
+        pos = l->lns;
+        if (!pos)
+        {
+            l->lns = ipr;
+        }
+        else
+        {
+            while (pos->next)
+                pos = pos->next;
+            pos->next = ipr;
+        }
+        strncpy (ipr->hostname, value, sizeof (ipr->hostname));
+        if (d)
+            ipr->port = atoi (d);
+        else
+            ipr->port = UDP_LISTEN_PORT;
+        break;
     default:
-	snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
-		  word);
-	return -1;
+        snprintf (filerr, sizeof (filerr), "'%s' not valid in this context\n",
+                  word);
+        return -1;
     }
     return 0;
 }
@@ -922,198 +922,198 @@ int parse_config (FILE * f)
     struct lac *tc;
     while (!feof (f))
     {
-	fgets (buf, sizeof (buf), f);
-	if (feof (f))
-	    break;
-	linenum++;
-	s = buf;
-	/* Strip comments */
-	while (*s && *s != ';')
-	    s++;
-	*s = 0;
-	s = buf;
-	if (!strlen (buf))
-	    continue;
-	while ((*s < 33) && *s)
-	    s++;		/* Skip over beginning white space */
-	t = s + strlen (s);
-	while ((t >= s) && (*t < 33))
-	    *(t--) = 0;		/* Ditch trailing white space */
-	if (!strlen (s))
-	    continue;
-	if (s[0] == '[')
-	{
-	    /* We've got a context description */
-	    if (!(t = strchr (s, ']')))
-	    {
-		log (LOG_CRIT, "parse_config: line %d: No closing bracket\n",
-		     linenum);
-		return -1;
-	    }
-	    t[0] = 0;
-	    s++;
-	    if ((d = strchr (s, ' ')))
-	    {
-		/* There's a parameter */
-		d[0] = 0;
-		d++;
-	    }
-	    if (d && !strcasecmp (d, "default"))
-		def = CONTEXT_DEFAULT;
-	    else
-		def = 0;
-	    if (!strcasecmp (s, "global"))
-	    {
-		context = CONTEXT_GLOBAL;
+        fgets (buf, sizeof (buf), f);
+        if (feof (f))
+            break;
+        linenum++;
+        s = buf;
+        /* Strip comments */
+        while (*s && *s != ';')
+            s++;
+        *s = 0;
+        s = buf;
+        if (!strlen (buf))
+            continue;
+        while ((*s < 33) && *s)
+            s++;                /* Skip over beginning white space */
+        t = s + strlen (s);
+        while ((t >= s) && (*t < 33))
+            *(t--) = 0;         /* Ditch trailing white space */
+        if (!strlen (s))
+            continue;
+        if (s[0] == '[')
+        {
+            /* We've got a context description */
+            if (!(t = strchr (s, ']')))
+            {
+                log (LOG_CRIT, "parse_config: line %d: No closing bracket\n",
+                     linenum);
+                return -1;
+            }
+            t[0] = 0;
+            s++;
+            if ((d = strchr (s, ' ')))
+            {
+                /* There's a parameter */
+                d[0] = 0;
+                d++;
+            }
+            if (d && !strcasecmp (d, "default"))
+                def = CONTEXT_DEFAULT;
+            else
+                def = 0;
+            if (!strcasecmp (s, "global"))
+            {
+                context = CONTEXT_GLOBAL;
 #ifdef DEBUG_FILE
-		log (LOG_DEBUG,
-		     "parse_config: global context descriptor %s\n",
-		     d ? d : "");
+                log (LOG_DEBUG,
+                     "parse_config: global context descriptor %s\n",
+                     d ? d : "");
 #endif
-		data = &gconfig;
-	    }
-	    else if (!strcasecmp (s, "lns"))
-	    {
-		context = CONTEXT_LNS;
-		if (def)
-		{
-		    if (!deflns)
-		    {
-			deflns = new_lns ();
-			strncpy (deflns->entname, "default",
-				 sizeof (deflns->entname));
-		    }
-		    data = deflns;
-		    continue;
-		}
-		data = NULL;
-		tl = lnslist;
-		if (d)
-		{
-		    while (tl)
-		    {
-			if (!strcasecmp (d, tl->entname))
-			    break;
-			tl = tl->next;
-		    }
-		    if (tl)
-			data = tl;
-		}
-		if (!data)
-		{
-		    data = new_lns ();
-		    if (!data)
-			return -1;
-		    ((struct lns *) data)->next = lnslist;
-		    lnslist = (struct lns *) data;
-		}
-		if (d)
-		    strncpy (((struct lns *) data)->entname,
-			     d, sizeof (((struct lns *) data)->entname));
+                data = &gconfig;
+            }
+            else if (!strcasecmp (s, "lns"))
+            {
+                context = CONTEXT_LNS;
+                if (def)
+                {
+                    if (!deflns)
+                    {
+                        deflns = new_lns ();
+                        strncpy (deflns->entname, "default",
+                                 sizeof (deflns->entname));
+                    }
+                    data = deflns;
+                    continue;
+                }
+                data = NULL;
+                tl = lnslist;
+                if (d)
+                {
+                    while (tl)
+                    {
+                        if (!strcasecmp (d, tl->entname))
+                            break;
+                        tl = tl->next;
+                    }
+                    if (tl)
+                        data = tl;
+                }
+                if (!data)
+                {
+                    data = new_lns ();
+                    if (!data)
+                        return -1;
+                    ((struct lns *) data)->next = lnslist;
+                    lnslist = (struct lns *) data;
+                }
+                if (d)
+                    strncpy (((struct lns *) data)->entname,
+                             d, sizeof (((struct lns *) data)->entname));
 #ifdef DEBUG_FILE
-		log (LOG_DEBUG, "parse_config: lns context descriptor %s\n",
-		     d ? d : "");
+                log (LOG_DEBUG, "parse_config: lns context descriptor %s\n",
+                     d ? d : "");
 #endif
-	    }
-	    else if (!strcasecmp (s, "lac"))
-	    {
-		context = CONTEXT_LAC;
-		if (def)
-		{
-		    if (!deflac)
-		    {
-			deflac = new_lac ();
-			strncpy (deflac->entname, "default",
-				 sizeof (deflac->entname));
-		    }
-		    data = deflac;
-		    continue;
-		}
-		data = NULL;
-		tc = laclist;
-		if (d)
-		{
-		    while (tc)
-		    {
-			if (!strcasecmp (d, tc->entname))
-			    break;
-			tc = tc->next;
-		    }
-		    if (tc)
-			data = tc;
-		}
-		if (!data)
-		{
-		    data = new_lac ();
-		    if (!data)
-			return -1;
-		    ((struct lac *) data)->next = laclist;
-		    laclist = (struct lac *) data;
-		}
-		if (d)
-		    strncpy (((struct lac *) data)->entname,
-			     d, sizeof (((struct lac *) data)->entname));
+            }
+            else if (!strcasecmp (s, "lac"))
+            {
+                context = CONTEXT_LAC;
+                if (def)
+                {
+                    if (!deflac)
+                    {
+                        deflac = new_lac ();
+                        strncpy (deflac->entname, "default",
+                                 sizeof (deflac->entname));
+                    }
+                    data = deflac;
+                    continue;
+                }
+                data = NULL;
+                tc = laclist;
+                if (d)
+                {
+                    while (tc)
+                    {
+                        if (!strcasecmp (d, tc->entname))
+                            break;
+                        tc = tc->next;
+                    }
+                    if (tc)
+                        data = tc;
+                }
+                if (!data)
+                {
+                    data = new_lac ();
+                    if (!data)
+                        return -1;
+                    ((struct lac *) data)->next = laclist;
+                    laclist = (struct lac *) data;
+                }
+                if (d)
+                    strncpy (((struct lac *) data)->entname,
+                             d, sizeof (((struct lac *) data)->entname));
 #ifdef DEBUG_FILE
-		log (LOG_DEBUG, "parse_config: lac context descriptor %s\n",
-		     d ? d : "");
+                log (LOG_DEBUG, "parse_config: lac context descriptor %s\n",
+                     d ? d : "");
 #endif
-	    }
-	    else
-	    {
-		log (LOG_WARN,
-		     "parse_config: line %d: unknown context '%s'\n", linenum,
-		     s);
-		return -1;
-	    }
-	}
-	else
-	{
-	    if (!context)
-	    {
-		log (LOG_WARN,
-		     "parse_config: line %d: data '%s' occurs with no context\n",
-		     linenum, s);
-		return -1;
-	    }
-	    if (!(t = strchr (s, '=')))
-	    {
-		log (LOG_WARN, "parse_config: line %d: no '=' in data\n",
-		     linenum);
-		return -1;
-	    }
-	    d = t;
-	    d--;
-	    t++;
-	    while ((d >= s) && (*d < 33))
-		d--;
-	    d++;
-	    *d = 0;
-	    while (*t && (*t < 33))
-		t++;
+            }
+            else
+            {
+                log (LOG_WARN,
+                     "parse_config: line %d: unknown context '%s'\n", linenum,
+                     s);
+                return -1;
+            }
+        }
+        else
+        {
+            if (!context)
+            {
+                log (LOG_WARN,
+                     "parse_config: line %d: data '%s' occurs with no context\n",
+                     linenum, s);
+                return -1;
+            }
+            if (!(t = strchr (s, '=')))
+            {
+                log (LOG_WARN, "parse_config: line %d: no '=' in data\n",
+                     linenum);
+                return -1;
+            }
+            d = t;
+            d--;
+            t++;
+            while ((d >= s) && (*d < 33))
+                d--;
+            d++;
+            *d = 0;
+            while (*t && (*t < 33))
+                t++;
 #ifdef DEBUG_FILE
-	    log (LOG_DEBUG, "parse_config: field is %s, value is %s\n", s, t);
+            log (LOG_DEBUG, "parse_config: field is %s, value is %s\n", s, t);
 #endif
-	    /* Okay, bit twidling is done.  Let's handle this */
-	    for (kw = words; kw->keyword; kw++)
-	    {
-		if (!strcasecmp (s, kw->keyword))
-		{
-		    if (kw->handler (s, t, context | def, data))
-		    {
-			log (LOG_WARN, "parse_config: line %d: %s", linenum,
-			     filerr);
-			return -1;
-		    }
-		    break;
-		}
-	    }
-	    if (!kw->keyword)
-	    {
-		log (LOG_CRIT, "parse_config: line %d: Unknown field '%s'\n",
-		     linenum, s);
-		return -1;
-	    }
-	}
+            /* Okay, bit twidling is done.  Let's handle this */
+            for (kw = words; kw->keyword; kw++)
+            {
+                if (!strcasecmp (s, kw->keyword))
+                {
+                    if (kw->handler (s, t, context | def, data))
+                    {
+                        log (LOG_WARN, "parse_config: line %d: %s", linenum,
+                             filerr);
+                        return -1;
+                    }
+                    break;
+                }
+            }
+            if (!kw->keyword)
+            {
+                log (LOG_CRIT, "parse_config: line %d: Unknown field '%s'\n",
+                     linenum, s);
+                return -1;
+            }
+        }
     }
     return 0;
 }

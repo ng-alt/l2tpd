@@ -29,8 +29,8 @@ void log (int level, const char *fmt, ...)
     va_list args;
     va_start (args, fmt);
     vsnprintf (buf, sizeof (buf), fmt, args);
-    va_end (args);		//bk - otherwise ppc segfaults
-    va_start (args, fmt);	//bk
+    va_end (args);              //bk - otherwise ppc segfaults
+    va_start (args, fmt);       //bk
     vfprintf (stderr, fmt, args);
     fflush (stderr);
     openlog (BINARY, LOG_PID, LOG_DAEMON);
@@ -47,7 +47,7 @@ void set_error (struct call *c, int error, const char *fmt, ...)
     c->needclose = -1;
     vsnprintf (c->errormsg, sizeof (c->errormsg), fmt, args);
     if (c->errormsg[strlen (c->errormsg) - 1] == '\n')
-	c->errormsg[strlen (c->errormsg) - 1] = 0;
+        c->errormsg[strlen (c->errormsg) - 1] = 0;
     va_end (args);
 }
 
@@ -55,12 +55,12 @@ struct buffer *new_buf (int size)
 {
     struct buffer *b = malloc (sizeof (struct buffer));
     if (!b || !size || size < 0)
-	return NULL;
+        return NULL;
     b->rstart = malloc (size);
     if (!b->rstart)
     {
-	free (b);
-	return NULL;
+        free (b);
+        return NULL;
     }
     b->start = b->rstart;
     b->rend = b->rstart + size - 1;
@@ -76,41 +76,40 @@ inline void recycle_buf (struct buffer *b)
 }
 
 #define bufferDumpWIDTH 16
-void bufferDump (buf, buflen)
-     char *buf;
-     int buflen;
+void bufferDump (char *buf, int buflen)
 {
     int i = 0, j = 0;
-    unsigned char line[2 * bufferDumpWIDTH + 1], *c;	/* we need TWO characters to DISPLAY ONE byte */
+    /* we need TWO characters to DISPLAY ONE byte */
+    unsigned char line[2 * bufferDumpWIDTH + 1], *c;
 
     for (i = 0; i < buflen / bufferDumpWIDTH; i++)
     {
-	c = line;
-	for (j = 0; j < bufferDumpWIDTH; j++)
-	{
-	    sprintf (c, "%02x ", (buf[i * bufferDumpWIDTH + j]) & 0xff);
-	    c++;
-	    c++;		/* again two characters to display ONE byte */
-	}
-	*c = '\0';
-	log (LOG_WARN, "%s: buflen=%d, buffer[%d]: *%s*\n", __FUNCTION__,
-	     buflen, i, line);
+        c = line;
+        for (j = 0; j < bufferDumpWIDTH; j++)
+        {
+            sprintf (c, "%02x ", (buf[i * bufferDumpWIDTH + j]) & 0xff);
+            c++;
+            c++;                /* again two characters to display ONE byte */
+        }
+        *c = '\0';
+        log (LOG_WARN, "%s: buflen=%d, buffer[%d]: *%s*\n", __FUNCTION__,
+             buflen, i, line);
     }
 
     c = line;
     for (j = 0; j < buflen % bufferDumpWIDTH; j++)
     {
-	sprintf (c, "%02x ",
-		 buf[(buflen / bufferDumpWIDTH) * bufferDumpWIDTH +
-		     j] & 0xff);
-	c++;
-	c++;
+        sprintf (c, "%02x ",
+                 buf[(buflen / bufferDumpWIDTH) * bufferDumpWIDTH +
+                     j] & 0xff);
+        c++;
+        c++;
     }
     if (c != line)
     {
-	*c = '\0';
-	log (LOG_WARN, "%s:             buffer[%d]: *%s*\n", __FUNCTION__, i,
-	     line);
+        *c = '\0';
+        log (LOG_WARN, "%s:             buffer[%d]: *%s*\n", __FUNCTION__, i,
+             line);
     }
 }
 
@@ -121,22 +120,22 @@ void do_packet_dump (struct buffer *buf)
     printf ("packet dump: \nHEX: { ");
     for (x = 0; x < buf->len; x++)
     {
-	printf ("%.2X ", *c);
-	c++;
+        printf ("%.2X ", *c);
+        c++;
     };
     printf ("}\nASCII: { ");
     c = buf->start;
     for (x = 0; x < buf->len; x++)
     {
-	if (*c > 31 && *c < 127)
-	{
-	    putchar (*c);
-	}
-	else
-	{
-	    putchar (' ');
-	}
-	c++;
+        if (*c > 31 && *c < 127)
+        {
+            putchar (*c);
+        }
+        else
+        {
+            putchar (' ');
+        }
+        c++;
     }
     printf ("}\n");
 }
@@ -151,9 +150,9 @@ inline void swaps (void *buf_v, int len)
     unsigned char *tmp = (_u16 *) buf_v;
     for (x = 0; x < len; x += 2)
     {
-	t1 = tmp[x];
-	tmp[x] = tmp[x + 1];
-	tmp[x + 1] = t1;
+        t1 = tmp[x];
+        tmp[x] = tmp[x + 1];
+        tmp[x + 1] = t1;
     }
 #else
 
@@ -162,7 +161,7 @@ inline void swaps (void *buf_v, int len)
     int x;
     _u16 *tmp = (_u16 *) buf_v;
     for (x = 0; x < len / 2; x++)
-	tmp[x] = ntohs (tmp[x]);
+        tmp[x] = ntohs (tmp[x]);
 #endif
 }
 
@@ -193,10 +192,10 @@ struct ppp_opts *add_opt (struct ppp_opts *option, char *fmt, ...)
     new = (struct ppp_opts *) malloc (sizeof (struct ppp_opts));
     if (!new)
     {
-	log (LOG_WARN,
-	     "%s : Unable to allocate ppp option memory.  Expect a crash\n",
-	     __FUNCTION__);
-	return NULL;
+        log (LOG_WARN,
+             "%s : Unable to allocate ppp option memory.  Expect a crash\n",
+             __FUNCTION__);
+        return NULL;
     }
     new->next = NULL;
     va_start (args, fmt);
@@ -204,22 +203,22 @@ struct ppp_opts *add_opt (struct ppp_opts *option, char *fmt, ...)
     va_end (args);
     if (option)
     {
-	last = option;
-	while (last->next)
-	    last = last->next;
-	last->next = new;
-	return option;
+        last = option;
+        while (last->next)
+            last = last->next;
+        last->next = new;
+        return option;
     }
     else
-	return new;
+        return new;
 }
 void opt_destroy (struct ppp_opts *option)
 {
     struct ppp_opts *tmp;
     while (option)
     {
-	tmp = option->next;
-	free (option);
-	option = tmp;
+        tmp = option->next;
+        free (option);
+        option = tmp;
     };
 }

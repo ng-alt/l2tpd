@@ -34,14 +34,14 @@ struct addr_ent
 struct challenge
 {
     struct MD5Context md5;
-    unsigned char ss;		/* State we're sending in */
-    unsigned char secret[MAXSTRLEN];	/* The shared secret */
-    unsigned char challenge[MD_SIG_SIZE];	/* The original challenge */
-    unsigned char response[MD_SIG_SIZE];	/* What we expect as a respsonse */
-    unsigned char reply[MD_SIG_SIZE];	/* What the peer sent */
+    unsigned char ss;           /* State we're sending in */
+    unsigned char secret[MAXSTRLEN];    /* The shared secret */
+    unsigned char *challenge;       /* The original challenge */
+    unsigned char response[MD_SIG_SIZE];        /* What we expect as a respsonse */
+    unsigned char reply[MD_SIG_SIZE];   /* What the peer sent */
     unsigned char *vector;
     unsigned int vector_len;
-    int state;			/* What state is challenge in? */
+    int state;                  /* What state is challenge in? */
 };
 
 extern struct lns *get_lns (struct tunnel *);

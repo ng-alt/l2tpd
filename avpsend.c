@@ -40,9 +40,9 @@ int add_message_type_avp (struct buffer *buf, _u16 type)
 int add_protocol_avp (struct buffer *buf)
 {
     _u16 *raw = (_u16 *) (buf->start + buf->len);
-    raw[0] = htons (0x8 | MBIT);	/* Length and M bit */
+    raw[0] = htons (0x8 | MBIT);        /* Length and M bit */
     raw[1] = htons (VENDOR_ID);
-    raw[2] = htons (0x2);	/* Value of our AVP */
+    raw[2] = htons (0x2);       /* Value of our AVP */
     raw[3] = htons (OUR_L2TP_VERSION);
     buf->len += 8;
     return 0;
@@ -176,7 +176,7 @@ int add_randvect_avp (struct buffer *buf, char *c, int len)
 }
 
 int add_result_code_avp (struct buffer *buf, _u16 result, _u16 error,
-			 char *msg, int len)
+                         char *msg, int len)
 {
     _u16 *raw = (_u16 *) (buf->start + buf->len);
     raw[0] = htons ((0xA + len) | MBIT);
@@ -199,7 +199,7 @@ int add_callid_avp (struct buffer *buf, _u16 callid)
     _u16 *raw = (_u16 *) (buf->start + buf->len);
 #ifdef TEST_HIDDEN
     if (t->hbit)
-	raw++;
+        raw++;
 #endif
     raw[0] = htons (0x8 | MBIT);
     raw[1] = htons (VENDOR_ID);
@@ -208,7 +208,7 @@ int add_callid_avp (struct buffer *buf, _u16 callid)
     buf->len += 8;
 #ifdef TEST_HIDDEN
     if (t->hbit)
-	encrypt_avp (buf, 8, t);
+        encrypt_avp (buf, 8, t);
 #endif
     return 0;
 }

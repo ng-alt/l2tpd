@@ -54,49 +54,49 @@ void alarm_handler (int signal)
     cnt++;
     if (cnt != 1)
     {
-	/* Whoa, we got called from within ourselves! */
-	log (LOG_DEBUG, "%s : Whoa... cnt = %d\n", __FUNCTION__, cnt);
-	return;
+        /* Whoa, we got called from within ourselves! */
+        log (LOG_DEBUG, "%s : Whoa... cnt = %d\n", __FUNCTION__, cnt);
+        return;
     }
     while (events)
     {
-	gettimeofday (&now, NULL);
-	p = events;
-	if (TVLESSEQ (p->tv, now))
-	{
-	    events = events->next;
-	    /* This needs to be executed, as it has expired.
-	       It is expected that p->func will free p->data
-	       if it is necessary */
-	    (*p->func) (p->data);
-	    free (p);
-	}
-	else
-	    break;
+        gettimeofday (&now, NULL);
+        p = events;
+        if (TVLESSEQ (p->tv, now))
+        {
+            events = events->next;
+            /* This needs to be executed, as it has expired.
+               It is expected that p->func will free p->data
+               if it is necessary */
+            (*p->func) (p->data);
+            free (p);
+        }
+        else
+            break;
     }
     /* When we get here, either there are no more events
        in the queue, or the remaining events need to happen
        in the future, so we should schedule another alarm */
     if (events)
     {
-	then.tv_sec = events->tv.tv_sec - now.tv_sec;
-	then.tv_usec = events->tv.tv_usec - now.tv_usec;
-	if (then.tv_usec < 0)
-	{
-	    then.tv_sec -= 1;
-	    then.tv_usec += 1000000;
-	}
-	if ((then.tv_sec <= 0) && (then.tv_usec <= 0))
-	{
-	    log (LOG_WARN, "%s: Whoa...  Scheduling for <=0 time???\n",
-		 __FUNCTION__);
-	}
-	else
-	{
-	    itv.it_interval = zero;
-	    itv.it_value = then;
-	    setitimer (ITIMER_REAL, &itv, NULL);
-	}
+        then.tv_sec = events->tv.tv_sec - now.tv_sec;
+        then.tv_usec = events->tv.tv_usec - now.tv_usec;
+        if (then.tv_usec < 0)
+        {
+            then.tv_sec -= 1;
+            then.tv_usec += 1000000;
+        }
+        if ((then.tv_sec <= 0) && (then.tv_usec <= 0))
+        {
+            log (LOG_WARN, "%s: Whoa...  Scheduling for <=0 time???\n",
+                 __FUNCTION__);
+        }
+        else
+        {
+            itv.it_interval = zero;
+            itv.it_value = then;
+            setitimer (ITIMER_REAL, &itv, NULL);
+        }
     }
     cnt--;
 }
@@ -115,7 +115,7 @@ void schedule_unlock ()
 };
 
 struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
-				 void *data)
+                                 void *data)
 {
     /* Schedule func to be run at relative time tv with data
        as arguments.  If it has already expired, run it 
@@ -131,27 +131,27 @@ struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
     tv.tv_usec += diff.tv_usec;
     if (tv.tv_usec > 1000000)
     {
-	tv.tv_sec++;
-	tv.tv_usec -= 1000000;
+        tv.tv_sec++;
+        tv.tv_usec -= 1000000;
     }
     while (p)
     {
-	if (TVLESS (tv, p->tv))
-	    break;
-	q = p;
-	p = p->next;
+        if (TVLESS (tv, p->tv))
+            break;
+        q = p;
+        p = p->next;
     };
     if (q)
     {
-	q->next =
-	    (struct schedule_entry *) malloc (sizeof (struct schedule_entry));
-	q = q->next;
+        q->next =
+            (struct schedule_entry *) malloc (sizeof (struct schedule_entry));
+        q = q->next;
     }
     else
     {
-	q = (struct schedule_entry *) malloc (sizeof (struct schedule_entry));
-	events = q;
-	need_timer = -1;
+        q = (struct schedule_entry *) malloc (sizeof (struct schedule_entry));
+        events = q;
+        need_timer = -1;
     }
     q->tv = tv;
     q->func = func;
@@ -159,9 +159,9 @@ struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
     q->next = p;
     if (need_timer)
     {
-	itv.it_interval = zero;
-	itv.it_value = diff;
-	setitimer (ITIMER_REAL, &itv, NULL);
+        itv.it_interval = zero;
+        itv.it_value = diff;
+        setitimer (ITIMER_REAL, &itv, NULL);
 
     }
     return q;
@@ -169,7 +169,7 @@ struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
 }
 
 inline struct schedule_entry *aschedule (struct timeval tv,
-					 void (*func) (void *), void *data)
+                                         void (*func) (void *), void *data)
 {
     /* Schedule func to be run at absolute time tv in the future with data
        as arguments */
@@ -178,8 +178,8 @@ inline struct schedule_entry *aschedule (struct timeval tv,
     tv.tv_usec -= now.tv_usec;
     if (tv.tv_usec < 0)
     {
-	tv.tv_usec += 1000000;
-	tv.tv_sec--;
+        tv.tv_usec += 1000000;
+        tv.tv_sec--;
     }
     tv.tv_sec -= now.tv_sec;
     return schedule (tv, func, data);
@@ -189,23 +189,23 @@ void deschedule (struct schedule_entry *s)
 {
     struct schedule_entry *p = events, *q = NULL;
     if (!s)
-	return;
+        return;
     while (p)
     {
-	if (p == s)
-	{
-	    if (q)
-	    {
-		q->next = p->next;
-	    }
-	    else
-	    {
-		events = events->next;
-	    }
-	    free (p);
-	    break;
-	}
-	q = p;
-	p = p->next;
+        if (p == s)
+        {
+            if (q)
+            {
+                q->next = p->next;
+            }
+            else
+            {
+                events = events->next;
+            }
+            free (p);
+            break;
+        }
+        q = p;
+        p = p->next;
     }
 }

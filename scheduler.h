@@ -23,10 +23,10 @@
 
 struct schedule_entry
 {
-    struct timeval tv;		/* Scheduled time to execute */
-    void (*func) (void *);	/* Function to execute */
-    void *data;			/* Data to be passed to func */
-    struct schedule_entry *next;	/* Next entry in queue */
+    struct timeval tv;          /* Scheduled time to execute */
+    void (*func) (void *);      /* Function to execute */
+    void *data;                 /* Data to be passed to func */
+    struct schedule_entry *next;        /* Next entry in queue */
 };
 
 extern struct schedule_entry *events;
@@ -35,12 +35,12 @@ extern struct schedule_entry *events;
    tv in the future. */
 
 struct schedule_entry *schedule (struct timeval tv, void (*func) (void *),
-				 void *data);
+                                 void *data);
 
 /* Like schedule() but tv represents an absolute time in the future */
 
 struct schedule_entry *aschedule (struct timeval tv, void (*func) (void *),
-				  void *data);
+                                  void *data);
 
 /* Remove a scheduled event from the queue */
 
