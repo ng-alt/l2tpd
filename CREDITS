@@ -20,4 +20,10 @@ The MD5 code was written by Colin Plumb, and is without copyright (public domain
 This project was forked January 12, 2001 by Scott Balmos and David Stipp due to the apparent inactivity of the project.
 We also would like to thank the following people who helped us after the fork:
 
-* Jeff McAdams, IgLou Internet Services, for helping clean up some outstanding PPPd and control packet issues in the code
+* Jeff McAdams, IgLou Internet Services, for being our own Alan Cox clone.
+
+* Huiban Yoann, Siemens, for some scaleability improvements.
+
+* Jens Zerbst, for initial implementation of a rudimentary Outgoing Call Request system
+
+* Everyone out there who have submitted an uncountable amount of little bug fixes. Thanks all!!!

@@ -32,6 +32,8 @@ struct keyword words[];
 int init_config() 
 {
 	FILE *f;
+	int returnedValue;
+
 	gconfig.port=UDP_LISTEN_PORT;
 	strncpy(gconfig.authfile,DEFAULT_AUTH_FILE, sizeof(gconfig.authfile));
 	lnslist=NULL;
@@ -42,7 +44,9 @@ int init_config()
 		log(LOG_CRIT, "%s: Unable to open config file %s\n",__FUNCTION__,CONFIG_FILE);
 		return -1;
 	}
-	return parse_config(f);
+	returnedValue =  parse_config(f);
+	fclose(f);
+	return(returnedValue);
 	filerr[0]=0;
 };
 
@@ -83,6 +87,7 @@ struct lns *new_lns()
 	tmp->proxyauth=0;
 	tmp->challenge=0;
 	tmp->debug=0;
+	tmp->pppoptfile[0]=0;
 	tmp->t=NULL;
 	return tmp;
 }
@@ -123,6 +128,7 @@ struct lac *new_lac()
 	tmp->rtimeout=30;
 	tmp->active=0;
 	tmp->debug=0;
+	tmp->pppoptfile[0]=0;
 	tmp->defaultroute=0;
 	return tmp;
 }
@@ -471,6 +477,26 @@ int set_debug(char *word, char *value, int context, void *item)
 	return 0;
 }
 
+int set_pppoptfile(char *word, char *value, int context, void *item)
+{
+	struct lac *l=(struct lac *)item;
+	struct lns *n=(struct lns *)item;
+	switch(context & ~CONTEXT_DEFAULT) {
+	case CONTEXT_LNS:
+		if (set_string(word,value,n->pppoptfile, sizeof(n->pppoptfile)))
+			return -1;
+		break;
+	case CONTEXT_LAC:
+		if (set_string(word,value,l->pppoptfile, sizeof(l->pppoptfile)))
+			return -1;
+		break;
+	default:
+		snprintf(filerr, sizeof(filerr),"'%s' not valid in this context\n",word);
+		return -1;
+	}
+	return 0;
+}
+
 int set_papchap(char *word, char *value, int context, void *item)
 {
 	int result;
@@ -669,7 +695,7 @@ int set_ip(char *word, char *value, unsigned int *addr)
 	struct hostent *hp;
 	hp=gethostbyname(value);
 	if (!hp) {
-		snprintf(filerr, sizeof(filerr), "%s: host '%s' not found\n",value);
+		snprintf(filerr, sizeof(filerr), "%s: host '%s' not found\n",__FUNCTION__,value);
 		return -1;
 	}
 	bcopy(hp->h_addr, addr, sizeof(unsigned int));
@@ -727,7 +753,7 @@ int set_lns(char *word, char *value, int context, void *item)
 		}
 		hp=gethostbyname(value);
 		if (!hp) {
-			snprintf(filerr, sizeof(filerr), "no such host '%s'\n");
+			snprintf(filerr, sizeof(filerr), "no such host '%s'\n",value);
 			return -1;
 		}
 		ipr = malloc(sizeof(struct host));
@@ -940,6 +966,7 @@ struct keyword words[] = {
 { "name", &set_authname },
 { "hostname", &set_hostname },
 { "ppp debug", &set_debug },
+{ "pppoptfile", &set_pppoptfile },
 { "call rws", &set_rws },
 { "tunnel rws", &set_rws },
 { "flow bit", &set_flow },

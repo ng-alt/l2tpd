@@ -80,6 +80,7 @@ int add_firmware_avp(struct buffer *buf) {
 	return 0;
 }
 
+/*
 int add_hostname_avp(struct buffer *buf) {
 	_u16 *raw = (_u16 *)(buf->start + buf->len);
 	raw[0] = htons((0x6 + strlen(hostname)) | MBIT);
@@ -88,6 +89,18 @@ int add_hostname_avp(struct buffer *buf) {
 	strcpy((char *)(&raw[3]), hostname);
 	buf->len += 6 + strlen(hostname);
 	return 0;
+}
+*/
+
+int add_hostname_avp(struct buffer *buf) {
+	char names[6]="eriwan";
+        _u16 *raw = (_u16 *)(buf->start + buf->len);
+        raw[0] = htons(0xC | MBIT);
+        raw[1] = htons(VENDOR_ID);
+        raw[2] = htons(0x7);
+        strcpy((char *)(&raw[3]), names);
+        buf->len += 12;
+        return 0;
 }
 
 int add_vendor_avp(struct buffer *buf) {
@@ -266,4 +279,41 @@ int add_seqreqd_avp(struct buffer *buf) {
 	raw[2] = htons(0x27);
 	buf->len += 6;
 	return 0;
+}
+
+/* jz: options dor the outgoing call */
+
+/* jz: Minimum BPS - 16 */
+int add_minbps_avp(struct buffer *buf, int speed) {
+        _u16 *raw = (_u16 *)(buf->start + buf->len);
+        raw[0] = htons(0xA | MBIT);
+        raw[1] = htons(VENDOR_ID);
+        raw[2] = htons(0x10);
+        raw[3] = htons((speed >> 16) & 0xFFFF);
+        raw[4] = htons(speed & 0xFFFF);
+        buf->len += 10;
+        return 0;
+}
+
+/* jz: Maximum BPS - 17 */
+int add_maxbps_avp(struct buffer *buf, int speed) {
+        _u16 *raw = (_u16 *)(buf->start + buf->len);
+        raw[0] = htons(0xA | MBIT);
+        raw[1] = htons(VENDOR_ID);
+        raw[2] = htons(0x11);
+        raw[3] = htons((speed >> 16) & 0xFFFF);
+        raw[4] = htons(speed & 0xFFFF);
+        buf->len += 10;
+        return 0;
+}
+
+/* jz: Dialed Number 21 */
+int add_number_avp(struct buffer *buf, char *no) {
+	_u16 *raw = (_u16 *)(buf->start + buf->len);
+        raw[0] = htons((0x6 + strlen(no)) | MBIT);
+        raw[1] = htons(VENDOR_ID);
+        raw[2] = htons(0x15);
+        strncpy((char *)(&(raw[3])), no, strlen(no));
+        buf->len += 6 + strlen(no);
+        return 0;
 }

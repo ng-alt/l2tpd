@@ -88,7 +88,10 @@ l2tpd must be running for this to work.
 
 Various other notes
 -------------------
-The PPP options are hard coded in l2tp.h until a file format is decided upon. Sending a SIGUSR1 to l2tpd will cause it to dump its status.
+The PPP options used to be hard coded in l2tp.h.  Now they (or at least
+some) are configurable - see the example config file and read file.[ch].
+
+Sending a SIGUSR1 to l2tpd will cause it to dump its status.
 
 Mailing List
 ------------

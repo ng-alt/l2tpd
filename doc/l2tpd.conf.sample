@@ -32,6 +32,7 @@
 ; unix authentication = no				; * Use /etc/passwd for auth.
 ; name = myhostname						; * Report this as our hostname
 ; ppp debug = no						; * Turn on PPP debugging
+; pppoptfile = /etc/ppp/options.l2tpd.lns	; * ppp options file
 ; call rws = 10							; * RWS for call (-1 is valid)
 ; tunnel rws = 4						; * RWS for tunnel (must be > 0)
 ; flow bit = yes						; * Include sequence numbers
@@ -55,6 +56,7 @@
 ; require authentication = yes			; * Require peer to authenticate
 ; name = marko							; * Report this as our hostname
 ; ppp debug = no						; * Turn on PPP debugging
+; pppoptfile = /etc/ppp/options.l2tpd.marko	; * ppp options file for this lac
 ; call rws = 10							; * RWS for call (-1 is valid)
 ; tunnel rws = 4						; * RWS for tunnel (must be > 0)
 ; flow bit = yes						; * Include sequence numbers

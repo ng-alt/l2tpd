@@ -176,6 +176,7 @@ int control_finish(struct tunnel *t, struct call *c) {
 #endif
 	char ip1[STRLEN];
 	char ip2[STRLEN];
+	char dummy_buf[128]="/var/l2tp/";  /* jz: needed to read /etc/ppp/var.options - just kick it if you dont like */	
 	if (c->msgtype < 0) {
 		log(LOG_DEBUG, "%s: Whoa...  non-ZLB with no message type!\n", __FUNCTION__);
 		return -EINVAL;
@@ -230,38 +231,74 @@ int control_finish(struct tunnel *t, struct call *c) {
 				log(LOG_DEBUG, "%s: control_finish: sending SCCRQ\n", __FUNCTION__);
 			control_xmit(buf); 
 		} else {
-			c->state = ICRQ;
-			if (c->lns) {
-				c->lbit = c->lns->lbit ? LBIT : 0;
-/*				c->ourrws = c->lns->call_rws;
-				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
-			} else if (c->lac) {
-				c->lbit = c->lac->lbit ? LBIT : 0;
-/*				c->ourrws = c->lac->call_rws;
-				if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
-			}
-			buf = new_outgoing(t);
-			add_message_type_avp(buf,ICRQ);
-			if (t->hbit) {
-				mk_challenge(t->chal_them.vector,VECTOR_SIZE);
-				add_randvect_avp(buf,t->chal_them.vector, VECTOR_SIZE);
-			}
+			if(switch_io) {
+					c->state = ICRQ;
+					if (c->lns) {
+					c->lbit = c->lns->lbit ? LBIT : 0;
+/*					c->ourrws = c->lns->call_rws;
+					if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
+					} else if (c->lac) {
+					c->lbit = c->lac->lbit ? LBIT : 0;
+/*					c->ourrws = c->lac->call_rws;
+					if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
+					}
+					buf = new_outgoing(t);
+					add_message_type_avp(buf,ICRQ);
+					if (t->hbit) {
+						mk_challenge(t->chal_them.vector,VECTOR_SIZE);
+						add_randvect_avp(buf,t->chal_them.vector, VECTOR_SIZE);
+						}
 #ifdef TEST_HIDDEN
-			add_callid_avp(buf, c->ourcid, t);
+					add_callid_avp(buf, c->ourcid, t);
 #else
-			add_callid_avp(buf, c->ourcid);
+					add_callid_avp(buf, c->ourcid);
 #endif
-			add_serno_avp(buf, global_serno);
-			c->serno = global_serno;
-			global_serno++;
-			add_bearer_avp(buf, 0);
-			add_control_hdr(t,c,buf);
-			c->cnu =  0; 
-			if (packet_dump)   
-				do_packet_dump(buf);
-			if (debug_state)
-				log(LOG_DEBUG, "%s: sending ICRQ\n",__FUNCTION__);
-			control_xmit(buf);
+					add_serno_avp(buf, global_serno);
+					c->serno = global_serno;
+					global_serno++;
+					add_bearer_avp(buf, 0);
+					add_control_hdr(t,c,buf);
+					c->cnu =  0; 
+					if (packet_dump)   
+						do_packet_dump(buf);
+					if (debug_state)
+						log(LOG_DEBUG, "%s: sending ICRQ\n",__FUNCTION__);
+					control_xmit(buf);
+			} else {		/* jz: sending a OCRQ */
+				c->state = OCRQ;           		
+                                if (c->lns) {
+                                        c->lbit = c->lns->lbit ? LBIT : 0;
+/*                                      c->ourrws = c->lns->call_rws;
+                                        if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
+                                } else if (c->lac) {
+/*                                      c->ourrws = c->lac->call_rws;
+                                        if (c->ourrws > -1) c->ourfbit = FBIT; else c->ourfbit = 0; */
+                                }
+
+				if (t->fc & SYNC_FRAMING)
+                        		c->frame = SYNC_FRAMING;
+                		else c->frame = ASYNC_FRAMING;
+				buf = new_outgoing(t);					
+	                        add_message_type_avp(buf,OCRQ);
+#ifdef TEST_HIDDEN
+                                add_callid_avp(buf, c->ourcid, t);
+#else
+                                add_callid_avp(buf, c->ourcid);
+#endif
+				add_serno_avp(buf, global_serno);
+					c->serno = global_serno;
+                	                global_serno++;			
+				add_minbps_avp(buf, DEFAULT_MIN_BPS);
+				add_maxbps_avp(buf, DEFAULT_MAX_BPS);	
+				add_bearer_avp(buf, 0);                
+			        add_frame_avp(buf,c->frame);			
+				add_number_avp(buf, c->dial_no);			
+				add_control_hdr(t,c,buf);                        
+				c->cnu =  0;                       				
+                        	if (packet_dump)   
+						do_packet_dump(buf);                        
+				control_xmit(buf);	
+			}
 		}
 		break;
 	case SCCRQ:
@@ -684,6 +721,10 @@ int control_finish(struct tunnel *t, struct call *c) {
 			}
 			if (c->lac->debug)
 				po=add_opt(po,"debug");
+			if (c->lac->pppoptfile[0]) {
+				po=add_opt(po,"file");
+				po=add_opt(po,c->lac->pppoptfile);
+			}
 		};
 		start_pppd(c, po);
 		opt_destroy(po);
@@ -755,10 +796,69 @@ int control_finish(struct tunnel *t, struct call *c) {
 		}
 		if (c->lns->debug) 
 			po=add_opt(po,"debug");
+		if (c->lns->pppoptfile[0]) {
+			po=add_opt(po,"file");
+			po=add_opt(po,c->lns->pppoptfile);
+		}
 		start_pppd(c, po);
 		opt_destroy(po);
 		log(LOG_LOG,"%s: Call established with %s, Local: %d, Remote: %d, Serial: %d\n",__FUNCTION__, IPADDY(t->peer.sin_addr),c->ourcid, c->cid, c->serno);
 		break;
+	case OCRP:	/* jz: nothing to do for OCRP, waiting for OCCN */
+		break;
+	case OCCN:	/* jz: get OCCN, so the only thing we must do is to start the pppd */
+                po=NULL;
+                po=add_opt(po, "passive");
+                po=add_opt(po, "-detach");
+                po=add_opt(po,"file");
+		strcat(dummy_buf, c->dial_no); /* jz: use /etc/ppp/dialnumber.options for pppd - kick it if you dont like */
+		strcat(dummy_buf, ".options");	
+	        po=add_opt(po, dummy_buf);
+	        if (c->lac) {
+                        if (c->lac->defaultroute)
+                                po=add_opt(po, "defaultroute");
+                        strncpy(ip1,IPADDY(c->lac->localaddr),sizeof(ip1));
+                        strncpy(ip2,IPADDY(c->lac->remoteaddr),sizeof(ip2));
+                        po=add_opt(po,"%s:%s",c->lac->localaddr ? ip1 : "",
+                                                c->lac->remoteaddr ? ip2 : "");
+                        if (c->lac->authself) {
+                                if (c->lac->pap_refuse)
+                                        po=add_opt(po, "refuse-pap");
+                                if (c->lac->chap_refuse)
+                                        po=add_opt(po, "refuse-chap");
+                        } else {
+                                po=add_opt(po, "refuse-pap");
+                                po=add_opt(po, "refuse-chap");
+                        }
+                        if (c->lac->authpeer) {
+                                po=add_opt(po,"auth");
+                                if (c->lac->pap_require)
+                                        po=add_opt(po, "require-pap");
+                                if (c->lac->chap_require)
+                                        po=add_opt(po, "require-chap");
+                        }
+                        if (c->lac->authname[0]) {
+                                po=add_opt(po,"name");
+                                po=add_opt(po,c->lac->authname);
+                        }
+                        if (c->lac->debug)
+                                po=add_opt(po,"debug");
+                        if (c->lac->pppoptfile[0]) {
+                                po=add_opt(po,"file");
+                                po=add_opt(po,c->lac->pppoptfile);
+                        }
+                };
+                start_pppd(c, po);
+
+                log(LOG_LOG,"parameters: Local: %d , Remote: %d , Serial: %d , Pid: %d , Tunnelid: %d , Phoneid: %s\n",
+                        c->ourcid, c->cid, c->serno, c->pppd, t->ourtid, c->dial_no); /*  jz: just show some information */
+ 
+                opt_destroy(po);
+                if (c->lac)
+                        c->lac->rtries=0;
+                break;	
+
+		
 	case CDN:
 		if (c->qcid<0)  {
 			if (DEBUG) log(LOG_DEBUG,
@@ -1167,19 +1267,29 @@ inline int write_packet(struct buffer *buf, struct tunnel *t, struct call *c, in
 		err=write(c->fd,buf->start,buf->len);
 		if (err == buf->len) {
 			return 0;
-		} else if (err==0) {
+		} else if (err == 0) {
 			log(LOG_WARN, "%s: wrote no bytes of async packet\n",__FUNCTION__);
 			return -EINVAL;
 		} else
-		if (err<buf->len) {
+        if (err < 0)
+        {
+            if ((errno == EAGAIN) || (errno == EINTR))
+            {
+                continue;
+            } else
+            {
+                log(LOG_WARN, "%s: async write failed: %s\n",__FUNCTION__,strerror(errno));
+            }
+        } else
+		if (err < buf->len) {
 			log(LOG_WARN, "%s: short write (%d of %d bytes)\n",__FUNCTION__,err,buf->len);
 			return -EINVAL;
-		} else if ((errno == EAGAIN) || (errno = EINTR))  /* retry on interrupt */
-			continue;
-		else {
-			log(LOG_WARN, "%s: async write failed: %s\n",__FUNCTION__,strerror(errno));
-			return -EINVAL;
-		}
+		} else
+        if (err > buf->len)
+        {
+            log(LOG_WARN, "%s: write returned LONGER than buffer length?\n",__FUNCTION__);
+            return -EINVAL;
+        }
 	}
 
 	/*

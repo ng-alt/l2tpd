@@ -66,6 +66,7 @@ struct call {
 						*/
 	struct tunnel *container; /* Tunnel we belong to */
 	int fd;			/* File descriptor for pty */
+	struct termios *oldptyconf;
 	int die;
 	int nego;		/* Show negotiation? */
 	int pppd;		/* PID of pppd */
@@ -85,6 +86,7 @@ struct call {
 	int  pLr;		/* Last packet received by peer */
 	struct lns *lns;	/* LNS that owns us */
 	struct lac *lac;	/* LAC that owns us */
+	char dial_no[128];	/* jz: dialing number for outgoing call */
 };
 
 

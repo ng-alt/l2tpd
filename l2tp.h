@@ -21,6 +21,7 @@ typedef unsigned long long _u64;
 #define MAXSTRLEN 120		/* Maximum length of common strings */
 
 #include <netinet/in.h>
+#include <termios.h>
 #include "osport.h"
 #include "scheduler.h"
 #include "misc.h"
@@ -33,11 +34,11 @@ typedef unsigned long long _u64;
 #define CONTROL_PIPE "/var/run/l2tp-control"
 
 #define BINARY "l2tpd"
-#define SERVER_VERSION "0.63"
+#define SERVER_VERSION "0.64"
 #define VENDOR_NAME "Adtran, l2tpd"
 #define PPPD		"/usr/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
-#define FIRMWARE_REV	0x0500	/* Revision of our firmware (software, in this case) */
+#define FIRMWARE_REV	0x0640	/* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32	/* By default only allow this many
 				   tunnels to exist */
 
@@ -88,6 +89,8 @@ struct payload_hdr {
 				   control packets in queue */
 #define DEFAULT_TX_BPS		10000000	/* For outgoing calls, report this speed */
 #define DEFAULT_RX_BPS		10000000
+#define DEFAULT_MAX_BPS		10000000	/* jz: outgoing calls max bps */
+#define DEFAULT_MIN_BPS		10000		/* jz: outgoing calls min bps */
 #define PAYLOAD_FUDGE		2	/* How many packets we're willing to drop */
 #define MIN_PAYLOAD_HDR_LEN 6
 
@@ -95,7 +98,7 @@ struct payload_hdr {
 				/* FIXME: MAX_RECV_SIZE, what is it? */
 #define MAX_RECV_SIZE 4096	/* Biggest packet we'll accept */
 
-#define OUR_L2TP_VERSION 0x100	/* We suppport version 1, revision 0 */
+#define OUR_L2TP_VERSION 0x100	/* We support version 1, revision 0 */
 
 #define PTBIT(ver) CTBIT(ver)	/* Type bit:  Must be zero for us */
 #define PLBIT(ver) CLBIT(ver)	/* Length specified? */
@@ -194,6 +197,7 @@ extern int read_packet(struct buffer *, int, int);
 extern void udp_xmit(struct buffer *);
 extern void control_xmit(void *);
 extern int ppd;
+extern int switch_io;		/* jz */
 extern int control_fd;
 extern int start_pppd(struct call *c, struct ppp_opts *);
 extern void magic_lac_dial(void *);

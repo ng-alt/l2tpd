@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <termios.h>
 #include "l2tp.h"
 #ifdef USE_KERNEL
 #include <sys/ioctl.h>
@@ -162,6 +163,9 @@ int read_packet(struct buffer *buf, int fd, int convert) {
 		}
 	}
 	/* I should never get here */
+	log(LOG_WARN, "%s: You should not see this message.  If you do, please
+		       enter a bug report at http://sourceforge.net/projects/l2tpd",
+		       __FUNCTION__);
 	return -EINVAL;			
 }
 
@@ -436,6 +440,7 @@ struct call *new_call(struct tunnel *parent) {
 	tmp->container = parent;
 /*	tmp->rws = -1; */
 	tmp->fd = -1;
+	tmp->oldptyconf = malloc(sizeof(struct termios));
 	tmp->pnu = 0;
 	tmp->cnu = 0;
 	tmp->needclose = 0;
@@ -455,8 +460,11 @@ struct call *new_call(struct tunnel *parent) {
 /*	tmp->ourrws = DEFAULT_RWS_SIZE;	 */
 /*	if (tmp->ourrws >= 0)
 		tmp->ourfbit = FBIT;
-	else
-		tmp->ourfbit = 0; */
+	else */
+	tmp->ourfbit = 0;   /* initialize to 0 since we don't actually use this 
+			       value at this point anywhere in the code (I don't 
+			       think)  We might just be able to remove it completely */
+	tmp->dial_no[0]='\0';		/* jz: dialing number for outgoing call */
 	return tmp;
 }
 

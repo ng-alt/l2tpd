@@ -131,3 +131,7 @@ extern int add_ppd_avp(struct buffer *, _u16 );
 extern int add_seqreqd_avp(struct buffer *);
 extern int add_chalresp_avp(struct buffer *, char *, int);
 extern int add_randvect_avp(struct buffer *, char *, int);
+extern int add_minbps_avp(struct buffer *buf, int speed); /* jz: needed for outgoing call */
+extern int add_maxbps_avp(struct buffer *buf, int speed); /* jz: needed for outgoing call */
+extern int add_number_avp(struct buffer *buf, char *no);  /* jz: needed for outgoing call */
+

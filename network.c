@@ -51,6 +51,8 @@ int init_network(void) {
 		log(LOG_CRIT,"%s: Unable to allocate socket. Terminating.\n",__FUNCTION__); 		
 		return -EINVAL;
 	};
+	/* L2TP/IPSec: Set up SA for listening port here?  NTB 20011015
+	 */
 	if (bind( server_socket, (struct sockaddr *)&server, sizeof(server))) {
 		close(server_socket);
 		log(LOG_CRIT, "%s: Unable to bind socket. Terminating.\n",__FUNCTION__ ); 		

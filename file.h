@@ -51,77 +51,79 @@ struct host {
 /* Definition of an LNS */
 struct lns {
 	struct lns *next;
-	int exclusive;				/* Only one tunnel per host? */
-	int active;					/* Is this actively in use? */
+	int exclusive;			/* Only one tunnel per host? */
+	int active;			/* Is this actively in use? */
 	unsigned int localaddr;		/* Local IP for PPP connections */
-	int tun_rws;				/* Receive window size (tunnel) */
-	int call_rws;				/* Call rws */
-	int hbit;					/* Permit hidden AVP's? */
-	int lbit;					/* Use the length field? */
-	int challenge;				/* Challenge authenticate the peer? */
-	int authpeer;				/* Authenticate our peer? */
-	int authself;				/* Authenticate ourselves? */
+	int tun_rws;			/* Receive window size (tunnel) */
+	int call_rws;			/* Call rws */
+	int hbit;			/* Permit hidden AVP's? */
+	int lbit;			/* Use the length field? */
+	int challenge;			/* Challenge authenticate the peer? */
+	int authpeer;			/* Authenticate our peer? */
+	int authself;			/* Authenticate ourselves? */
 	char authname[STRLEN];		/* Who we authenticate as */
 	char peername[STRLEN];		/* Force peer name to this */
 	char hostname[STRLEN];		/* Hostname to report */
 	char entname[STRLEN];		/* Name of this entry */
 	struct iprange *lacs;		/* Hosts permitted to connect */
 	struct iprange *range;		/* Range of IP's we provide */
-	int passwdauth;				/* Authenticate by passwd file? (or PAM)*/
-	int pap_require;			/* Require PAP auth for PPP */
-	int chap_require;			/* Require CHAP auth for PPP */
-	int pap_refuse;				/* Refuse PAP authentication for us */
-	int chap_refuse;			/* Refuse CHAP authentication for us */
-	int idle;					/* Idle timeout in seconds */
+	int passwdauth;			/* Authenticate by passwd file? (or PAM)*/
+	int pap_require;		/* Require PAP auth for PPP */
+	int chap_require;		/* Require CHAP auth for PPP */
+	int pap_refuse;			/* Refuse PAP authentication for us */
+	int chap_refuse;		/* Refuse CHAP authentication for us */
+	int idle;			/* Idle timeout in seconds */
 	unsigned int pridns;		/* Primary DNS server */
 	unsigned int secdns;		/* Secondary DNS server */
 	unsigned int priwins;		/* Primary WINS server */
 	unsigned int secwins;		/* Secondary WINS server */
-	int proxyarp;				/* Use proxy-arp? */
-	int proxyauth;				/* Allow proxy authentication? */
-	int debug;					/* Debug PPP? */
-	struct tunnel *t;			/* Tunnel of this, if it's ready */
+	int proxyarp;			/* Use proxy-arp? */
+	int proxyauth;			/* Allow proxy authentication? */
+	int debug;			/* Debug PPP? */
+	char pppoptfile[STRLEN];	/* File containing PPP options */
+	struct tunnel *t;		/* Tunnel of this, if it's ready */
 };
 
 struct lac {
 	struct lac *next;
-	struct host *lns;			/* LNS's we can connect to */
+	struct host *lns;		/* LNS's we can connect to */
 	struct schedule_entry *rsched;
-	int tun_rws;				/* Receive window size (tunnel) */
-	int call_rws;				/* Call rws */
-	int active;					/* Is this connection in active use? */
-	int hbit;					/* Permit hidden AVP's? */
-	int lbit;					/* Use the length field? */
-	int challenge;				/* Challenge authenticate the peer? */
+	int tun_rws;			/* Receive window size (tunnel) */
+	int call_rws;			/* Call rws */
+	int active;			/* Is this connection in active use? */
+	int hbit;			/* Permit hidden AVP's? */
+	int lbit;			/* Use the length field? */
+	int challenge;			/* Challenge authenticate the peer? */
 	unsigned int localaddr;		/* Local IP address */
 	unsigned int remoteaddr;	/* Force remote address to this */
 	char authname[STRLEN];		/* Who we authenticate as */
 	char peername[STRLEN];		/* Force peer name to this */
 	char hostname[STRLEN];		/* Hostname to report */
 	char entname[STRLEN];		/* Name of this entry */
-	int authpeer;				/* Authenticate our peer? */
-	int authself;				/* Authenticate ourselves? */
-	int pap_require;			/* Require PAP auth for PPP */
-	int chap_require;			/* Require CHAP auth for PPP */
-	int pap_refuse;				/* Refuse PAP authentication for us */
-	int chap_refuse;			/* Refuse CHAP authentication for us */
-	int idle;					/* Idle timeout in seconds */
-	int autodial;				/* Try to dial immediately? */
-	int defaultroute;			/* Use as default route? */
-	int redial;					/* Redial if disconnected */
-	int rmax;					/* Maximum # of consecutive redials */
-	int rtries;					/* # of tries so far */
-	int rtimeout;				/* Redial every this many # of seconds */
+	int authpeer;			/* Authenticate our peer? */
+	int authself;			/* Authenticate ourselves? */
+	int pap_require;		/* Require PAP auth for PPP */
+	int chap_require;		/* Require CHAP auth for PPP */
+	int pap_refuse;			/* Refuse PAP authentication for us */
+	int chap_refuse;		/* Refuse CHAP authentication for us */
+	int idle;			/* Idle timeout in seconds */
+	int autodial;			/* Try to dial immediately? */
+	int defaultroute;		/* Use as default route? */
+	int redial;			/* Redial if disconnected */
+	int rmax;			/* Maximum # of consecutive redials */
+	int rtries;			/* # of tries so far */
+	int rtimeout;		/* Redial every this many # of seconds */
+	char pppoptfile[STRLEN];	/* File containing PPP options */
 	int debug;
-	struct tunnel *t;			/* Our tunnel */
-	struct call *c;				/* Our call */
+	struct tunnel *t;		/* Our tunnel */
+	struct call *c;			/* Our call */
 };	
 
 struct global {
-	int port;					/* Port number to listen to */
-	char authfile[STRLEN];		/* File containing authentication info */
-	int accesscontrol;			/* Use access control? */
-	int forceuserspace;			/* Force userspace? */
+	int port;			/* Port number to listen to */
+	char authfile[STRLEN];	/* File containing authentication info */
+	int accesscontrol;		/* Use access control? */
+	int forceuserspace;		/* Force userspace? */
 };
 
 extern struct global gconfig;	/* Global configuration options */

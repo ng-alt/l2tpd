@@ -47,6 +47,9 @@ int ppd = 1;		/* Packet processing delay */
 int control_fd;		/* descriptor of control area */
 char *args;
 
+char *dial_no_tmp;	/* jz: Dialnumber for Outgoing Call */
+int switch_io = 0;	/* jz: Switch for Incoming or Outgoing Call */
+
 void init_tunnel_list(struct tunnel_list *t) {
 	t->head = NULL;
 	t->count=0;
@@ -135,7 +138,7 @@ void show_status(int fd)
 
 void status_handler(int sig)
 {
-	show_status(0);
+	show_status(1);
 }
 
 void child_handler(int signal)
@@ -216,6 +219,7 @@ int start_pppd(struct call *c, struct ppp_opts *opts)
 #ifdef DEBUG_PPPD
 	int x;
 #endif
+	struct termios ptyconf;
 	char *str;
 	p=opts;
 	stropt[0]=strdup(PPPD);
@@ -250,8 +254,17 @@ int start_pppd(struct call *c, struct ppp_opts *opts)
 			log(LOG_WARN, "%s: unable to allocate pty, abandoning!\n",__FUNCTION__);
 			return -EINVAL;
 		}
+
+		/* set fd opened above to not echo so we don't see read our own packets
+		   back of the file descriptor that we just wrote them to */
+		tcgetattr(c->fd,&ptyconf);
+		*(c->oldptyconf) = ptyconf;
+		ptyconf.c_cflag &= ~(ICANON|ECHO);
+		tcsetattr(c->fd,TCSANOW,&ptyconf);
+
 		snprintf(tty,sizeof(tty),"/dev/tty%c%c",a,b);
 		fd2=open(tty,O_RDWR);
+
 #ifdef USE_KERNEL
 	}
 #endif
@@ -268,19 +281,45 @@ int start_pppd(struct call *c, struct ppp_opts *opts)
 		log(LOG_WARN, "%s: unable to fork(), abandoning!\n",__FUNCTION__);
 		return -EINVAL;
 	} else if (!c->pppd) {
+		struct call   *sc;
+		struct tunnel *st;
+
 		close(0);
 		close(1);
 		close(2);
 #ifdef USE_KERNEL
-		if (!kernel_support && (fd2<0)) {
+		if (!kernel_support && (fd2<0))
 #else
-		if (fd2 < 0) {
+		if (fd2 < 0)
 #endif
+		{
 			log(LOG_WARN,"%s: Unable to open %s to launch pppd!\n",__FUNCTION__,tty);
 			exit(1);
 		}
 		dup2(fd2,0);
 		dup2(fd2,1);
+
+
+		/* close all the calls pty fds */
+		st=tunnels.head;
+		while (st)
+		{
+			sc=st->call_head;
+			while (sc)
+			{
+				close(sc->fd);
+				sc=sc->next;
+			}
+			st=st->next;
+		}
+
+		/* close the UDP socket fd */
+		close(server_socket);
+
+		/* close the control pipe fd */
+		close(control_fd);
+
+
 		execv(PPPD,stropt);
 		log(LOG_WARN, "%s: Exec of %s failed!\n",PPPD);
 		exit(1);
@@ -354,6 +393,9 @@ void destroy_tunnel(struct tunnel *t)
 			t->lac->rsched=schedule(tv, magic_lac_dial, t->lac);
 		}
 	}
+	/* XXX L2TP/IPSec: remove relevant SAs here?  NTB 20011010
+	 * XXX But what if another tunnel is using same SA?
+	 */
 	if (t->lns)
 		t->lns->t=NULL;
 	free(t);
@@ -379,7 +421,13 @@ struct tunnel *l2tp_call(char *host, int port, struct lac *lac, struct lns *lns)
 	/* Force creation of a new tunnel
 	   and set it's tid to 0 to cause
 	   negotiation to occur */
+	/* XXX L2TP/IPSec: Set up SA to addr:port here?  NTB 20011010
+	 */
 	tmp = get_call(0,0,addr, port);
+	if (!tmp) {
+		log(LOG_WARN, "%s: Unable to create tunnel to %s.\n",__FUNCTION__,host);
+		return NULL;
+	}
 	tmp->container->tid = 0;
 	tmp->container->lac = lac;
 	tmp->container->lns = lns;
@@ -389,10 +437,6 @@ struct tunnel *l2tp_call(char *host, int port, struct lac *lac, struct lns *lns)
 		lac->t = tmp->container;
 	if (lns)
 		lns->t = tmp->container;
-	if (!tmp) {
-		log(LOG_WARN, "%s: Unable to create tunnel to %s.\n",__FUNCTION__,host);
-		return NULL;
-	}
 	/*
 	 * Since our state is 0, we will establish a tunnel now
 	 */
@@ -443,6 +487,7 @@ struct call *lac_call(int tid, struct lac *lac, struct lns *lns)
 			if (lac)
 				lac->c = tmp;
 			log(LOG_LOG, "%s: Calling on tunnel %d\n",__FUNCTION__,tid);
+			strcpy(tmp->dial_no, dial_no_tmp);  /*	jz: copy dialnumber to tmp->dial_no  */
 			control_finish(t,tmp);
 			return tmp;
 		}
@@ -582,6 +627,9 @@ void do_control() {
 	char *host;
 	char *tunstr;
 	char *callstr;
+	
+	char *sub_str;		/* jz: use by the strtok function */
+        char *tmp_ptr;		/* jz: use by the strtok function */ 	
 	struct lac *lac;
 	int call;
 	int tunl;
@@ -602,6 +650,9 @@ void do_control() {
 				l2tp_call(host,UDP_LISTEN_PORT,NULL,NULL);
 				break;
 			case 'c':
+
+				switch_io=1;		/* jz: Switch for Incoming - Outgoing Calls */
+
 				tunstr=strchr(buf,' ') +1;
 				lac=laclist;
 				while(lac) {
@@ -627,6 +678,42 @@ void do_control() {
 #endif
 				lac_call(tunl,NULL,NULL);
 				break;
+				
+			case 'o':			/* jz: option 'o' for doing a outgoing call */ 
+
+				switch_io=0;	        /* jz: Switch for incoming - outgoing Calls */	
+				
+				sub_str=strchr(buf,' ') +1;
+		
+				tunstr=strtok(sub_str, " ");	/* jz: using strtok function to get */		
+				tmp_ptr=strtok(NULL, " ");      /*     params out of the pipe       */
+                                strcpy(dial_no_tmp,tmp_ptr);
+
+				lac=laclist;
+				while(lac) {
+					if (!strcasecmp(lac->entname, tunstr)) {
+						lac->active=-1;
+						lac->rtries=0;
+						if (!lac->c)
+							magic_lac_dial(lac);
+						else
+							log(LOG_DEBUG, "%s: Session '%s' already active!\n",__FUNCTION__,lac->entname);
+						break;
+					}
+					lac=lac->next;
+				}
+				if (lac) break;
+				tunl = atoi(tunstr);
+				if (!tunl) {
+					log(LOG_DEBUG, "%s: No such tunnel '%s'\n",__FUNCTION__,tunstr);
+					break;
+				}
+#ifdef DEBUG_CONTROL
+				log(LOG_DEBUG, "%s: Attempting to call on tunnel %d\n",__FUNCTION__,tunl);
+#endif
+				lac_call(tunl,NULL,NULL);
+				break;
+								
 			case 'h':
 				callstr=strchr(buf,' ') +1;
 				call=atoi(callstr);
@@ -660,6 +747,9 @@ void do_control() {
 				log(LOG_DEBUG, "%s: Attempting to disconnect tunnel %d\n", __FUNCTION__,tunl);
 #endif
 				lac_disconnect(tunl);
+				break;
+			case 's':
+				show_status(1);
 				break;
 			default:
 				log(LOG_DEBUG, "%s: Unknown command %c\n", __FUNCTION__,buf[0]);
@@ -695,7 +785,7 @@ void init() {
 		log(LOG_CRIT, "%s: Unable to open " CONTROL_PIPE " for reading.", __FUNCTION__);
 		exit(1);
 	}
-	log(LOG_LOG, "l2tpd version " SERVER_VERSION " started on %s\n",hostname);
+	log(LOG_LOG, "l2tpd version " SERVER_VERSION " started on %s PID:%d\n",hostname, getpid());
 	log(LOG_LOG, "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
     log(LOG_LOG, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
 	log(LOG_LOG, "%s version %s on a %s, port %d\n",uts.sysname,uts.release,uts.machine,gconfig.port);
@@ -715,6 +805,7 @@ void init() {
 int main(int argc, char *argv[]) {
 	args=argv[0];
 	init();
+	dial_no_tmp=calloc(128,sizeof(char));
 	network_thread();
 	return 0;
 }

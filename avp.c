@@ -195,7 +195,22 @@ if (debug_avp)
 				if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate SLI when state != ICCN\n", __FUNCTION__);
 				return -EINVAL;
 			}
-			/* Fall through */
+		case OCRP:		/* jz: case for ORCP */
+			if (t->state != SCCCN) {
+                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP on tunnel!=SCCCN\n",__FUNCTION__);
+                                return -EINVAL;
+                        }                        if (c->state != OCRQ) {
+                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCRP when state != OCRQ\n",__FUNCTION__);
+                                return -EINVAL;
+			 }
+                         break;
+		case OCCN:		/* jz: case for OCCN */
+
+                        if (c->state != OCRQ) {
+                                if (DEBUG) log(LOG_DEBUG, "%s: attempting to negotiate OCCN when state != OCRQ\n",__FUNCTION__);
+                                return -EINVAL;
+			 }
+                         break;
 		case StopCCN:
 		case CDN:
 		case Hello:
@@ -339,7 +354,7 @@ int result_code_avp(struct tunnel *t, struct call *c, void *data, int datalen) {
 	result = ntohs(raw[3]);
 	error = ntohs(raw[4]);
 	if ((result>3) || (result < 1)) {
-		if (DEBUG) log(LOG_DEBUG, "%s: result code out or range (%d).  Ignoring.\n",__FUNCTION__,error);
+		if (DEBUG) log(LOG_DEBUG, "%s: result code out of range (%d %d %d).  Ignoring.\n",__FUNCTION__,result,error,datalen);
 		return 0;
 	}
 	c->error = error;
@@ -956,13 +971,9 @@ int assigned_call_avp(struct tunnel *t, struct call *c, void *data, int datalen)
 		case CDN:
 		case ICRP:
 		case ICRQ:
+		case OCRP:	/* jz: deleting the debug message */
 			break;
-		case OCRP:
 		case OCRQ:
-			if (DEBUG) log(LOG_DEBUG,
-			"%s: I don't know how to handle call ID on %s.  Ignoring.\n",__FUNCTION__,
-			msgtypes[c->msgtype]);
-			return 0;
 		default:
 			if (DEBUG)
 				log(LOG_DEBUG,
@@ -985,6 +996,8 @@ int assigned_call_avp(struct tunnel *t, struct call *c, void *data, int datalen)
 		t->call_head->cid = ntohs(raw[3]);
 	} else if (c->msgtype == ICRP) {
 		c->cid = ntohs(raw[3]);
+	} else if (c->msgtype == OCRP) {	/* jz: copy callid to c->cid */
+      		c->cid = ntohs(raw[3]);   	
 	} else {
 		log(LOG_DEBUG,"%s:  Dunno what to do when it's state %s!\n",__FUNCTION__,
 			msgtypes[c->msgtype]);
@@ -1010,6 +1023,7 @@ int packet_delay_avp(struct tunnel *t, struct call *c, void *data, int datalen) 
 		case ICRP:
 		case OCRQ:
 		case ICCN:
+		case OCRP:
 		case OCCN:
 			break;
 		default:
@@ -1048,12 +1062,8 @@ int call_serno_avp(struct tunnel *t, struct call *c, void *data, int datalen) {
 	if (t->sanity) {
 		switch(c->msgtype) {
 		case ICRQ:
-			break;
 		case OCRQ:
-			if (DEBUG) log(LOG_DEBUG,
-			"%s: I don't know how to handle call ID on %s.  Ignoring.\n",__FUNCTION__,
-			msgtypes[c->msgtype]);
-			return 0;
+			break;
 		default:
 			if (DEBUG)
 				log(LOG_DEBUG,
@@ -1172,8 +1182,10 @@ int call_physchan_avp(struct tunnel *t, struct call *c, void *data, int datalen)
 	if (t->sanity) {
 		switch(c->msgtype) {
 		case ICRQ:
-			break;
 		case OCRQ:
+		case OCRP:
+		case OCCN:
+			break;
 		default:
 			if (DEBUG)
 				log(LOG_DEBUG,
@@ -1211,6 +1223,8 @@ int receive_window_size_avp(struct tunnel *t, struct call *c, void *data, int da
 		switch(c->msgtype) {
 		case SCCRP:
 		case SCCRQ:
+		case OCRP:	/* jz */
+		case OCCN:	/* jz */
 		case StopCCN:
 /*		case ICRP:
 		case ICCN: */

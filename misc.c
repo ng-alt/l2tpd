@@ -29,6 +29,8 @@ void log(int level, const char *fmt,...)
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, args);
+	va_end(args);			//bk - otherwise ppc segfaults
+	va_start(args, fmt);	//bk
 	vfprintf(stderr,fmt, args);
 	fflush(stderr);
 	openlog(BINARY, LOG_PID, LOG_DAEMON);
@@ -120,12 +122,26 @@ void do_packet_dump(struct buffer *buf) {
 
 inline void swaps(void *buf_v, int len)
 {
+#ifdef __alpha
+		/* Reverse byte order alpha is little endian so lest save a step.
+		   to make things work out easier */
+	int x;
+	unsigned char t1;
+	unsigned char *tmp=(_u16 *)buf_v;
+	for (x=0;x<len;x+=2) {
+			t1 = tmp[x];
+			tmp[x] = tmp[x+1];
+			tmp[x+1] = t1;
+	}
+#else
+
 	/* Reverse byte order (if proper to do so) 
 	   to make things work out easier */
 	int x;
 	_u16 *tmp=(_u16 *)buf_v;
 	for (x=0;x<len/2;x++) 
 		tmp[x]=ntohs(tmp[x]);	
+#endif
 }
 
 
