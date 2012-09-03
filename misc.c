@@ -124,13 +124,13 @@ void do_packet_dump (struct buffer *buf)
 {
     int x;
     unsigned char *c = buf->start;
-    printf ("packet dump: \nHEX: { ");
+    //printf ("packet dump: \nHEX: { ");
     for (x = 0; x < buf->len; x++)
     {
-        printf ("%.2X ", *c);
+        //printf ("%.2X ", *c);
         c++;
     };
-    printf ("}\nASCII: { ");
+    //printf ("}\nASCII: { ");
     c = buf->start;
     for (x = 0; x < buf->len; x++)
     {
@@ -144,7 +144,7 @@ void do_packet_dump (struct buffer *buf)
         }
         c++;
     }
-    printf ("}\n");
+    //printf ("}\n");
 }
 
 inline void swaps (void *buf_v, int len)

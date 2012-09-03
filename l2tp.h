@@ -38,7 +38,7 @@ typedef unsigned long long _u64;
 #define BINARY "l2tpd"
 #define SERVER_VERSION "0.69"
 #define VENDOR_NAME "l2tpd.org"
-#define PPPD		"/usr/sbin/pppd"
+#define PPPD		"/sbin/pppd"
 #define CALL_PPP_OPTS "defaultroute"
 #define FIRMWARE_REV	0x0690  /* Revision of our firmware (software, in this case) */
 #define DEF_MAX_TUNNELS 32      /* By default only allow this many

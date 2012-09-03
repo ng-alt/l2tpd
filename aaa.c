@@ -25,7 +25,7 @@ extern void bufferDump (char *, int);
 
 /* FIXME: Accounting? */
 
-static struct addr_ent *uaddr[ADDR_HASH_SIZE];
+struct addr_ent *uaddr[ADDR_HASH_SIZE];
 
 void init_addr ()
 {

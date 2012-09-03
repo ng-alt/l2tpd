@@ -26,12 +26,26 @@
 # Also look at the top of network.c for some other (eventually to 
 # become runtime options) debugging flags
 #
+include ../config.in
+include ../config.mk
+
+#CC= /opt/brcm/hndtools-mipsel-uclibc-3.2.3/bin/mipsel-uclibc-gcc
 #DFLAGS= -g -O2 -DDEBUG_PPPD
-DFLAGS= -g -O2 -DDEBUG_PPPD -DDEBUG_CONTROL -DDEBUG_ENTROPY
+DFLAGS= -g -O2 -DDEBUG_PPPD -DDEBUG_CONTROL -DDEBUG_ENTROPY -DDEBUG_CLOSE -DPPPOX_L2TP
 #
 # Uncomment the next line for Linux
 #
-OSFLAGS= -DLINUX -I/usr/include
+#OSFLAGS= -DLINUX -I/usr/include
+
+ifeq ($(CONFIG_KERNEL_2_6_36),y)
+OSFLAGS= -DLINUX -I$(TOOLCHAIN)/include/ -DUSE_KERNEL
+else
+OSFLAGS= -DLINUX -I/opt/brcm/hndtools-mipsel-uclibc-3.2.3/include/
+endif
+
+
+OSFLAGS+= -I$(LINUXDIR)/include/
+
 #
 # Uncomment the following to use the kernel interface under Linux
 #
@@ -57,17 +71,31 @@ OSFLAGS= -DLINUX -I/usr/include
 FFLAGS= -DIP_ALLOCATION 
 
 CFLAGS= $(DFLAGS) -Wall -DSANITY $(OSFLAGS) $(FFLAGS)
+
+#add static_pppoe define.
+ifeq ($(CONFIG_STATIC_PPPOE),y)
+CFLAGS  += -DSTATIC_PPPOE
+else
+CFLAGS  += -USTATIC_PPPOE
+endif
+
 HDRS=l2tp.h avp.h misc.h control.h call.h scheduler.h file.h aaa.h md5.h
 OBJS=l2tpd.o pty.o misc.o control.o avp.o call.o network.o avpsend.o scheduler.o file.o aaa.o md5.o
 LIBS= $(OSLIB) # -lefence # efence for malloc checking
 BIN=l2tpd
-BINDIR=/usr/sbin
-ETCDIR=/etc
+BINDIR=$(TARGETDIR)/usr/sbin
+ETCDIR=$(TARGETDIR)/etc
 
 all: $(BIN)
 
 clean:
 	rm -f $(OBJS) $(BIN)
 
-$(BIN): $(OBJS) $(HDRS) 
+$(BIN): $(OBJS) $(HDRS)
 	$(CC) -o $(BIN) $(DFLAGS) $(OBJS) $(LIBS)
+
+install:
+	mkdir -p $(BINDIR)
+	install -m 755 l2tpd $(BINDIR)
+	$(STRIP) $(BINDIR)/l2tpd
+	rm -f $(BINDIR)/st*

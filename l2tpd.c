@@ -41,6 +41,11 @@
 #endif
 #include "l2tp.h"
 
+#ifdef PPPOX_L2TP
+#include "pppol2tp.h"
+#endif
+
+
 struct tunnel_list tunnels;
 int max_tunnels = DEF_MAX_TUNNELS;
 struct utsname uts;
@@ -242,6 +247,8 @@ void death_handler (int signal)
         sec = st->self->closing;
         if (st->lac)
             st->lac->redial = 0;
+        /* Disconnect the call (send CDN) tear down tunnel (StopCCN) */
+        call_close(st->call_head);       
         call_close (st->self);
         if (!sec)
         {
@@ -253,6 +260,21 @@ void death_handler (int signal)
 
     /* erase pid file */
 	unlink (gconfig.pidfile);
+
+#ifdef PPPOX_L2TP
+    extern int pox_fd;
+    extern int ppp_fd;
+
+    if(ppp_fd >= 0){ 
+        if (ioctl(ppp_fd, PPPIOCDETACH) < 0)
+            log (LOG_DEBUG, "detach ioctl(PPPIOCDETACH) failed");
+    }
+
+    if(pox_fd){
+        close(pox_fd);
+    }
+
+#endif
 
     exit (1);
 }
@@ -309,49 +331,68 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     else
     {
 #endif
+        int flags;
+
+        c->fd = STDOUT_FILENO;
+
+        flags = fcntl(c->fd, F_GETFL); 
+        flags |= O_NONBLOCK; 
+        fcntl(c->fd, F_SETFL, flags); 
+
+        //dup2(STDOUT_FILENO, c->fd);
+        //dup2(STDIN_FILENO,  c->fd);
+
+        /*
         if ((c->fd = getPtyMaster (&a, &b)) < 0)
         {
             log (LOG_WARN, "%s: unable to allocate pty, abandoning!\n",
                  __FUNCTION__);
             return -EINVAL;
         }
-
-        /* set fd opened above to not echo so we don't see read our own packets
-           back of the file descriptor that we just wrote them to */
+        */
+        // set fd opened above to not echo so we don't see read our own packets
+        //   back of the file descriptor that we just wrote them to 
         tcgetattr (c->fd, &ptyconf);
         *(c->oldptyconf) = ptyconf;
         ptyconf.c_cflag &= ~(ICANON | ECHO);
         tcsetattr (c->fd, TCSANOW, &ptyconf);
-
+        /*
         snprintf (tty, sizeof (tty), "/dev/tty%c%c", a, b);
-        fd2 = open (tty, O_RDWR);
+	
+	    //snprintf (tty, sizeof (tty), "/tmp/ttyp0");
+	    log (LOG_DEBUG, "try to open %s\n", tty);
 
+        fd2 = open (tty, O_RDWR);
+        */
 #ifdef USE_KERNEL
     }
 #endif
     str = stropt[0];
 #ifdef DEBUG_PPPD
-    log (LOG_DEBUG, "%s: I'm running:  ", __FUNCTION__);
+    /*log (LOG_DEBUG, "%s: I'm running:  ", __FUNCTION__);
     for (x = 0; stropt[x]; x++)
     {
         log (LOG_DEBUG, "\"%s\" ", stropt[x]);
     };
-    log (LOG_DEBUG, "\n");
+    log (LOG_DEBUG, "\n");*/
 #endif
+    c->pppd = 88888;
+    /*
     c->pppd = fork ();
-    if (c->pppd < 0)
+
+    if (c->pppd < 0) //fork failed
     {
         log (LOG_WARN, "%s: unable to fork(), abandoning!\n", __FUNCTION__);
         return -EINVAL;
     }
-    else if (!c->pppd)
+    else if (!c->pppd) //pid==0, child process;
     {
         struct call *sc;
         struct tunnel *st;
 
-        close (0);
-        close (1);
-        close (2);
+        //close (0);
+        //close (1);
+        //close (2);
 #ifdef USE_KERNEL
         if (!kernel_support && (fd2 < 0))
 #else
@@ -366,7 +407,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
         dup2 (fd2, 1);
 
 
-        /* close all the calls pty fds */
+        // close all the calls pty fds 
         st = tunnels.head;
         while (st)
         {
@@ -379,17 +420,26 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
             st = st->next;
         }
 
-        /* close the UDP socket fd */
+        // close the UDP socket fd 
         close (server_socket);
 
-        /* close the control pipe fd */
+        // close the control pipe fd 
         close (control_fd);
-
+	
+	    printf ("===================\n");
+	    printf ("%s\n", PPPD);
+	    for (x = 0; stropt[x]; x++)
+    	{
+        	printf ("\"%s\" ", stropt[x]);
+    	};
         execv (PPPD, stropt);
-        log (LOG_WARN, "%s: Exec of %s failed!\n", __FUNCTION__, PPPD);
+	    printf ("===================\n");
+
+        printf("%s: Exec of %s failed!\n", __FUNCTION__, PPPD);
         exit (1);
     };
     close (fd2);
+    */
     pos = 0;
     while (stropt[pos])
     {
@@ -487,6 +537,206 @@ void destroy_tunnel (struct tunnel *t)
     free (me);
 }
 
+
+/* If L2TP server isn't on WAN side. 
+ * We need to set a routing for Server's IP to pass ethernet 
+ * act1: add, 2: del
+ * inetadd: IP of L2TP server 
+ */
+static char del_host_cmd[64]="";
+
+#undef DEBUG_SERV_IP_ROUTING
+#define IPV4_LEN        4
+
+#ifdef STATIC_PPPOE
+void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
+{
+    //struct sockaddr_pptpox sp_info;
+    FILE *fp = NULL;
+    unsigned char buf[128];
+    //unsigned char gateWay[IPV4_LEN];
+    unsigned char name[32];
+    char value[18];
+    char getGateway[18]= "";
+    char getUserIp[18]= "";
+    char getNetmask[18]= "";
+    char gate_way[] = "gateway_addr";
+    char user_ipaddr[] = "user_ip_addr";
+    char netmask_addr[] = "netmask_addr";
+    char user_nvram[] = "l2tp_user_ip";
+    char gw_nvram[] = "l2tp_gateway_ip";
+    char netmask_nvram[] = "l2tp_user_netmask";
+    char command[64];
+
+    del_host_cmd[0] = '\0';
+
+    if ((fp = fopen("/tmp/ppp/dhcpIp", "r")) != NULL)
+    {/* If server IP, resolved from udhcpc. */
+        while (fgets(buf, sizeof(buf), fp))
+        {
+            name[0] = '\0';
+            value[0] = '\0';
+            sscanf(buf, "%s %s", &name[0],&value[0]);
+
+            if (strcmp(name, user_ipaddr) == 0)
+            {
+                strcpy(getUserIp,value);
+            }
+            else if (strcmp(name, gate_way) == 0)
+            {
+                strcpy(getGateway,value);
+            }
+            else if (strcmp(name, netmask_addr) == 0)
+            {
+                strcpy(getNetmask,value);
+            }
+        }
+        fclose(fp);
+    }
+    else if ((fp = fopen("/tmp/ppp/l2tpIp", "r")) != NULL)
+    {/* If server IP, gotten from the user setting */
+        while (fgets(buf, sizeof(buf), fp))
+        {
+            name[0] = '\0';
+            value[0] = '\0';
+            sscanf(buf, "%s %s", &name[0],&value[0]);
+
+            if (strcmp(name, user_nvram) == 0)
+            {
+                strcpy(getUserIp,value);
+            }
+            else if (strcmp(name, gw_nvram) == 0)
+            {
+                strcpy(getGateway,value);
+            }
+            else if (strcmp(name, netmask_nvram) == 0)
+            {
+                strcpy(getNetmask,value);
+            }
+        }
+        fclose(fp);
+    }
+#ifdef DEBUG_SERV_IP_ROUTING
+    printf("%s user IP: %s\n", __FUNCTION__, getUserIp);
+    printf("%s gateway IP:%s\n", __FUNCTION__, getGateway);
+    printf("%s netmask:%s\n", __FUNCTION__, getNetmask);
+#endif
+
+
+    if (getUserIp[0] != '\0')
+    {
+        char wan_ifname[32] = "vlan2";
+        char dns_srv1[32];
+        char dns_srv2[32];
+        fp = fopen("/tmp/ppp/l2tpIp", "r");
+        if (fp)
+        {
+            fgets(buf, sizeof(buf), fp);
+            fclose(fp);
+            strcpy(wan_ifname, buf);
+        }
+
+        if ( act == 1 )
+        {
+            sprintf(command, "route add -host %s dev %s", getGateway, wan_ifname);
+            system(command);
+            sprintf(command, "route add default gw %s", getGateway) ;
+            system(command);
+#ifdef DEBUG_SERV_IP_ROUTING
+            printf("%s: %s\n", __FUNCTION__, command);
+#endif
+        }
+        else if ( act == 2 )  /* remove default gateway and add host route */
+        {
+            unsigned int i_wanip, i_netmask;
+            system(del_host_cmd); /* remove last host route here */
+            system("route del default");
+#ifdef DEBUG_SERV_IP_ROUTING
+            printf("%s\n", del_host_cmd);
+            printf("route del default\n");
+#endif
+            if ((strcmp (getUserIp,"0.0.0.0") != 0) && (strcmp (getNetmask,"0.0.0.0") != 0))
+            {
+                i_wanip = inet_addr(getUserIp);
+                i_netmask = inet_addr(getNetmask);
+
+                if((i_wanip & i_netmask) != (inetaddr.s_addr & i_netmask))
+                {
+                    sprintf(command, "route add -host %s dev %s", getGateway, wan_ifname);
+                    system(command);
+
+                    sprintf(command, "route add -host %s gw %s",
+                            inet_ntoa(inetaddr), getGateway);
+                    system(command);
+#ifdef DEBUG_SERV_IP_ROUTING
+                    printf("%s: %s\n", __FUNCTION__, command);
+#endif
+                }
+            }
+
+        }
+    }
+}
+#else
+void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
+{
+    //struct sockaddr_pptpox sp_info; /*commented by MJ.*/
+    FILE *fp = NULL;
+    unsigned char buf[128];
+    unsigned char gateWay[IPV4_LEN];
+    unsigned char addrname[12];
+    unsigned int getIp[IPV4_LEN];
+    char gate_way[] = "gateway_addr";
+    char command[64];
+
+    del_host_cmd[0] = '\0';
+
+    if ((fp = fopen("/tmp/ppp/dhcpIp", "r")) != NULL)
+    {
+        /* commented by MJ.
+        // I can't find a place to use these variables.
+        memset(&sp_info, 0, sizeof(struct sockaddr_pptpox));
+
+        sp_info.sa_family = AF_PPPOX;
+        sp_info.sa_protocol = PX_PROTO_TP;
+        */
+        memset(gateWay, 0, IPV4_LEN);
+
+        while (fgets(buf, sizeof(buf), fp))
+        {
+            sscanf(buf, "%s %d.%d.%d.%d", &addrname[0],
+                &getIp[0], &getIp[1], &getIp[2], &getIp[3]);
+
+            if (memcmp(addrname, gate_way, sizeof(gate_way)) == 0)
+            {
+                if ( act == 1 )
+                {
+                    sprintf(command, "route add default gw %d.%d.%d.%d",
+                            getIp[0], getIp[1], getIp[2], getIp[3]);
+                    system(command);
+                }
+                else if ( act == 2 )  /* remove default gateway and add host route */
+                {
+                    system(del_host_cmd); /* remove last host route here */
+                    system("route del default");
+                    sprintf(command, "route add -host %s gw %d.%d.%d.%d",
+                    inet_ntoa(inetaddr), getIp[0], getIp[1], getIp[2], getIp[3]);
+                    system(command);
+
+                    sprintf(del_host_cmd, "route del %s gw %d.%d.%d.%d",
+                            inet_ntoa(inetaddr), getIp[0], getIp[1], getIp[2], getIp[3]);
+                }
+
+                fclose(fp);
+                return;
+            }
+        }
+        fclose(fp);
+    }
+}
+#endif
+
+
 struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
                           struct lns *lns)
 {
@@ -497,8 +747,16 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     struct call *tmp = NULL;
     struct hostent *hp;
     unsigned int addr;
+    FILE *fp;
     port = htons (port);
+
+    struct in_addr l2tp_serv_ip;
+
+    /* add routing for DNS server 01/29/2010*/
+    fxc_add_gw(1, l2tp_serv_ip);
+
     hp = gethostbyname (host);
+
     if (!hp)
     {
         log (LOG_WARN, "%s: gethostbyname() failed for %s.\n", __FUNCTION__,
@@ -506,6 +764,21 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
         return NULL;
     }
     bcopy (hp->h_addr, &addr, hp->h_length);
+
+
+    if (hp->h_addrtype == AF_INET){
+        memcpy(&l2tp_serv_ip.s_addr, hp->h_addr, sizeof(l2tp_serv_ip.s_addr));
+        if ( fp = fopen("/tmp/ppp/l2tpSrvIp", "w") )
+        {
+            fprintf(fp, "%s", inet_ntoa(l2tp_serv_ip));
+            fclose(fp);
+        }
+    }
+
+    /* Add routing for L2TP server */
+    fxc_add_gw(2, l2tp_serv_ip);
+
+
     /* Force creation of a new tunnel
        and set it's tid to 0 to cause
        negotiation to occur */
@@ -752,7 +1025,7 @@ struct tunnel *new_tunnel ()
     return tmp;
 }
 
-void do_control ()
+void do_control (char *cmd)
 {
     char buf[1024];
     char *host;
@@ -765,9 +1038,22 @@ void do_control ()
     int call;
     int tunl;
     int cnt = -1;
+    int first_run = 0;
+
+
     while (cnt)
     {
-        cnt = read (control_fd, buf, sizeof (buf));
+        /* for building L2TP tunnel in the begining. */
+        if(cmd != NULL)
+        {
+            first_run = 1;
+            strcpy(buf, cmd);
+            cnt = strlen(buf);
+            log (LOG_DEBUG, "%s -> L2TP connect immediately. \n", __FUNCTION__);
+        }
+        else    
+            cnt = read (control_fd, buf, sizeof (buf));
+        /*add end, by MJ.*/
         if (cnt > 0)
         {
             if (buf[cnt - 1] == '\n')
@@ -808,13 +1094,16 @@ void do_control ()
                     }
                     lac = lac->next;
                 }
-                if (lac)
-                    break;
+                if (lac){
+                    if (first_run) cnt = 0; /* for leaving while */
+                    break; 
+                }
                 tunl = atoi (tunstr);
                 if (!tunl)
                 {
                     log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
                          tunstr);
+                    if (first_run) cnt = 0; /* for leaving while */
                     break;
                 }
 #ifdef DEBUG_CONTROL
@@ -822,6 +1111,8 @@ void do_control ()
                      __FUNCTION__, tunl);
 #endif
                 lac_call (tunl, NULL, NULL);
+
+                if (first_run) cnt = 0; /* for leaving while */
                 break;
 
             case 'o':          /* jz: option 'o' for doing a outgoing call */
@@ -1105,11 +1396,20 @@ void init (int argc,char *argv[])
         lac = lac->next;
     }
 }
+#define AUTO_CONNECT
+int is_first_run = 0;
 
 int main (int argc, char *argv[])
 {
+    struct in_addr l2tp_serv_ip;
+    fxc_add_gw(1, l2tp_serv_ip);
+	
     init(argc,argv);
     dial_no_tmp = calloc (128, sizeof (char));
+    /* A global variable to mark the first execution */
+#ifdef AUTO_CONNECT
+    is_first_run = 1;
+#endif
     network_thread ();
     return 0;
 }

@@ -21,9 +21,36 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "l2tp.h"
+#include <signal.h>
 #ifdef USE_KERNEL
 #include <sys/ioctl.h>
 #endif
+
+#ifdef PPPOX_L2TP
+//#include <linux/ppp_defs.h>
+#include "pppol2tp.h"
+//#include <linux/if_ether.h>    // For ETH_ALEN
+//#include <net/if.h>    //IFNAMSIZ
+
+//#include <linux/if_ppp.h>
+//#include <linux/if_pppol2tp.h>
+//#include <linux/if_pppox.h>
+//#include <linux/if_ppp.h>
+//#include <net/if.h>    //IFNAMSIZ
+//#include <linux/if_ether.h>    // For ETH_ALEN
+#include <linux/types.h>
+#include <linux/ppp_defs.h>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#endif
+
+struct sockaddr_pppol2tp sax;
+int pox_fd = -1;
+int ppp_fd = -1;
+//int ret;//session_fd;
+
+
 
 _u16 ppp_crc16_table[256] = {
     0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
@@ -666,7 +693,11 @@ int control_finish (struct tunnel *t, struct call *c)
              ntohs (t->peer.sin_port), t->self->errormsg, t->ourtid, t->tid);
         c->needclose = 0;
         c->closing = -1;
+    
+        /* , add by MJ. for kill itself after call closed. 01/20/2010*/
+        death_handler(SIGTERM);
         break;
+
     case ICRQ:
         p = t->call_head;
         if (!p->lns)
@@ -816,6 +847,64 @@ int control_finish (struct tunnel *t, struct call *c)
              "%s: Call established with %s, Local: %d, Remote: %d, Serial: %d\n",
              __FUNCTION__, IPADDY (t->peer.sin_addr), c->ourcid, c->cid,
              c->serno);
+
+#ifdef PPPOX_L2TP    
+        /* , add start by MJ. for building pppol2tp socket*/
+        //struct sockaddr_pppol2tp sax;
+        //int pox_fd, ppp_fd;
+        //int ret;//session_fd;
+        //int chindex;
+        
+        pox_fd = socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OL2TP);
+
+        sax.sa_family = AF_PPPOX;
+        sax.sa_protocol = PX_PROTO_OL2TP;
+        sax.pppol2tp.fd = server_socket; // bound UDP socket
+        sax.pppol2tp.pid = 0;        // current pid owns UDP socket
+        sax.pppol2tp.addr.sin_addr.s_addr = t->peer.sin_addr.s_addr;
+        sax.pppol2tp.addr.sin_port = t->peer.sin_port;
+        sax.pppol2tp.addr.sin_family = AF_INET;
+        sax.pppol2tp.s_tunnel  = t->ourtid;
+        sax.pppol2tp.s_session = c->ourcid;
+        sax.pppol2tp.d_tunnel  = t->tid;
+        sax.pppol2tp.d_session = c->cid;
+ 
+        if(pox_fd > 0)
+        {
+            int ret = -1;
+
+            /* Connect to the PPPOL2TP device */
+            ret = connect(pox_fd, (struct sockaddr *)&sax, sizeof(sax));
+        
+            if(ret == 0)
+            {
+                int chindex;
+                int flags;
+                /* Try to get PPP channel from PPPoL2TP device */   
+                if (ioctl(pox_fd, PPPIOCGCHAN, &chindex) == -1)
+                    log (LOG_DEBUG, "Couldn't get channel number\n");
+                /* Open ppp device */
+                ppp_fd = open("/dev/ppp", O_RDWR);
+
+                if(ppp_fd >=0)
+                {
+                    /* Attach to PPP channel */
+                    if ((ret = ioctl(ppp_fd, PPPIOCATTCHAN, &chindex)) < 0)
+                        log (LOG_DEBUG, "Couldn't attach channel to ppp device\n");
+                    flags = fcntl(ppp_fd, F_GETFL);
+                    if (flags == -1 || fcntl(ppp_fd, F_SETFL, flags | O_NONBLOCK) == -1)
+                        log (LOG_DEBUG, "Couldn't set /dev/ppp (channel) to nonblock\n");        
+                }
+                else
+                    log (LOG_DEBUG, "Couldn't reopen /dev/ppp\n");
+            }
+            else
+                log (LOG_DEBUG, "Couldn't connect PPPoL2TP\n");
+        }
+        else
+            log (LOG_DEBUG, "open PPPoL2TP socket failed\n");
+        /* , add edn by MJ.*/
+#endif
         control_xmit (buf);
         po = NULL;
         po = add_opt (po, "passive");
@@ -1048,6 +1137,7 @@ int control_finish (struct tunnel *t, struct call *c)
                      __FUNCTION__, c->qcid, c->cid);
             return -EINVAL;
         }
+        /* , add comment, by MJ., Call will be canceled in here. */
         c->qcid = -1;
         if (c->result < 0)
         {
@@ -1062,6 +1152,8 @@ int control_finish (struct tunnel *t, struct call *c)
              IPADDY (t->peer.sin_addr), c->serno, c->errormsg);
         c->needclose = 0;
         c->closing = -1;
+        /* , add by MJ. for kill itself after call closed. 01/20/2010*/
+        death_handler(SIGTERM);
         break;
     case Hello:
         break;
@@ -1427,7 +1519,10 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
 #endif
             return -EINVAL;
         }
-        else if (new_hdr->Ns <= c->data_rec_seq_num + PAYLOAD_FUDGE)
+        /*  modified start pling 06/10/2011 */
+        /* Disable seq number check, to avoid L2TP disconnect in heavy traffic */
+        else /* if (new_hdr->Ns <= c->data_rec_seq_num + PAYLOAD_FUDGE) */
+        /*  modified end pling 06/10/2011 */
         {
             /* FIXME: I should buffer for out of order packets */
 #ifdef DEBUG_FLOW
@@ -1438,6 +1533,9 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
 #endif
             c->data_rec_seq_num = new_hdr->Ns;
         }
+        /*  removed start pling 06/10/2011 */
+        /* Disable seq number check, to avoid L2TP disconnect in heavy traffic */
+#if 0
         else
         {
 #ifdef DEBUG_FLOW
@@ -1448,6 +1546,8 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
 #endif
             return -EINVAL;
         }
+#endif
+        /*  removed end pling 06/10/2011 */
     }
     else
     {
@@ -1517,6 +1617,10 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
             log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
         return -EIO;
     }
+    /* Modified by MJ.*/
+    //log (LOG_DEBUG, "-> enter write_packet.\n");
+
+
     /*
      * Skip over header 
      */
@@ -1535,6 +1639,11 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
         /* We are given async frames, so write them
            directly to the tty */
         err = write (c->fd, buf->start, buf->len);
+
+        /*, by MJ., I use STDOUT to replace the fd for writting.*/
+        //log (LOG_DEBUG, "write %d bytes to tty:%d\n", err,c->fd);
+
+
         if (err == buf->len)
         {
             return 0;
@@ -1594,6 +1703,11 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
     }
     wbuf[pos++] = PPP_FLAG;
     x = write (c->fd, wbuf, pos);
+
+    /*, by MJ., for Debugging. */
+    //log (LOG_DEBUG, "write %d bytes to ttyfd:%d\n", x, c->fd);
+
+
     if (x < pos)
     {
         if (!(errno == EINTR) && !(errno == EAGAIN))
@@ -1812,3 +1926,24 @@ inline int handle_packet (struct buffer *buf, struct tunnel *t,
         }
     }
 }
+
+/*  wklin added start, 04/12/2011 */
+void connect_pppunit(void)
+{
+#define cprintf(level, fmt, args...) do { \
+	FILE *fp = fopen("/dev/console", "w"); \
+	if (fp) { \
+		fprintf(fp, fmt , ## args); \
+		fclose(fp); \
+	} \
+} while (0)
+    static int connected = 0;
+    int ppp_unit = 0;
+    if (connected) return;
+    if (ppp_fd < 0 || (ioctl(ppp_fd, PPPIOCCONNECT, &ppp_unit)) < 0)
+        ; /* cprintf(LOG_DEBUG, "Couldn't connect channel to ppp0\n"); */
+    else
+        connected = 1;
+    return;
+}
+/*  wklin added end, 04/12/2011 */

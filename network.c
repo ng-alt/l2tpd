@@ -22,6 +22,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+#if (__GLIBC__ < 2)
+# if defined(FREEBSD)
+#  include <sys/signal.h>
+# elif defined(LINUX)
+#  include <bsd/signal.h>
+# elif defined(SOLARIS)
+#  include <signal.h>
+# endif
+#else
+# include <signal.h>
+#endif
 #include "l2tp.h"
 
 char hostname[256];
@@ -203,6 +214,10 @@ void control_xmit (void *b)
                      __FUNCTION__, t->ourtid);
                 t->self->needclose = 0;
                 t->self->closing = -1;
+                /* , added by MJ., for terminate program when time out. */
+                extern void death_handler (int signal);
+                death_handler(SIGTERM);
+                /* add end, by MJ.*/
             }
             else
             {
@@ -322,15 +337,50 @@ void network_thread ()
             max = control_fd;
         tv.tv_sec = 1;
         tv.tv_usec = 0;
+
+        /*add start, by MJ.*/
+        extern int is_first_run;
+        if(is_first_run)
+        {
+            int lac_fp;  /* to get conn_id which written by acos */
+            char cmd[64]={0};
+            char conn_id[64] = "c default";            
+
+            lac_fp = fopen("/tmp/l2tp/l2tpd.info", "r");
+
+            if (lac_fp != NULL){
+                //fscanf(lac_fp, "%s", conn_id);
+                fgets(conn_id, sizeof(conn_id), lac_fp);
+                fclose(lac_fp);
+            }
+            else
+                log (LOG_DEBUG, "open /tmp/l2tp/l2tpd.info fialed\n");
+
+            log (LOG_DEBUG, "%s: -> the first run.\n", __FUNCTION__);
+            
+            sprintf(cmd, "c %s", conn_id);
+
+            //do_control("c MJ.");
+            do_control(cmd);
+            //write(control_fd, cmd, strlen(cmd) );
+            is_first_run = 0;
+        }
+        /*add end. by MJ.*/        
+
         schedule_unlock ();
         select (max + 1, &readfds, NULL, NULL, NULL);
         schedule_lock ();
+
         if (FD_ISSET (control_fd, &readfds))
         {
-            do_control ();
+            do_control (NULL);
         }
         if (FD_ISSET (server_socket, &readfds))
         {
+            /*  wklin added start, 04/12/2011 */
+            extern void connect_pppunit(void);
+            connect_pppunit();
+            /*  wklin added end, 04/12/2011 */
             /*
              * Okay, now we're ready for reading and processing new data.
              */
@@ -342,6 +392,11 @@ void network_thread ()
             recvsize =
                 recvfrom (server_socket, buf->start, buf->len, 0,
                           (struct sockaddr *) &from, &fromlen);
+
+            /* , by MJ. for debugging.*/
+            //log (LOG_DEBUG, "receive %d bytes from server_scoket.\n", recvsize);
+
+
             if (recvsize < MIN_PAYLOAD_HDR_LEN)
             {
                 if (recvsize < 0)
@@ -364,8 +419,8 @@ void network_thread ()
                 extract (buf->start, &tunnel, &call);
                 if (debug_network)
                 {
-                    log (LOG_DEBUG, "%s: recv packet from %s, size = %d,
-tunnel = %d, call = %d\n", __FUNCTION__, inet_ntoa (from.sin_addr), recvsize, tunnel, call);
+                    log (LOG_DEBUG, "%s: recv packet from %s, size = %d,"
+"tunnel = %d, call = %d\n", __FUNCTION__, inet_ntoa (from.sin_addr), recvsize, tunnel, call);
                 }
                 if (packet_dump)
                 {
@@ -415,6 +470,9 @@ tunnel = %d, call = %d\n", __FUNCTION__, inet_ntoa (from.sin_addr), recvsize, tu
                         /* Send Zero Byte Packet */
                         control_zlb (buf, c->container, c);
                         c->cnu = 0;
+
+                        
+    
                     }
                 }
             }

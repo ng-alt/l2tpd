@@ -1608,7 +1608,7 @@ int handle_avps (struct buffer *buf, struct tunnel *t, struct call *c)
             if (AMBIT (avp->length))
             {
                 log (LOG_WARN,
-                     "%s:  dont know how to handle mandatory attribute %d.  Closing %s.\n"
+                     "%s:  dont know how to handle mandatory attribute %d.  Closing %s.\n",
                      __FUNCTION__, avp->attr,
                      (c != t->self) ? "call" : "tunnel");
                 set_error (c, VENDOR_ERROR,
