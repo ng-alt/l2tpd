@@ -36,7 +36,8 @@ DFLAGS= -g -O2 -DDEBUG_PPPD -DDEBUG_CONTROL -DDEBUG_ENTROPY -DDEBUG_CLOSE -DPPPO
 # Uncomment the next line for Linux
 #
 #OSFLAGS= -DLINUX -I/usr/include
-
+#Foxconn add start by Hank 07/30/2012
+#For Kernel 2.6.36
 ifeq ($(CONFIG_KERNEL_2_6_36),y)
 OSFLAGS= -DLINUX -I$(TOOLCHAIN)/include/ -DUSE_KERNEL
 else

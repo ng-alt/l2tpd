@@ -694,7 +694,7 @@ int control_finish (struct tunnel *t, struct call *c)
         c->needclose = 0;
         c->closing = -1;
     
-        /* , add by MJ. for kill itself after call closed. 01/20/2010*/
+        /* Foxconn, add by MJ. for kill itself after call closed. 01/20/2010*/
         death_handler(SIGTERM);
         break;
 
@@ -849,7 +849,7 @@ int control_finish (struct tunnel *t, struct call *c)
              c->serno);
 
 #ifdef PPPOX_L2TP    
-        /* , add start by MJ. for building pppol2tp socket*/
+        /* Foxconn, add start by MJ. for building pppol2tp socket*/
         //struct sockaddr_pppol2tp sax;
         //int pox_fd, ppp_fd;
         //int ret;//session_fd;
@@ -903,7 +903,7 @@ int control_finish (struct tunnel *t, struct call *c)
         }
         else
             log (LOG_DEBUG, "open PPPoL2TP socket failed\n");
-        /* , add edn by MJ.*/
+        /* Foxconn, add edn by MJ.*/
 #endif
         control_xmit (buf);
         po = NULL;
@@ -1137,7 +1137,7 @@ int control_finish (struct tunnel *t, struct call *c)
                      __FUNCTION__, c->qcid, c->cid);
             return -EINVAL;
         }
-        /* , add comment, by MJ., Call will be canceled in here. */
+        /* Foxconn, add comment, by MJ., Call will be canceled in here. */
         c->qcid = -1;
         if (c->result < 0)
         {
@@ -1152,7 +1152,7 @@ int control_finish (struct tunnel *t, struct call *c)
              IPADDY (t->peer.sin_addr), c->serno, c->errormsg);
         c->needclose = 0;
         c->closing = -1;
-        /* , add by MJ. for kill itself after call closed. 01/20/2010*/
+        /* Foxconn, add by MJ. for kill itself after call closed. 01/20/2010*/
         death_handler(SIGTERM);
         break;
     case Hello:
@@ -1519,10 +1519,10 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
 #endif
             return -EINVAL;
         }
-        /*  modified start pling 06/10/2011 */
+        /* Foxconn modified start pling 06/10/2011 */
         /* Disable seq number check, to avoid L2TP disconnect in heavy traffic */
         else /* if (new_hdr->Ns <= c->data_rec_seq_num + PAYLOAD_FUDGE) */
-        /*  modified end pling 06/10/2011 */
+        /* Foxconn modified end pling 06/10/2011 */
         {
             /* FIXME: I should buffer for out of order packets */
 #ifdef DEBUG_FLOW
@@ -1533,7 +1533,7 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
 #endif
             c->data_rec_seq_num = new_hdr->Ns;
         }
-        /*  removed start pling 06/10/2011 */
+        /* Foxconn removed start pling 06/10/2011 */
         /* Disable seq number check, to avoid L2TP disconnect in heavy traffic */
 #if 0
         else
@@ -1547,7 +1547,7 @@ inline int expand_payload (struct buffer *buf, struct tunnel *t,
             return -EINVAL;
         }
 #endif
-        /*  removed end pling 06/10/2011 */
+        /* Foxconn removed end pling 06/10/2011 */
     }
     else
     {
@@ -1640,7 +1640,7 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
            directly to the tty */
         err = write (c->fd, buf->start, buf->len);
 
-        /*, by MJ., I use STDOUT to replace the fd for writting.*/
+        /*Foxconn, by MJ., I use STDOUT to replace the fd for writting.*/
         //log (LOG_DEBUG, "write %d bytes to tty:%d\n", err,c->fd);
 
 
@@ -1704,7 +1704,7 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
     wbuf[pos++] = PPP_FLAG;
     x = write (c->fd, wbuf, pos);
 
-    /*, by MJ., for Debugging. */
+    /*Foxconn, by MJ., for Debugging. */
     //log (LOG_DEBUG, "write %d bytes to ttyfd:%d\n", x, c->fd);
 
 
@@ -1927,7 +1927,7 @@ inline int handle_packet (struct buffer *buf, struct tunnel *t,
     }
 }
 
-/*  wklin added start, 04/12/2011 */
+/* foxconn wklin added start, 04/12/2011 */
 void connect_pppunit(void)
 {
 #define cprintf(level, fmt, args...) do { \
@@ -1946,4 +1946,4 @@ void connect_pppunit(void)
         connected = 1;
     return;
 }
-/*  wklin added end, 04/12/2011 */
+/* foxconn wklin added end, 04/12/2011 */

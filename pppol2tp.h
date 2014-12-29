@@ -25,13 +25,13 @@ struct pppol2tp_addr
 };
 
 
-/* , add start by MJ. for pppol2tp. 01/21/2010 */
+/* Foxconn, add start by MJ. for pppol2tp. 01/21/2010 */
 struct sockaddr_pppol2tp {
     sa_family_t     sa_family;      /* address family, AF_PPPOX */
     unsigned int    sa_protocol;    /* protocol identifier */
     struct pppol2tp_addr pppol2tp;
 }__attribute__ ((packed));
-/* , add end by MJ. for pppol2tp. 01/21/2010 */
+/* Foxconn, add end by MJ. for pppol2tp. 01/21/2010 */
 
 #endif
 

@@ -105,7 +105,7 @@ int read_packet (struct buffer *buf, int fd, int convert)
     {
         if (pos >= max)
         {
-            /*, by MJ., I use STDIN to replace the fd for reading.*/
+            /*Foxconn, by MJ., I use STDIN to replace the fd for reading.*/
             max = read (STDIN_FILENO, rbuf, sizeof (rbuf));
             //max = read (fd, rbuf, sizeof (rbuf));
             //log (LOG_DEBUG, "read %d bytes from tty:%d\n", fd);
@@ -670,7 +670,7 @@ struct call *get_call (int tunnel, int call, unsigned int addr, int port)
             ioctl (server_socket, L2TPIOCSETTUNOPTS, &to);
         }
 #endif
-        /*  wklin added start, 08/04/2010 @l2tp throughput */
+        /* foxconn wklin added start, 08/04/2010 @l2tp throughput */
         /* this is to make "connected == 1" in usb_sendmsg(), so the dst entry can
         * be cached in struct sock.
         */
@@ -679,7 +679,7 @@ struct call *get_call (int tunnel, int call, unsigned int addr, int port)
                  "%s: unable to connect to host %s, port %d.\n",
                  __FUNCTION__, IPADDY (addr), ntohs (port));
         }
-        /*  wklin added end, 08/04/2010 */
+        /* foxconn wklin added end, 08/04/2010 */
         st->next = tunnels.head;
         tunnels.head = st;
         tunnels.count++;

@@ -247,8 +247,10 @@ void death_handler (int signal)
         sec = st->self->closing;
         if (st->lac)
             st->lac->redial = 0;
+        /* Foxconn added start pling 08/31/2010 */
         /* Disconnect the call (send CDN) tear down tunnel (StopCCN) */
         call_close(st->call_head);       
+        /* Foxconn added end pling 08/31/2010 */
         call_close (st->self);
         if (!sec)
         {
@@ -538,6 +540,7 @@ void destroy_tunnel (struct tunnel *t)
 }
 
 
+/* Foxconn, add start by MJ., copied from pptp.c 01/29/2010 */
 /* If L2TP server isn't on WAN side. 
  * We need to set a routing for Server's IP to pass ethernet 
  * act1: add, 2: del
@@ -555,7 +558,7 @@ void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
     FILE *fp = NULL;
     unsigned char buf[128];
     //unsigned char gateWay[IPV4_LEN];
-    unsigned char name[32];
+    unsigned char name[32];     // foxconn modified pling 07/26/2010, 12->32
     char value[18];
     char getGateway[18]= "";
     char getUserIp[18]= "";
@@ -625,6 +628,8 @@ void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
 
     if (getUserIp[0] != '\0')
     {
+        /* Foxconn added start pling 03/30/2012 */
+        /* get the wan interface name properly */
         char wan_ifname[32] = "vlan2";
         char dns_srv1[32];
         char dns_srv2[32];
@@ -635,13 +640,27 @@ void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
             fclose(fp);
             strcpy(wan_ifname, buf);
         }
+        /* Foxconn added end pling 03/30/2012 */
 
         if ( act == 1 )
         {
+            /* Foxconn added start pling 03/30/2012 */
+            /* Change the way to add default gateway, in case the gateway is 
+            * in different subnet from the WAN IP. */
             sprintf(command, "route add -host %s dev %s", getGateway, wan_ifname);
             system(command);
+            /* Foxconn added end pling 03/30/2012 */
+            
+            /* Foxconn removed start by Bob, 12/23/2013, 
+            the default route should be removed when act==2, but for unknown reason, 
+            the default route is not deleted in end user's environmnet, so we just add host route here. 
+            It's unnecessary to add default route. */
+            /*
             sprintf(command, "route add default gw %s", getGateway) ;
             system(command);
+            */
+            /* Foxconn removed end by Bob, 12/23/2013 */
+            
 #ifdef DEBUG_SERV_IP_ROUTING
             printf("%s: %s\n", __FUNCTION__, command);
 #endif
@@ -662,8 +681,12 @@ void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
 
                 if((i_wanip & i_netmask) != (inetaddr.s_addr & i_netmask))
                 {
+                    /* Foxconn added start pling 03/30/2012 */
+                    /* Change the way to add default gateway, in case the gateway is 
+                    * in different subnet from the WAN IP. */
                     sprintf(command, "route add -host %s dev %s", getGateway, wan_ifname);
                     system(command);
+                    /* Foxconn added end pling 03/30/2012 */
 
                     sprintf(command, "route add -host %s gw %s",
                             inet_ntoa(inetaddr), getGateway);
@@ -736,6 +759,7 @@ void fxc_add_gw(int act, struct in_addr inetaddr) /*1: add, 2: del*/
 }
 #endif
 
+/* Foxconn, add end by MJ., 01/29/2010*/
 
 struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
                           struct lns *lns)
@@ -750,10 +774,12 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     FILE *fp;
     port = htons (port);
 
+    /* Foxconn, added by MJ. 01/29/2010 */
     struct in_addr l2tp_serv_ip;
 
     /* add routing for DNS server 01/29/2010*/
     fxc_add_gw(1, l2tp_serv_ip);
+    /* Foxconn, added end.*/
 
     hp = gethostbyname (host);
 
@@ -765,6 +791,7 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     }
     bcopy (hp->h_addr, &addr, hp->h_length);
 
+    /* Foxconn, add start by MJ., for l2tp. 01/28/2010 */
 
     if (hp->h_addrtype == AF_INET){
         memcpy(&l2tp_serv_ip.s_addr, hp->h_addr, sizeof(l2tp_serv_ip.s_addr));
@@ -777,6 +804,7 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
 
     /* Add routing for L2TP server */
     fxc_add_gw(2, l2tp_serv_ip);
+    /* Foxconn, add end, by MJ., for l2tp. 01/28/2010 */    
 
 
     /* Force creation of a new tunnel
@@ -1043,7 +1071,7 @@ void do_control (char *cmd)
 
     while (cnt)
     {
-        /* for building L2TP tunnel in the begining. */
+        /* Foxconn, add by MJ. for building L2TP tunnel in the begining. */
         if(cmd != NULL)
         {
             first_run = 1;
@@ -1095,7 +1123,7 @@ void do_control (char *cmd)
                     lac = lac->next;
                 }
                 if (lac){
-                    if (first_run) cnt = 0; /* for leaving while */
+                    if (first_run) cnt = 0; /*Foxconn, by MJ., for leaving while*/
                     break; 
                 }
                 tunl = atoi (tunstr);
@@ -1103,7 +1131,7 @@ void do_control (char *cmd)
                 {
                     log (LOG_DEBUG, "%s: No such tunnel '%s'\n", __FUNCTION__,
                          tunstr);
-                    if (first_run) cnt = 0; /* for leaving while */
+                    if (first_run) cnt = 0; /*Foxconn, by MJ., for leaving while*/
                     break;
                 }
 #ifdef DEBUG_CONTROL
@@ -1112,7 +1140,7 @@ void do_control (char *cmd)
 #endif
                 lac_call (tunl, NULL, NULL);
 
-                if (first_run) cnt = 0; /* for leaving while */
+                if (first_run) cnt = 0; /*Foxconn, by MJ., for leaving while*/
                 break;
 
             case 'o':          /* jz: option 'o' for doing a outgoing call */
@@ -1401,12 +1429,15 @@ int is_first_run = 0;
 
 int main (int argc, char *argv[])
 {
+    /* Foxconn added start pling 03/20/2012 */
+    /* Add the default first */
     struct in_addr l2tp_serv_ip;
     fxc_add_gw(1, l2tp_serv_ip);
+    /* Foxconn added end pling 03/20/2012 */
 	
     init(argc,argv);
     dial_no_tmp = calloc (128, sizeof (char));
-    /* A global variable to mark the first execution */
+    /* Foxconn, add by MJ. A global variable to mark the first execution */
 #ifdef AUTO_CONNECT
     is_first_run = 1;
 #endif

@@ -214,7 +214,7 @@ void control_xmit (void *b)
                      __FUNCTION__, t->ourtid);
                 t->self->needclose = 0;
                 t->self->closing = -1;
-                /* , added by MJ., for terminate program when time out. */
+                /* Foxconn, added by MJ., for terminate program when time out. */
                 extern void death_handler (int signal);
                 death_handler(SIGTERM);
                 /* add end, by MJ.*/
@@ -377,10 +377,10 @@ void network_thread ()
         }
         if (FD_ISSET (server_socket, &readfds))
         {
-            /*  wklin added start, 04/12/2011 */
+            /* foxconn wklin added start, 04/12/2011 */
             extern void connect_pppunit(void);
             connect_pppunit();
-            /*  wklin added end, 04/12/2011 */
+            /* foxconn wklin added end, 04/12/2011 */
             /*
              * Okay, now we're ready for reading and processing new data.
              */
@@ -393,7 +393,7 @@ void network_thread ()
                 recvfrom (server_socket, buf->start, buf->len, 0,
                           (struct sockaddr *) &from, &fromlen);
 
-            /* , by MJ. for debugging.*/
+            /* Foxconn, by MJ. for debugging.*/
             //log (LOG_DEBUG, "receive %d bytes from server_scoket.\n", recvsize);
 
 
